@@ -1,10 +1,15 @@
 import sys
-import rdflib
+from rdflib import Graph, URIRef, Literal
+from rdflib.namespace import RDF, OWL, RDFS, SKOS
 from lxml import etree
 from enum import Enum
 
+import rdflib.namespace
+
 # TODO: Vocabularies (low priority)
+# TODO: VocabularyType implementation
 # TODO: RDF conversion
+# TODO: Better IRI generation
 # TODO: Write to file
 
 
@@ -16,7 +21,10 @@ outputName = "Slovník"
 TermType = Enum("TermType", ['TERM', 'CLASS',
                 'RELATIONSHIP', 'TROPE', 'SUBJECT', 'OBJECT'])
 
+VocabularyType = Enum("VocabularyType", ["THESAURUS", "CONCEPTUAL_MODEL"])
+
 ARCHIMATE_NAMESPACE = 'http://www.w3.org/2001/XMLSchema-instance'
+
 
 propertyDefinitions = {}
 terms = []
@@ -42,6 +50,7 @@ class Vocabulary:
         self.name = {}
         self.description = {}
         self.terms = []
+        self.type = VocabularyType.THESAURUS
 
 
 vocabulary = Vocabulary()
@@ -157,10 +166,17 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                 term.name[lang] = name.text
 
 # RDF conversion
-# graph = rdflib.Graph()
+graph = Graph()
 
 # Vocabulary
+vocabularyIRI = URIRef(
+    "https://slovník.gov.cz/{}".format(vocabulary.name.strip().lower().replace(" ", "-")))
 
+graph.add((vocabularyIRI, RDF.type, SKOS.ConceptScheme))
+if (vocabulary.type == VocabularyType.CONCEPTUAL_MODEL):
+    graph.add((vocabularyIRI, RDF.type, OWL.Ontology))
+for lang, name in vocabulary.name.items():
+    graph.add((vocabularyIRI, SKOS.prefLabel, Literal(name, lang)))
 
 # File output
 
