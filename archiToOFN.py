@@ -1,6 +1,6 @@
 import sys
 from rdflib import Graph, URIRef, Literal
-from rdflib.namespace import RDF, OWL, RDFS, SKOS
+from rdflib.namespace import RDF, OWL, RDFS, SKOS, DCTERMS
 from lxml import etree
 from enum import Enum
 
@@ -17,6 +17,7 @@ import rdflib.namespace
 # outputLocation = sys.argv[2]
 inputLocation = "Slovníky-Archi.xml"
 outputName = "Slovník"
+defaultLanguage = "cs"
 
 TermType = Enum("TermType", ['TERM', 'CLASS',
                 'RELATIONSHIP', 'TROPE', 'SUBJECT', 'OBJECT'])
@@ -32,11 +33,11 @@ terms = []
 
 class Term:
     def __init__(self) -> None:
-        self.id = ""
-        self.type = TermType.TERM
-        self.name = {}
-        self.description = {}
-        self.definition = {}
+        self.id: str = ""
+        self.type: TermType = TermType.TERM
+        self.name: dict = {}
+        self.description: dict = {}
+        self.definition: dict = {}
         self.source = ""
         self.domain = ""
         self.range = ""
@@ -54,7 +55,7 @@ class Vocabulary:
 
 
 vocabulary = Vocabulary()
-vocabulary.name = outputName
+vocabulary.name[defaultLanguage] = outputName
 
 # XML parsing
 
@@ -103,6 +104,7 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                                 term.type = TermType.OBJECT
                             case "typ vlastnosti":
                                 term.type = TermType.TROPE
+                                # TODO: domain
                     # Source
                     case "zdroj":
                         term.source = valueText
@@ -112,6 +114,8 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                     # Description
                     case "popis":
                         term.description[valueLang] = valueText
+                    case "datový typ":
+                        term.datatype = valueText
             for name in names:
                 lang = name.attrib['{http://www.w3.org/XML/1998/namespace}lang']
                 term.name[lang] = name.text
@@ -132,8 +136,8 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
             term = Term()
             term.type = TermType.RELATIONSHIP
             term.id = element.attrib['identifier']
-            term.source = source
-            term.target = target
+            term.domain = source
+            term.range = target
             # Name
             names = element.findall(
                 "{http://www.opengroup.org/xsd/archimate/3.0/}name")
@@ -170,13 +174,50 @@ graph = Graph()
 
 # Vocabulary
 vocabularyIRI = URIRef(
-    "https://slovník.gov.cz/{}".format(vocabulary.name.strip().lower().replace(" ", "-")))
+    "https://slovník.gov.cz/{}".format(vocabulary.name[defaultLanguage].strip().lower().replace(" ", "-")))
 
 graph.add((vocabularyIRI, RDF.type, SKOS.ConceptScheme))
 if (vocabulary.type == VocabularyType.CONCEPTUAL_MODEL):
     graph.add((vocabularyIRI, RDF.type, OWL.Ontology))
 for lang, name in vocabulary.name.items():
     graph.add((vocabularyIRI, SKOS.prefLabel, Literal(name, lang)))
+for lang, name in vocabulary.description.items():
+    graph.add((vocabularyIRI, DCTERMS.description, Literal(name, lang)))
+
+# Terms
+for term in vocabulary.terms:
+    termIRI = URIRef("https://slovník.gov.cz/{}/pojem/{}".format(
+        vocabulary.name[defaultLanguage].strip().lower().replace(" ", "-"),
+        term.name[defaultLanguage].strip().lower().replace(" ", "-")))
+    graph.add((termIRI, RDF.type, SKOS.Concept))
+    graph.add((termIRI, SKOS.inScheme, vocabularyIRI))
+    graph.add((termIRI, DCTERMS.conformsTo, URIRef(term.source)))
+    for lang, name in term.name.items():
+        graph.add((vocabularyIRI, SKOS.prefLabel, Literal(name, lang)))
+    for lang, name in term.description.items():
+        graph.add((vocabularyIRI, DCTERMS.description, Literal(name, lang)))
+
+    if term.type is TermType.CLASS or term.type is TermType.OBJECT or term.type is TermType.SUBJECT:
+        graph.add((termIRI, RDF.type, OWL.Class))
+    if term.type is TermType.OBJECT:
+        graph.add((termIRI, RDF.type, URIRef(
+            "https://slovník.gov.cz/veřejný-sektor/pojem/typ-objektu-práva")))
+    if term.type is TermType.SUBJECT:
+        graph.add((termIRI, RDF.type, URIRef(
+            "https://slovník.gov.cz/veřejný-sektor/pojem/typ-subjektu-práva")))
+    if term.type is TermType.TROPE:
+        graph.add((termIRI, RDF.type, OWL.DatatypeProperty))
+        graph.add((termIRI, RDFS.domain, URIRef(term.domain)))
+        graph.add((termIRI, RDFS.range, URIRef(term.datatype)))
+    if term.type is TermType.RELATIONSHIP:
+        graph.add((termIRI, RDF.type, OWL.ObjectProperty))
+        graph.add((termIRI, RDFS.domain, URIRef(term.domain)))
+        graph.add((termIRI, RDFS.range, URIRef(term.range)))
+
+    for broader in term.subClassOf:
+        # TODO: term IRIs
+        graph.add((termIRI, SKOS.broader, URIRef(broader)))
+
 
 # File output
 
