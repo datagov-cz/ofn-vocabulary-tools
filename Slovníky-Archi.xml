@@ -11,6 +11,12 @@
         <property propertyDefinitionRef="propid-1">
           <value xml:lang="cs">typ subjektu</value>
         </property>
+        <property propertyDefinitionRef="propid-2">
+          <value xml:lang="cs">222</value>
+        </property>
+        <property propertyDefinitionRef="propid-2">
+          <value xml:lang="cs">eee</value>
+        </property>
       </properties>
     </element>
     <element identifier="id-d1512e05d20a45318e647e2de02171f0" xsi:type="DataObject">
@@ -57,22 +63,20 @@
     </item>
   </organizations>
   <propertyDefinitions>
-    <propertyDefinition identifier="propid-2" type="string">
+    <propertyDefinition identifier="propid-3" type="string">
       <name />
     </propertyDefinition>
+    <propertyDefinition identifier="propid-2" type="string">
+      <name>test</name>
+    </propertyDefinition>
     <propertyDefinition identifier="propid-1" type="string">
-      <name>type</name>
+      <name>typ</name>
     </propertyDefinition>
   </propertyDefinitions>
   <views>
     <diagrams>
       <view identifier="id-8a0d7f0baac44e6cb54b0decb49583ed" xsi:type="Diagram">
         <name xml:lang="cs">A994</name>
-        <properties>
-          <property propertyDefinitionRef="propid-1">
-            <value xml:lang="cs" />
-          </property>
-        </properties>
         <node identifier="id-7bbfe133ec6e46ee9246107561d73812" elementRef="id-9cbff7b9ef6445918f3af0fdcb58de15" xsi:type="Element" x="504" y="396" w="120" h="55">
           <style>
             <fillColor r="181" g="255" b="255" a="100" />

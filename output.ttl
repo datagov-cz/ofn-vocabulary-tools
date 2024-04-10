@@ -1,0 +1,22 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+<https://slovník.gov.cz/slovník/pojem/test> a owl:Class,
+        skos:Concept,
+        <https://slovník.gov.cz/veřejný-sektor/pojem/typ-subjektu-práva> ;
+    skos:inScheme <https://slovník.gov.cz/slovník> ;
+    skos:prefLabel "Test"@cs .
+
+<https://slovník.gov.cz/slovník/pojem/test-(copy)> a owl:Class,
+        skos:Concept,
+        <https://slovník.gov.cz/veřejný-sektor/pojem/typ-subjektu-práva> ;
+    skos:inScheme <https://slovník.gov.cz/slovník> ;
+    skos:prefLabel "Test (copy)"@cs .
+
+<https://slovník.gov.cz/slovník/pojem/typ-objektu> a skos:Concept ;
+    skos:inScheme <https://slovník.gov.cz/slovník> ;
+    skos:prefLabel "typ objektu"@cs .
+
+<https://slovník.gov.cz/slovník> a skos:ConceptScheme ;
+    skos:prefLabel "Slovník"@cs .
+

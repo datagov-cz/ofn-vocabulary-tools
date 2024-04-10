@@ -1,12 +1,10 @@
 import sys
 
 from lxml import etree
+from ofnClasses import Vocabulary, Term, TermType
+from outputToOFN import convertToRDF
 
 # TODO: Vocabularies (low priority)
-# TODO: VocabularyType implementation
-# TODO: RDF conversion
-# TODO: Better IRI generation
-# TODO: Write to file
 
 
 # inputLocation = sys.argv[1]
@@ -29,7 +27,7 @@ vocabulary.name[defaultLanguage] = outputName
 # XML parsing
 
 with open(inputLocation, "r", encoding="utf-8") as inputFile:
-    tree = etree.parse(inputLocation)
+    tree = etree.parse(inputLocation, parser=etree.XMLParser())
     root = tree.getroot()
     properties = root.findall(
         ".//{http://www.opengroup.org/xsd/archimate/3.0/}propertyDefinition[@identifier]")
@@ -54,11 +52,11 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                 term.name[lang] = name.text
             # Properties
             termProperties = element.findall(
-                "{http://www.opengroup.org/xsd/archimate/3.0/}property")
+                ".//{http://www.opengroup.org/xsd/archimate/3.0/}property")
             for termProperty in termProperties:
                 identifier = termProperty.attrib['propertyDefinitionRef']
-                value = termProperty.find(property.find(
-                    ".//{http://www.opengroup.org/xsd/archimate/3.0/}value"))
+                value = termProperty.find(
+                    "{http://www.opengroup.org/xsd/archimate/3.0/}value")
                 valueLang = value.attrib['{http://www.w3.org/XML/1998/namespace}lang']
                 valueText = value.text
                 propertyType = propertyDefinitions[identifier]
@@ -88,25 +86,26 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
             for name in names:
                 lang = name.attrib['{http://www.w3.org/XML/1998/namespace}lang']
                 term.name[lang] = name.text
+            vocabulary.terms.append(term)
 
     for relationship in relationships:
         identifier = relationship.attrib['identifier']
-        source = relationship.attrib['source']
-        target = relationship.attrib['target']
-        sourceTerm = next((x for x in terms if x.id == source), None)
-        targetTerm = next((x for x in terms if x.id == target), None)
-        if sourceTerm is None or targetTerm is None:
+        domain = relationship.attrib['source']
+        range = relationship.attrib['target']
+        domainTerm = next((x for x in terms if x.id == domain), None)
+        rangeTerm = next((x for x in terms if x.id == range), None)
+        if domainTerm is None or rangeTerm is None:
             continue
         if element.attrib['{http://www.w3.org/2001/XMLSchema-instance}type'] == "Specialization":
-            sourceTerm.subClassOf.append(targetTerm)
+            domainTerm.subClassOf.append(rangeTerm.iri)
         elif element.attrib['{http://www.w3.org/2001/XMLSchema-instance}type'] == "Composition":
-            sourceTerm.tropes.append(targetTerm)
+            domainTerm.tropes.append(rangeTerm.iri)
         elif element.attrib['{http://www.w3.org/2001/XMLSchema-instance}type'] == "Association":
             term = Term()
             term.type = TermType.RELATIONSHIP
             term.id = element.attrib['identifier']
-            term.domain = source
-            term.range = target
+            term.domain = domainTerm.iri
+            term.range = rangeTerm.iri
             # Name
             names = element.findall(
                 "{http://www.opengroup.org/xsd/archimate/3.0/}name")
@@ -115,11 +114,11 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                 term.name[lang] = name.text
             # Properties
             termProperties = element.findall(
-                "{http://www.opengroup.org/xsd/archimate/3.0/}property")
+                ".//{http://www.opengroup.org/xsd/archimate/3.0/}property")
             for termProperty in termProperties:
                 identifier = termProperty.attrib['propertyDefinitionRef']
-                value = termProperty.find(property.find(
-                    ".//{http://www.opengroup.org/xsd/archimate/3.0/}value"))
+                value = termProperty.find(
+                    ".//{http://www.opengroup.org/xsd/archimate/3.0/}value")
                 valueLang = value.attrib['{http://www.w3.org/XML/1998/namespace}lang']
                 valueText = value.text
                 propertyType = propertyDefinitions[identifier]
@@ -137,7 +136,8 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
             for name in names:
                 lang = name.attrib['{http://www.w3.org/XML/1998/namespace}lang']
                 term.name[lang] = name.text
-
+            vocabulary.terms.append(term)
+    convertToRDF(vocabulary, "cs")
 
 # File output
 
