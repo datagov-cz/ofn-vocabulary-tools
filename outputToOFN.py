@@ -1,6 +1,7 @@
-from rdflib import XSD, Graph, URIRef, Literal
-from rdflib.namespace import RDF, OWL, RDFS, SKOS, DCTERMS
+from rdflib import XSD, Graph, URIRef, Literal, BNode
+from rdflib.namespace import RDF, OWL, RDFS, SKOS, DCTERMS, TIME
 from ofnClasses import RPPType, TermType, VocabularyType, Vocabulary, Term
+from datetime import datetime
 
 # TODO: Better IRI generation (priority)
 # TODO: Code lists
@@ -31,7 +32,12 @@ def convertToRDF(vocabulary: Vocabulary, defaultLanguage: str):
     # description
     for lang, name in vocabulary.description.items():
         graph.add((vocabularyIRI, DCTERMS.description, Literal(name, lang)))
-    # TODO: creation and modify date
+    # TODO: creation date
+    modifiedBNode = BNode()
+    graph.add((vocabularyIRI, DCTERMS.modified, modifiedBNode))
+    graph.add((modifiedBNode, RDF.type, TIME.Instant))
+    graph.add((modifiedBNode, TIME.inXSDDateTimeStamp,
+              Literal(datetime.now().isoformat(), datatype=XSD.dateTimeStamp)))
 
     # Terms
     for term in vocabulary.terms:
