@@ -1,24 +1,27 @@
+from ast import Tuple
 import sys
 
 from lxml import etree
-from ofnClasses import Vocabulary, Term, TermType
-from outputToOFN import convertToRDF
+from ofnClasses import ClassType, Relationship, Trope, Vocabulary, Term, getClass, getTrope
+from outputToRDF import convertToRDF
 
-# TODO: Vocabularies (low priority)
+# TODO: Vocabularies
+# TODO: Cardinalities
+# TODO: Security!!!
 
 
 # inputLocation = sys.argv[1]
 # outputLocation = sys.argv[2]
 inputLocation = "Slovníky-Archi.xml"
 outputName = "Slovník"
+# TODO
 defaultLanguage = "cs"
 
 
-ARCHIMATE_NAMESPACE = 'http://www.w3.org/2001/XMLSchema-instance'
+# ARCHIMATE_NAMESPACE = 'http://www.w3.org/2001/XMLSchema-instance'
 
 
 propertyDefinitions = {}
-terms = []
 
 
 vocabulary = Vocabulary()
@@ -51,73 +54,83 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                 lang = name.attrib['{http://www.w3.org/XML/1998/namespace}lang']
                 term.name[lang] = name.text
             # Properties
-            termProperties = element.findall(
+            termProperties: dict[str, tuple[str, str]] = {}
+            termPropertyElements = element.findall(
                 ".//{http://www.opengroup.org/xsd/archimate/3.0/}property")
-            for termProperty in termProperties:
-                identifier = termProperty.attrib['propertyDefinitionRef']
-                value = termProperty.find(
+            for termPropertyElement in termPropertyElements:
+                identifier = termPropertyElement.attrib['propertyDefinitionRef']
+                value = termPropertyElement.find(
                     "{http://www.opengroup.org/xsd/archimate/3.0/}value")
                 valueLang = value.attrib['{http://www.w3.org/XML/1998/namespace}lang']
                 valueText = value.text
                 propertyType = propertyDefinitions[identifier]
-                match propertyType:
-                    # Type
-                    case "typ":
-                        valueTextNormalized = valueText.strip().lower()
-                        match valueTextNormalized:
-                            case "typ subjektu":
-                                term.type = TermType.SUBJECT
-                            case "typ objektu":
-                                term.type = TermType.OBJECT
-                            case "typ vlastnosti":
-                                term.type = TermType.TROPE
-                                # TODO: domain
-                    # Source
-                    case "zdroj":
-                        term.source = valueText
-                    # Definition
-                    case "definice":
-                        term.definition[valueLang] = valueText
-                    # Description
-                    case "popis":
-                        term.description[valueLang] = valueText
-                    case "datový typ":
-                        term.datatype = valueText
-            for name in names:
-                lang = name.attrib['{http://www.w3.org/XML/1998/namespace}lang']
-                term.name[lang] = name.text
+                termProperties[propertyType] = (valueText, valueLang)
+            if "typ" in termProperties:
+                valueTextNormalized = termProperties["typ"][0].strip().lower()
+                match valueTextNormalized:
+                    case "typ subjektu":
+                        term = getClass(term)
+                        term.type = ClassType.SUBJECT
+                    case "typ objektu":
+                        term = getClass(term)
+                        term.type = ClassType.OBJECT
+                    case "typ vlastnosti":
+                        term = getTrope(term)
+                        # TODO: domain, datatype
+            # Source
+            if "zdroj" in termProperties:
+                term.source = termProperties["zdroj"][0]
+            # Definition
+            if "definice" in termProperties:
+                term.definition[termProperties["definice"]
+                                [1]] = termProperties["definice"][0]
+            # Description
+            if "popis" in termProperties:
+                term.description[termProperties["popis"]
+                                 [1]] = termProperties["popis"][0]
+            if "datový typ" in termProperties and isinstance(term, Trope):
+                term.datatype = termProperties["datový typ"][0]
             vocabulary.terms.append(term)
 
     for relationship in relationships:
         identifier = relationship.attrib['identifier']
         domain = relationship.attrib['source']
         range = relationship.attrib['target']
-        domainTerm = next((x for x in terms if x.id == domain), None)
-        rangeTerm = next((x for x in terms if x.id == range), None)
+        domainTerm = None
+        rangeTerm = None
+        for term in vocabulary.terms:
+            if term.id == domain:
+                domainTerm = term
+            if term.id == range:
+                rangeTerm = term
+            if domainTerm is not None and rangeTerm is not None:
+                break
+        relationshipType = relationship.attrib['{http://www.w3.org/2001/XMLSchema-instance}type']
         if domainTerm is None or rangeTerm is None:
             continue
-        if element.attrib['{http://www.w3.org/2001/XMLSchema-instance}type'] == "Specialization":
+        if relationshipType == "Specialization":
             domainTerm.subClassOf.append(rangeTerm.iri)
-        elif element.attrib['{http://www.w3.org/2001/XMLSchema-instance}type'] == "Composition":
-            domainTerm.tropes.append(rangeTerm.iri)
-        elif element.attrib['{http://www.w3.org/2001/XMLSchema-instance}type'] == "Association":
-            term = Term()
-            term.type = TermType.RELATIONSHIP
-            term.id = element.attrib['identifier']
-            term.domain = domainTerm.iri
-            term.range = rangeTerm.iri
+        elif relationshipType == "Composition" and isinstance(domainTerm, Trope):
+            domainTerm.target = rangeTerm.iri
+        elif relationshipType == "Association":
+            isDirected = relationship.attrib.get("isDirected", False)
+            if not isDirected or isDirected != "true":
+                continue
+            term = Relationship(domainTerm.getIRI(
+                vocabulary, defaultLanguage), rangeTerm.getIRI(vocabulary, defaultLanguage))
+            term.id = identifier
             # Name
-            names = element.findall(
+            names = relationship.findall(
                 "{http://www.opengroup.org/xsd/archimate/3.0/}name")
             for name in names:
                 lang = name.attrib['{http://www.w3.org/XML/1998/namespace}lang']
                 term.name[lang] = name.text
             # Properties
-            termProperties = element.findall(
+            termPropertyElements = relationship.findall(
                 ".//{http://www.opengroup.org/xsd/archimate/3.0/}property")
-            for termProperty in termProperties:
-                identifier = termProperty.attrib['propertyDefinitionRef']
-                value = termProperty.find(
+            for termPropertyElement in termPropertyElements:
+                identifier = termPropertyElement.attrib['propertyDefinitionRef']
+                value = termPropertyElement.find(
                     ".//{http://www.opengroup.org/xsd/archimate/3.0/}value")
                 valueLang = value.attrib['{http://www.w3.org/XML/1998/namespace}lang']
                 valueText = value.text

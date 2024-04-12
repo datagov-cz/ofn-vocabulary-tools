@@ -28,7 +28,23 @@
       </properties>
     </element>
     <element identifier="id-3a2baf566c1642d7a4f63f293c67bfbe" xsi:type="DataObject">
-      <name xml:lang="cs">typ objektu</name>
+      <name xml:lang="cs">vlastnost</name>
+      <properties>
+        <property propertyDefinitionRef="propid-1">
+          <value xml:lang="cs">typ vlastnosti</value>
+        </property>
+      </properties>
+    </element>
+    <element identifier="id-518eaab5b87f4f178c2a25fab2a18899" xsi:type="DataObject">
+      <name xml:lang="cs">Vozidlo</name>
+      <properties>
+        <property propertyDefinitionRef="propid-1">
+          <value xml:lang="cs">typ objektu</value>
+        </property>
+      </properties>
+    </element>
+    <element identifier="id-4f1c7443ffca4a0bab6ab65d22004781" xsi:type="DataObject">
+      <name xml:lang="cs">Text</name>
     </element>
   </elements>
   <relationships>
@@ -49,6 +65,8 @@
       <item identifierRef="id-9cbff7b9ef6445918f3af0fdcb58de15" />
       <item identifierRef="id-d1512e05d20a45318e647e2de02171f0" />
       <item identifierRef="id-3a2baf566c1642d7a4f63f293c67bfbe" />
+      <item identifierRef="id-518eaab5b87f4f178c2a25fab2a18899" />
+      <item identifierRef="id-4f1c7443ffca4a0bab6ab65d22004781" />
     </item>
     <item>
       <label xml:lang="cs">Relations</label>
@@ -95,7 +113,7 @@
             </font>
           </style>
         </node>
-        <node identifier="id-1b2163d0219a40678da1bd099f943271" elementRef="id-3a2baf566c1642d7a4f63f293c67bfbe" xsi:type="Element" x="988" y="338" w="120" h="55">
+        <node identifier="id-1b2163d0219a40678da1bd099f943271" elementRef="id-3a2baf566c1642d7a4f63f293c67bfbe" xsi:type="Element" x="988" y="338" w="129" h="55">
           <style>
             <fillColor r="181" g="255" b="255" a="100" />
             <lineColor r="92" g="92" b="92" a="100" />
@@ -104,9 +122,9 @@
             </font>
           </style>
         </node>
-        <node identifier="id-69fd1881eae84c128e43d2d77c1f6272" xsi:type="Label" x="863" y="132" w="185" h="80">
+        <node identifier="id-99368d2f63b042d0834c67046f3e6cbd" elementRef="id-518eaab5b87f4f178c2a25fab2a18899" xsi:type="Element" x="119" y="140" w="120" h="55">
           <style>
-            <fillColor r="255" g="255" b="255" a="100" />
+            <fillColor r="181" g="255" b="255" a="100" />
             <lineColor r="92" g="92" b="92" a="100" />
             <font name="Segoe UI" size="9">
               <color r="0" g="0" b="0" />
@@ -121,14 +139,6 @@
             </font>
           </style>
           <bendpoint x="504" y="228" />
-        </connection>
-        <connection identifier="id-dccfcd3ed585438c8b04e89f97fcb08b" xsi:type="Line" source="id-6eb292938ffd4afcbf82e3a58f0c0457" target="id-69fd1881eae84c128e43d2d77c1f6272">
-          <style>
-            <lineColor r="0" g="0" b="0" />
-            <font name="Segoe UI" size="9">
-              <color r="0" g="0" b="0" />
-            </font>
-          </style>
         </connection>
         <connection identifier="id-ed6a8773c69e44b4abe9a2a72753506b" relationshipRef="id-c8b7f3b5a7114c80a320d32f7ff407d5" xsi:type="Relationship" source="id-6eb292938ffd4afcbf82e3a58f0c0457" target="id-7bbfe133ec6e46ee9246107561d73812">
           <style>

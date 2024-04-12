@@ -1,9 +1,9 @@
 from rdflib import XSD, Graph, URIRef, Literal, BNode
 from rdflib.namespace import RDF, OWL, RDFS, SKOS, DCTERMS, TIME
-from ofnClasses import RPPType, TermType, VocabularyType, Vocabulary, Term
+from ofnClasses import ClassType, RPPType, Relationship, Term, TermClass, Trope, VocabularyType, Vocabulary
 from datetime import datetime
 
-# TODO: Better IRI generation (priority)
+# TODO: Better IRI generation (priority,PN_LOCAL)
 # TODO: Code lists
 # TODO: Error handling
 # TODO: Input validation
@@ -71,40 +71,42 @@ def convertToRDF(vocabulary: Vocabulary, defaultLanguage: str):
                 term.sharedInPPDF, datatype=XSD.boolean)))
 
         # term types (& broader)
-        if term.type is TermType.TERM:
+        if isinstance(term, Term):
             for broader in term.subClassOf:
                 graph.add((termIRI, SKOS.broader, URIRef(broader)))
-        if term.type is TermType.CLASS or term.type is TermType.OBJECT or term.type is TermType.SUBJECT:
+        if isinstance(term, TermClass):
             graph.add((termIRI, RDF.type, OWL.Class))
+            if term.ais is not None:
+                graph.add((termIRI, URIRef(
+                    "https://slovník.gov.cz/agendový/104/pojem/údaje-jsou-v-ais"), URIRef(term.ais)))
+            if term.agenda is not None:
+                graph.add((termIRI, URIRef(
+                    "https://slovník.gov.cz/agendový/104/pojem/sdružuje-údaje-vedené-nebo-vytvářené-v-rámci-agendy"), URIRef(term.agenda)))
             for broader in term.subClassOf:
                 graph.add((termIRI, RDFS.subClassOf, URIRef(broader)))
-        if term.type is TermType.OBJECT:
+        if isinstance(term, TermClass) and term.type is ClassType.OBJECT:
             graph.add((termIRI, RDF.type, URIRef(
                 "https://slovník.gov.cz/veřejný-sektor/pojem/typ-objektu-práva")))
-        if term.type is TermType.SUBJECT:
+        if isinstance(term, TermClass) and term.type is ClassType.SUBJECT:
             graph.add((termIRI, RDF.type, URIRef(
                 "https://slovník.gov.cz/veřejný-sektor/pojem/typ-subjektu-práva")))
-        if term.type is TermType.TROPE or term.type is TermType.RELATIONSHIP:
+        if isinstance(term, Trope) or isinstance(term, Relationship):
             for broader in term.subClassOf:
                 graph.add((termIRI, RDFS.subPropertyOf, URIRef(broader)))
-        if term.type is TermType.TROPE:
+        if isinstance(term, Trope):
             graph.add((termIRI, RDF.type, OWL.DatatypeProperty))
-            graph.add((termIRI, RDFS.domain, URIRef(term.domain)))
-            graph.add((termIRI, RDFS.range, URIRef(term.datatype)))
-        if term.type is TermType.RELATIONSHIP:
+            if term.target is not None:
+                graph.add((termIRI, RDFS.domain, URIRef(term.target)))
+            if term.datatype is not None:
+                graph.add((termIRI, RDFS.range, URIRef(term.datatype)))
+        if isinstance(term, Relationship):
             graph.add((termIRI, RDF.type, OWL.ObjectProperty))
-            graph.add((termIRI, RDFS.domain, URIRef(term.domain)))
-            graph.add((termIRI, RDFS.range, URIRef(term.range)))
+            if term.domain is not None:
+                graph.add((termIRI, RDFS.domain, URIRef(term.domain)))
+            if term.range is not None:
+                graph.add((termIRI, RDFS.range, URIRef(term.range)))
 
-        # RPP
-        if term.ais is not None:
-            graph.add((termIRI, URIRef(
-                "https://slovník.gov.cz/agendový/104/pojem/údaje-jsou-v-ais"), URIRef(term.ais)))
-        if term.agenda is not None:
-            graph.add((termIRI, URIRef(
-                "https://slovník.gov.cz/agendový/104/pojem/sdružuje-údaje-vedené-nebo-vytvářené-v-rámci-agendy"), URIRef(term.agenda)))
-
-        # public/private types
+        # RPP public/private types
         if term.rppType is not None:
             if term.rppType is RPPType.PUBLIC:
                 graph.add((termIRI, RDF.type, URIRef(
