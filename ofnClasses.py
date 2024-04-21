@@ -1,5 +1,4 @@
 from enum import Enum
-import types
 
 ClassType = Enum("ClassType", ['CLASS', 'SUBJECT', 'OBJECT'])
 

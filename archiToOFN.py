@@ -1,21 +1,16 @@
-from ast import Tuple
 import sys
 
 from lxml import etree
-from ofnClasses import ClassType, Relationship, Trope, Vocabulary, Term, getClass, getTrope
+from ofnClasses import ClassType, Relationship, Trope, Vocabulary, Term, VocabularyType, getClass, getTrope
 from outputToRDF import convertToRDF
 
 # TODO: Vocabularies
 # TODO: Cardinalities
 # TODO: Security!!!
 
-
-# inputLocation = sys.argv[1]
-# outputLocation = sys.argv[2]
-inputLocation = "Slovníky-Archi.xml"
-outputName = "Slovník"
 # TODO
-defaultLanguage = "cs"
+inputLocation = sys.argv[1]
+outputLocation = sys.argv[2]
 
 
 # ARCHIMATE_NAMESPACE = 'http://www.w3.org/2001/XMLSchema-instance'
@@ -23,15 +18,23 @@ defaultLanguage = "cs"
 
 propertyDefinitions = {}
 
-
-vocabulary = Vocabulary()
-vocabulary.name[defaultLanguage] = outputName
-
 # XML parsing
 
 with open(inputLocation, "r", encoding="utf-8") as inputFile:
     tree = etree.parse(inputLocation, parser=etree.XMLParser())
     root = tree.getroot()
+    vocabularyNameElement = root.find(
+        "{http://www.opengroup.org/xsd/archimate/3.0/}name")
+    vocabularyName: str = "slovník"
+    defaultLanguage: str = "cs"
+    if vocabularyNameElement is not None:
+        vocabularyName = vocabularyNameElement.text
+    else:
+        raise LookupError(
+            "Cannot find model name. Are you sure you are passing an Archi export?")
+    vocabulary = Vocabulary()
+    defaultLanguage = vocabularyNameElement.attrib['{http://www.w3.org/XML/1998/namespace}lang']
+    vocabulary.name[defaultLanguage] = vocabularyName
     properties = root.findall(
         ".//{http://www.opengroup.org/xsd/archimate/3.0/}propertyDefinition[@identifier]")
     elements = root.findall(
@@ -44,7 +47,7 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
         propertyDefinitions[property.attrib['identifier']
                             ] = getattr(name, "text", "name")
     for element in elements:
-        if element.attrib['{http://www.w3.org/2001/XMLSchema-instance}type'] == "DataObject":
+        if element.attrib['{http://www.w3.org/2001/XMLSchema-instance}type'] == "BusinessObject":
             term = Term()
             term.id = element.attrib['identifier']
             # Name
@@ -150,7 +153,9 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                 lang = name.attrib['{http://www.w3.org/XML/1998/namespace}lang']
                 term.name[lang] = name.text
             vocabulary.terms.append(term)
-    convertToRDF(vocabulary, "cs")
+    if (next(x for x in vocabulary.terms if isinstance(x, Trope) or isinstance(x, Relationship))):
+        vocabulary.type = VocabularyType.CONCEPTUAL_MODEL
+    convertToRDF(vocabulary, "cs", outputLocation)
 
 # File output
 

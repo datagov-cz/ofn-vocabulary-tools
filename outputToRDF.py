@@ -3,7 +3,7 @@ from rdflib.namespace import RDF, OWL, RDFS, SKOS, DCTERMS, TIME
 from ofnClasses import ClassType, RPPType, Relationship, Term, TermClass, Trope, VocabularyType, Vocabulary
 from datetime import datetime
 
-# TODO: Better IRI generation (priority,PN_LOCAL)
+# TODO: Better IRI generation (PN_LOCAL)
 # TODO: Code lists
 # TODO: Error handling
 # TODO: Input validation
@@ -11,12 +11,13 @@ from datetime import datetime
 # TODO: Write to file
 
 
-def getRDFoutput(graph: Graph):
-    with open("output.ttl", "w", encoding="utf-8") as outputFile:
-        outputFile.write(graph.serialize(format="ttl"))
+def getRDFoutput(graph: Graph, outputLocation: str):
+    with open(outputLocation, "w", encoding="utf-8") as outputFile:
+        format: str = outputLocation[len(outputLocation) - 3:]
+        outputFile.write(graph.serialize(format=format))
 
 
-def convertToRDF(vocabulary: Vocabulary, defaultLanguage: str):
+def convertToRDF(vocabulary: Vocabulary, defaultLanguage: str, outputFile: str):
     graph = Graph()
 
     # Vocabulary
@@ -117,4 +118,4 @@ def convertToRDF(vocabulary: Vocabulary, defaultLanguage: str):
                 graph.add((termIRI, RDF.type, URIRef(
                     term.rppPrivateTypeSource)))
 
-        getRDFoutput(graph)
+        getRDFoutput(graph, outputFile)
