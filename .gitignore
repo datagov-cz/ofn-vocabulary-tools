@@ -1,8 +1,8 @@
 .venv
 .vscode
 __pycache__
-archimate3_Diagram.xsd
-archimate3_Model.xsd
-archimate3_View.xsd
-output.ttl
-Slovníky-Archi.xml
+*.xsd
+*.ttl
+*.csv
+*.xml
+*.xlsx
