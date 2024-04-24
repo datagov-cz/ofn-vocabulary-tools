@@ -113,8 +113,8 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
             continue
         if relationshipType == "Specialization":
             domainTerm.subClassOf.append(rangeTerm.iri)
-        elif relationshipType == "Composition" and isinstance(domainTerm, Trope):
-            domainTerm.target = rangeTerm.iri
+        elif relationshipType == "Composition" and isinstance(rangeTerm, Trope):
+            rangeTerm.target = domainTerm.iri
         elif relationshipType == "Association":
             isDirected = relationship.attrib.get("isDirected", False)
             if not isDirected or isDirected != "true":
