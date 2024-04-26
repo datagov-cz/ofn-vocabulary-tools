@@ -1,24 +1,17 @@
 import sys
+import archiBindings
 
 from lxml import etree
 from ofnClasses import ClassType, Relationship, Trope, Vocabulary, Term, VocabularyType, getClass, getTrope
 from outputToRDF import convertToRDF
 
-# TODO: Vocabularies
-# TODO: Cardinalities
 # TODO: Security!!!
-
-# TODO
-inputLocation = sys.argv[1]
-outputLocation = sys.argv[2]
-
-
+# TODO: Support multiple vocabularies?
 # ARCHIMATE_NAMESPACE = 'http://www.w3.org/2001/XMLSchema-instance'
 
-
+inputLocation = sys.argv[1]
+outputLocation = sys.argv[2]
 propertyDefinitions = {}
-
-# XML parsing
 
 with open(inputLocation, "r", encoding="utf-8") as inputFile:
     tree = etree.parse(inputLocation, parser=etree.XMLParser())
@@ -68,31 +61,30 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                 valueText = value.text
                 propertyType = propertyDefinitions[identifier]
                 termProperties[propertyType] = (valueText, valueLang)
-            if "typ" in termProperties:
+            if archiBindings.OFN_TYPE in termProperties:
                 valueTextNormalized = termProperties["typ"][0].strip().lower()
                 match valueTextNormalized:
-                    case "typ subjektu":
+                    case archiBindings.OFN_SUBJECT_TYPE:
                         term = getClass(term)
                         term.type = ClassType.SUBJECT
-                    case "typ objektu":
+                    case archiBindings.OFN_OBJECT_TYPE:
                         term = getClass(term)
                         term.type = ClassType.OBJECT
-                    case "typ vlastnosti":
+                    case archiBindings.OFN_TROPE_TYPE:
                         term = getTrope(term)
-                        # TODO: domain, datatype
             # Source
-            if "zdroj" in termProperties:
-                term.source = termProperties["zdroj"][0]
+            if archiBindings.OFN_RELATION in termProperties:
+                term.source = termProperties[archiBindings.OFN_RELATION][0]
             # Definition
-            if "definice" in termProperties:
-                term.definition[termProperties["definice"]
-                                [1]] = termProperties["definice"][0]
+            if archiBindings.OFN_DEFINITION in termProperties:
+                term.definition[termProperties[archiBindings.OFN_DEFINITION]
+                                [1]] = termProperties[archiBindings.OFN_DEFINITION][0]
             # Description
-            if "popis" in termProperties:
-                term.description[termProperties["popis"]
-                                 [1]] = termProperties["popis"][0]
-            if "datový typ" in termProperties and isinstance(term, Trope):
-                term.datatype = termProperties["datový typ"][0]
+            if archiBindings.OFN_DESCRIPTION in termProperties:
+                term.description[termProperties[archiBindings.OFN_DESCRIPTION]
+                                 [1]] = termProperties[archiBindings.OFN_DESCRIPTION][0]
+            if archiBindings.OFN_DATATYPE in termProperties and isinstance(term, Trope):
+                term.datatype = termProperties[archiBindings.OFN_DATATYPE][0]
             vocabulary.terms.append(term)
 
     for relationship in relationships:
@@ -141,13 +133,13 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                 match propertyType:
                     # Not interested in type
                     # Source
-                    case "zdroj":
+                    case archiBindings.OFN_RELATION:
                         term.source = valueText
                     # Definition
-                    case "definice":
+                    case archiBindings.OFN_DEFINITION:
                         term.definition[valueLang] = valueText
                     # Description
-                    case "popis":
+                    case archiBindings.OFN_DESCRIPTION:
                         term.description[valueLang] = valueText
             for name in names:
                 lang = name.attrib['{http://www.w3.org/XML/1998/namespace}lang']
@@ -156,8 +148,3 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
     if (next(x for x in vocabulary.terms if isinstance(x, Trope) or isinstance(x, Relationship))):
         vocabulary.type = VocabularyType.CONCEPTUAL_MODEL
     convertToRDF(vocabulary, "cs", outputLocation)
-
-# File output
-
-# with open("{}_OFN_Slovník.ttl".format(vocabulary.name), "w") as outputFile:
-# pass
