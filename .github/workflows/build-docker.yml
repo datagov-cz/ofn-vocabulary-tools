@@ -6,6 +6,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: al-ofn-vocabulary-tools-server
+  AL_DEV_URL: ${{ vars.AL_DEV_URL }}
   USERNAME: ${{ github.actor }}
   TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
