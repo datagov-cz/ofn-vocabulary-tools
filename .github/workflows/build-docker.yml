@@ -5,8 +5,7 @@ on:
   workflow_dispatch:
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: al-ofn-vocabulary-tools-server
-  AL_DEV_URL: ${{ vars.AL_DEV_URL }}
+  IMAGE_NAME: ofn-vocabulary-tools-server
   USERNAME: ${{ github.actor }}
   TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
@@ -36,15 +35,3 @@ jobs:
           echo IMAGE_TAG=$IMAGE_TAG
           docker tag $IMAGE_NAME $IMAGE_TAG
           docker push $IMAGE_TAG
-
-  
-  update-dev-instance:
-    needs: build-and-push-image
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Call update webhook
-        uses: wei/curl@v1.1.1
-        with:
-          args: |
-            -H \"X-Secret: ${{ secrets.AL_DEV_SECRET }}\" -X POST ${{ env.AL_DEV_URL }}/update/${{ env.IMAGE_NAME }}.php
