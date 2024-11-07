@@ -147,7 +147,7 @@ def convertToRDF(vocabulary: Vocabulary, defaultLanguage: str, outputFile: str):
             if term.rppType is RPPType.PRIVATE and term.rppPrivateTypeSource is not None:
                 graph.add((termIRI, RDF.type, URIRef(
                     "https://slovník.gov.cz/legislativní/sbírka/111/2009/pojem/neveřejný-údaj")))
-                graph.add((termIRI, RDF.type, URIRef(
+                graph.add((termIRI, RDF.type, getURIRefOrLiteral(
                     term.rppPrivateTypeSource)))
 
     getRDFoutput(graph, outputFile)
