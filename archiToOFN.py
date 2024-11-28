@@ -61,8 +61,9 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                 valueText = value.text
                 propertyType = propertyDefinitions[identifier]
                 termProperties[propertyType] = (valueText, valueLang)
-            if archiBindings.OFN_TYPE in termProperties:
-                valueTextNormalized = termProperties["typ"][0].strip().lower()
+            if archiBindings.OFN_TYPE in termProperties and termProperties[archiBindings.OFN_TYPE][0] is not None:
+                valueTextNormalized = termProperties[archiBindings.OFN_TYPE][0].strip(
+                ).lower()
                 match valueTextNormalized:
                     case archiBindings.OFN_SUBJECT_TYPE:
                         term = getClass(term)

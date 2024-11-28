@@ -2,7 +2,7 @@ from rdflib import XSD, Graph, URIRef, Literal, BNode
 from rdflib.namespace import RDF, OWL, RDFS, SKOS, DCTERMS, TIME
 from ofnClasses import ClassType, RPPType, Relationship, Term, TermClass, Trope, VocabularyType, Vocabulary
 from datetime import datetime
-from urllib.parse import urlparse
+import traceback
 
 # TODO: Better IRI generation (PN_LOCAL)
 # TODO: Code lists
@@ -29,6 +29,7 @@ def getURIRefOrLiteral(string: str):
         result.n3()
         return result
     except Exception:
+        print(traceback.format_exc())
         return Literal(string)
 
 
