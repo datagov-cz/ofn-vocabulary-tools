@@ -13,6 +13,9 @@ def outputToRDFBase(term: Term, graph: Graph):
     for lang, name in term.name.items():
         if testInputString(name):
             graph.add((termIRI, SKOS.prefLabel, Literal(name, lang)))
+    # altLabel
+    for (lang, name) in term.alternateName:
+        graph.add((termIRI, SKOS.altLabel, Literal(name, lang)))
     # description
     for lang, name in term.description.items():
         if testInputString(name):

@@ -6,6 +6,8 @@ from src.output.outputToRDF import convertToRDF
 import tableBindings
 import csv
 
+from util.ofnBindings import MULTIPLE_VALUE_SEPARATOR
+
 
 def openXLSX(file: str):
     return openpyxl.load_workbook(file, data_only=True)
@@ -73,6 +75,8 @@ def soSheetToOFN(sheet) -> List[TermClass]:
             aisIndex = row.index("Agendový informační systém")
             agendaIndex = row.index("Agenda")
             typeIndex = row.index("Typ")
+            relatedSourceIndex = row.index("Související zdroj")
+            alternativeNameIndex = row.index("Alternativní název")
             header = False
         else:
             term = TermClass()
@@ -100,6 +104,12 @@ def soSheetToOFN(sheet) -> List[TermClass]:
                 term.ais = row[aisIndex]
             if row[agendaIndex]:
                 term.agenda = row[agendaIndex]
+            if row[relatedSourceIndex]:
+                term.related += [x.strip()
+                                 for x in row[relatedSourceIndex].split(MULTIPLE_VALUE_SEPARATOR)]
+            if row[alternativeNameIndex]:
+                term.alternateName += [(defaultLanguage, x.strip())
+                                       for x in row[alternativeNameIndex].split(MULTIPLE_VALUE_SEPARATOR)]
             list.append(term)
     return list
 
@@ -135,6 +145,8 @@ def itSheetToOFN(sheet) -> List[Trope]:
             rppTypeIndex = row.index("Je pojem veřejný?")
             rppPrivateTypeSourceIndex = row.index(
                 "Ustanovení dokládající neveřejnost pojmu")
+            relatedSourceIndex = row.index("Související zdroj")
+            alternativeNameIndex = row.index("Alternativní název")
             header = False
         else:
             if row[nameIndex] is None or row[termClassIndex] is None:
@@ -162,6 +174,12 @@ def itSheetToOFN(sheet) -> List[Trope]:
                 term.rppType = row[rppTypeIndex]
             if row[rppPrivateTypeSourceIndex]:
                 term.rppPrivateTypeSource = row[rppPrivateTypeSourceIndex]
+            if row[relatedSourceIndex]:
+                term.related += [x.strip()
+                                 for x in row[relatedSourceIndex].split(MULTIPLE_VALUE_SEPARATOR)]
+            if row[alternativeNameIndex]:
+                term.alternateName += [(defaultLanguage, x.strip())
+                                       for x in row[alternativeNameIndex].split(MULTIPLE_VALUE_SEPARATOR)]
             list.append(term)
     return list
 
@@ -192,6 +210,8 @@ def rlSheetToOFN(sheet) -> List[Relationship]:
                 row) if y == "Subjekt nebo objekt práva"]
             termClassSourceIndex = termClassIndices[0]
             termClassTargetIndex = termClassIndices[1]
+            relatedSourceIndex = row.index("Související zdroj")
+            alternativeNameIndex = row.index("Alternativní název")
             header = False
         else:
             if row[nameIndex] is None or row[termClassSourceIndex] is None or row[termClassTargetIndex] is None:
@@ -211,6 +231,12 @@ def rlSheetToOFN(sheet) -> List[Relationship]:
                 term.equivalent.append(row[equivalentIndex])
             if row[iriIndex]:
                 term.iri = row[iriIndex]
+            if row[relatedSourceIndex]:
+                term.related += [x.strip()
+                                 for x in row[relatedSourceIndex].split(MULTIPLE_VALUE_SEPARATOR)]
+            if row[alternativeNameIndex]:
+                term.alternateName += [(defaultLanguage, x.strip())
+                                       for x in row[alternativeNameIndex].split(MULTIPLE_VALUE_SEPARATOR)]
             list.append(term)
     return list
 

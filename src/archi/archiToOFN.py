@@ -4,6 +4,7 @@ import archiBindings
 from lxml import etree
 from src.util.ofnClasses import ClassType, Relationship, Trope, Vocabulary, Term, VocabularyType, getClass, getTrope
 from src.output.outputToRDF import convertToRDF
+from util.ofnBindings import MULTIPLE_VALUE_SEPARATOR
 
 # TODO: Security!!!
 # TODO: Support multiple vocabularies?
@@ -76,6 +77,14 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
             # Source
             if archiBindings.OFN_RELATION in termProperties:
                 term.source = termProperties[archiBindings.OFN_RELATION][0]
+            # Related source
+            if archiBindings.OFN_RELATED in termProperties:
+                term.related += [x.strip() for x in termProperties[archiBindings.OFN_RELATION]
+                                 [0].split(MULTIPLE_VALUE_SEPARATOR)]
+            # Alternative name
+            if archiBindings.OFN_ALTERNATIVE in termProperties:
+                term.alternateName += [(defaultLanguage, x.strip()) for x in termProperties[archiBindings.OFN_RELATION]
+                                       [0].split(MULTIPLE_VALUE_SEPARATOR)]
             # Definition
             if archiBindings.OFN_DEFINITION in termProperties:
                 term.definition[termProperties[archiBindings.OFN_DEFINITION]
