@@ -15,14 +15,16 @@ def xlsxToSheets(file: str):
     soSheet = None
     itSheet = None
     rlSheet = None
+    vcSheet = None
     if file.endswith("xlsx"):
         wb = openpyxl.load_workbook(file, data_only=True)
+        vcSheet = wb["Slovník"]
         soSheet = wb["Subjekty a objekty práva"]
         itSheet = wb["Vlastnosti"]
         rlSheet = wb["Vztahy"]
 
-    if soSheet is not None and itSheet is not None and rlSheet is not None:
-        return (soSheet, itSheet, rlSheet)
+    if soSheet is not None and itSheet is not None and rlSheet is not None and vcSheet is not None:
+        return (soSheet, itSheet, rlSheet, vcSheet)
     else:
         raise Exception()
 
@@ -195,12 +197,38 @@ def rlSheetToOFN(sheet) -> List[Relationship]:
     return list
 
 
+def vcSheetToOFN(sheet):
+    name = None
+    desc = None
+    lkod = None
+    for lst in sheet:
+        row = [cell.value for cell in lst]
+        if name is None:
+            name = row[1]
+            continue
+        elif desc is None:
+            desc = row[1]
+            continue
+        elif lkod is None:
+            lkod = row[1]
+            continue
+        else:
+            break
+    if name is None or desc is None or lkod is None:
+        raise Exception()
+    return (name, desc, lkod)
+
+
 def tableToOFN():
-    (soSheet, itSheet, rlSheet) = xlsxToSheets(inputLocation)
+    (soSheet, itSheet, rlSheet, vcSheet) = xlsxToSheets(inputLocation)
     soList = soSheetToOFN(soSheet)
     itList = itSheetToOFN(itSheet)
     rlList = rlSheetToOFN(rlSheet)
+    (name, desc, lkod) = vcSheetToOFN(vcSheet)
     vocabulary = Vocabulary()
+    vocabulary.name[defaultLanguage] = name
+    vocabulary.description[defaultLanguage] = desc
+    vocabulary.lkod = lkod
     vocabulary.terms.extend(soList)
     vocabulary.terms.extend(itList)
     vocabulary.terms.extend(rlList)
