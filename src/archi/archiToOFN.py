@@ -2,8 +2,8 @@ import sys
 import archiBindings
 
 from lxml import etree
-from ofnClasses import ClassType, Relationship, Trope, Vocabulary, Term, VocabularyType, getClass, getTrope
-from outputToRDF import convertToRDF
+from src.util.ofnClasses import ClassType, Relationship, Trope, Vocabulary, Term, VocabularyType, getClass, getTrope
+from src.output.outputToRDF import convertToRDF
 
 # TODO: Security!!!
 # TODO: Support multiple vocabularies?
@@ -112,6 +112,7 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
             isDirected = relationship.attrib.get("isDirected", False)
             if not isDirected or isDirected != "true":
                 continue
+            # FIXME
             term = Relationship(domainTerm.getIRI(
                 vocabulary, defaultLanguage), rangeTerm.getIRI(vocabulary, defaultLanguage))
             term.id = identifier

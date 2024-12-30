@@ -1,6 +1,6 @@
 from rdflib import DCTERMS, OWL, RDF, RDFS, SKOS, Graph, Literal, URIRef
-from ofnClasses import Relationship, Term, TermClass, Trope
-from outputToRDF import getURIRefOrLiteral, testInputString
+from src.util.ofnClasses import Relationship, Term, TermClass, Trope
+from src.output.outputToRDF import getURIRefOrLiteral, testInputString
 
 # Remember to call AFTER the term's IRI has been initialized!
 

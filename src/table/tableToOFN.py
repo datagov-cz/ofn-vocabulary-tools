@@ -1,8 +1,8 @@
 from typing import List
 import openpyxl
 import sys
-from ofnClasses import Relationship, TermClass, Trope, Vocabulary, VocabularyType, getClass, getTrope, ClassType
-from outputToRDF import convertToRDF
+from src.util.ofnClasses import Relationship, TermClass, Trope, Vocabulary, VocabularyType, getClass, getTrope, ClassType
+from src.output.outputToRDF import convertToRDF
 
 inputLocation = sys.argv[1]
 outputLocation = sys.argv[2]

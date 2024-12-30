@@ -1,6 +1,6 @@
 from rdflib import XSD, Graph, URIRef, Literal, BNode
 from rdflib.namespace import RDF, OWL, RDFS, SKOS, DCTERMS, TIME
-from ofnClasses import ClassType, RPPType, Relationship, Term, TermClass, Trope, VocabularyType, Vocabulary
+from src.util.ofnClasses import ClassType, RPPType, Relationship, Term, TermClass, Trope, VocabularyType, Vocabulary
 from datetime import datetime
 import traceback
 
@@ -32,6 +32,16 @@ def getURIRefOrLiteral(string: str):
     except Exception:
         print(traceback.format_exc())
         return Literal(string)
+
+
+def checkForTerm(vocabulary: Vocabulary, string: str):
+    result = URIRef(string)
+    try:
+        result.n3()
+        return result
+    except Exception:
+
+        pass
 
 
 def convertToRDF(vocabulary: Vocabulary, defaultLanguage: str, outputFile: str):
