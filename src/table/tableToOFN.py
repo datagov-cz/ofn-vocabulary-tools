@@ -3,12 +3,30 @@ import openpyxl
 import sys
 from src.util.ofnClasses import Relationship, TermClass, Trope, Vocabulary, VocabularyType, getClass, getTrope, ClassType
 from src.output.outputToRDF import convertToRDF
+import tableBindings
+import csv
 
-inputLocation = sys.argv[1]
-outputLocation = sys.argv[2]
-defaultLanguage = "cs"
 
-# TODO: CSV support
+def openXLSX(file: str):
+    return openpyxl.load_workbook(file, data_only=True)
+
+
+def csvToSheets(vcCSV, soCSV, itCSV, rlCSV):
+    wb = openpyxl.Workbook()
+    vcSheet = wb.create_sheet(tableBindings.SHEET_VOCABULARY)
+    soSheet = wb.create_sheet(tableBindings.SHEET_CLASS)
+    itSheet = wb.create_sheet(tableBindings.SHEET_TROPE)
+    rlSheet = wb.create_sheet(tableBindings.SHEET_RELATIONSHIP)
+
+    for x in [(vcCSV, vcSheet), (soCSV, soSheet), (itCSV, itSheet), (rlCSV, rlSheet)]:
+        if not x[0].endswith("csv"):
+            raise Exception()
+        with open(x[0]) as f:
+            reader = csv.reader(f, delimiter=",")
+            for row in reader:
+                x[1].append(row)
+
+    return (soSheet, itSheet, rlSheet, vcSheet)
 
 
 def xlsxToSheets(file: str):
@@ -18,10 +36,10 @@ def xlsxToSheets(file: str):
     vcSheet = None
     if file.endswith("xlsx"):
         wb = openpyxl.load_workbook(file, data_only=True)
-        vcSheet = wb["Slovník"]
-        soSheet = wb["Subjekty a objekty práva"]
-        itSheet = wb["Vlastnosti"]
-        rlSheet = wb["Vztahy"]
+        vcSheet = wb[tableBindings.SHEET_VOCABULARY]
+        soSheet = wb[tableBindings.SHEET_CLASS]
+        itSheet = wb[tableBindings.SHEET_TROPE]
+        rlSheet = wb[tableBindings.SHEET_RELATIONSHIP]
 
     if soSheet is not None and itSheet is not None and rlSheet is not None and vcSheet is not None:
         return (soSheet, itSheet, rlSheet, vcSheet)
@@ -96,7 +114,7 @@ def itSheetToOFN(sheet) -> List[Trope]:
     sourceIndex = None
     subClassOfIndex = None
     equivalentIndex = None
-    sharedInPpdfIndex = None
+    sharedInPPDFIndex = None
     rppTypeIndex = None
     rppPrivateTypeSourceIndex = None
     iriIndex = None
@@ -113,7 +131,7 @@ def itSheetToOFN(sheet) -> List[Trope]:
             iriIndex = row.index("Identifikátor")
             termClassIndex = row.index("Subjekt nebo objekt práva")
             datatypeIndex = row.index("Datový typ")
-            sharedInPpdfIndex = row.index("Je pojem sdílen v PPDF?")
+            sharedInPPDFIndex = row.index("Je pojem sdílen v PPDF?")
             rppTypeIndex = row.index("Je pojem veřejný?")
             rppPrivateTypeSourceIndex = row.index(
                 "Ustanovení dokládající neveřejnost pojmu")
@@ -136,8 +154,8 @@ def itSheetToOFN(sheet) -> List[Trope]:
                 term.equivalent.append(row[equivalentIndex])
             if row[iriIndex]:
                 term.iri = row[iriIndex]
-            if row[sharedInPpdfIndex]:
-                term.sharedInPPDF = row[sharedInPpdfIndex]
+            if row[sharedInPPDFIndex]:
+                term.sharedInPPDF = row[sharedInPPDFIndex]
             if row[datatypeIndex]:
                 term.datatype = row[datatypeIndex]
             if row[rppTypeIndex]:
@@ -219,8 +237,22 @@ def vcSheetToOFN(sheet):
     return (name, desc, lkod)
 
 
+inputLocation = sys.argv[1]
+outputLocation = sys.argv[2]
+defaultLanguage = "cs"
+
+
 def tableToOFN():
-    (soSheet, itSheet, rlSheet, vcSheet) = xlsxToSheets(inputLocation)
+    soSheet = None
+    itSheet = None
+    rlSheet = None
+    vcSheet = None
+    if len(sys.argv) == 3:
+        (soSheet, itSheet, rlSheet, vcSheet) = xlsxToSheets(inputLocation)
+    elif len(sys.argv) == 6:
+        (soSheet, itSheet, rlSheet, vcSheet) = csvToSheets(inputLocation)
+    else:
+        raise Exception()
     soList = soSheetToOFN(soSheet)
     itList = itSheetToOFN(itSheet)
     rlList = rlSheetToOFN(rlSheet)
@@ -234,45 +266,8 @@ def tableToOFN():
     vocabulary.terms.extend(rlList)
     if len(itList) > 0 or len(rlList) > 0:
         vocabulary.type = VocabularyType.CONCEPTUAL_MODEL
-
     vocabulary.name = {defaultLanguage: "test"}
     convertToRDF(vocabulary, defaultLanguage, outputLocation)
 
 
 tableToOFN()
-
-# def tableToOFN(soSheet, itSheet, rlSheet):
-
-#     convertToRDF(vocabulary, defaultLanguage, outputLocation)
-
-# def csvToSheets(soFile: str, itFile: str, rlFile: str):
-#     soExtension = os.path.splitext(soFile)
-# itExtension = os.path.splitext(itFile)
-# rlExtension = os.path.splitext(rlFile)
-# soSheet = None
-# itSheet = None
-# rlSheet = None
-# if "csv" in soExtension[1]:
-#     with open(soFile) as soCSV:
-#         for row in soCSV:
-#             print([cell for cell in row])
-# if itExtension is "csv":
-#     pass
-# if rlExtension is "csv":
-#     pass
-
-# if soSheet is not None and itSheet is not None and rlSheet is not None:
-#     return (soSheet, itSheet, rlSheet)
-# else:
-#     raise Exception()
-# wb = openpyxl.load_workbook(file, read_only=True, data_only=True)
-# soSheet = wb["Subjekty a objekty práva"]
-# itSheet = wb["Vlastnosti"]
-# rlSheet = wb["Vztahy"]
-# if (soSheet is not None):
-#     for row in soSheet.iter_rows():
-#         print([cell.value for cell in row])
-# if (itSheet is not None):
-#     pass
-# if (rlSheet is not None):
-#     pass
