@@ -44,11 +44,11 @@ def checkForTerm(vocabulary: Vocabulary, string: str):
         pass
 
 
-def convertToRDF(vocabulary: Vocabulary, defaultLanguage: str, outputFile: str):
+def convertToRDF(vocabulary: Vocabulary, DEFAULT_LANGUAGE: str, outputFile: str):
     graph = Graph()
 
     # Vocabulary
-    vocabularyIRI = URIRef(vocabulary.getIRI(defaultLanguage))
+    vocabularyIRI = URIRef(vocabulary.getIRI(DEFAULT_LANGUAGE))
 
     # types
     graph.add((vocabularyIRI, RDF.type, SKOS.ConceptScheme))
@@ -71,7 +71,7 @@ def convertToRDF(vocabulary: Vocabulary, defaultLanguage: str, outputFile: str):
     for term in vocabulary.terms:
         # create IRI if not available
         if len(term.iri) == 0:
-            term.getIRI(vocabulary, defaultLanguage)
+            term.getIRI(vocabulary, DEFAULT_LANGUAGE)
         # associate with vocabulary
         graph.add((URIRef(term.iri), SKOS.inScheme, vocabularyIRI))
         # Base

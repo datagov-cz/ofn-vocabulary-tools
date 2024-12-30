@@ -1,10 +1,8 @@
 import sys
-import archiBindings
-
 from lxml import etree
 from src.util.ofnClasses import ClassType, Relationship, Trope, Vocabulary, Term, VocabularyType, getClass, getTrope
 from src.output.outputToRDF import convertToRDF
-from util.ofnBindings import MULTIPLE_VALUE_SEPARATOR
+from util.ofnBindings import *
 
 # TODO: Security!!!
 # TODO: Support multiple vocabularies?
@@ -20,15 +18,14 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
     vocabularyNameElement = root.find(
         "{http://www.opengroup.org/xsd/archimate/3.0/}name")
     vocabularyName: str = "slovník"
-    defaultLanguage: str = "cs"
     if vocabularyNameElement is not None:
         vocabularyName = vocabularyNameElement.text
     else:
         raise LookupError(
             "Cannot find model name. Are you sure you are passing an Archi export?")
     vocabulary = Vocabulary()
-    defaultLanguage = vocabularyNameElement.attrib['{http://www.w3.org/XML/1998/namespace}lang']
-    vocabulary.name[defaultLanguage] = vocabularyName
+    DEFAULT_LANGUAGE = vocabularyNameElement.attrib['{http://www.w3.org/XML/1998/namespace}lang']
+    vocabulary.name[DEFAULT_LANGUAGE] = vocabularyName
     properties = root.findall(
         ".//{http://www.opengroup.org/xsd/archimate/3.0/}propertyDefinition[@identifier]")
     elements = root.findall(
@@ -62,39 +59,38 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                 valueText = value.text
                 propertyType = propertyDefinitions[identifier]
                 termProperties[propertyType] = (valueText, valueLang)
-            if archiBindings.OFN_TYPE in termProperties and termProperties[archiBindings.OFN_TYPE][0] is not None:
-                valueTextNormalized = termProperties[archiBindings.OFN_TYPE][0].strip(
+            if OFN_TYPE.lower() in termProperties and termProperties[OFN_TYPE.lower()][0] is not None:
+                valueTextNormalized = termProperties[OFN_TYPE.lower()][0].strip(
                 ).lower()
-                match valueTextNormalized:
-                    case archiBindings.OFN_SUBJECT_TYPE:
-                        term = getClass(term)
-                        term.type = ClassType.SUBJECT
-                    case archiBindings.OFN_OBJECT_TYPE:
-                        term = getClass(term)
-                        term.type = ClassType.OBJECT
-                    case archiBindings.OFN_TROPE_TYPE:
-                        term = getTrope(term)
+                if valueTextNormalized == OFN_SUBJECT_TYPE.lower():
+                    term = getClass(term)
+                    term.type = ClassType.SUBJECT
+                elif valueTextNormalized == OFN_OBJECT_TYPE.lower():
+                    term = getClass(term)
+                    term.type = ClassType.OBJECT
+                elif valueTextNormalized == OFN_TROPE_TYPE.lower():
+                    term = getTrope(term)
             # Source
-            if archiBindings.OFN_RELATION in termProperties:
-                term.source = termProperties[archiBindings.OFN_RELATION][0]
+            if OFN_SOURCE.lower() in termProperties:
+                term.source = termProperties[OFN_SOURCE.lower()][0]
             # Related source
-            if archiBindings.OFN_RELATED in termProperties:
-                term.related += [x.strip() for x in termProperties[archiBindings.OFN_RELATION]
+            if OFN_RELATED.lower() in termProperties:
+                term.related += [x.strip() for x in termProperties[OFN_SOURCE.lower()]
                                  [0].split(MULTIPLE_VALUE_SEPARATOR)]
             # Alternative name
-            if archiBindings.OFN_ALTERNATIVE in termProperties:
-                term.alternateName += [(defaultLanguage, x.strip()) for x in termProperties[archiBindings.OFN_RELATION]
+            if OFN_ALTERNATIVE.lower() in termProperties:
+                term.alternateName += [(DEFAULT_LANGUAGE, x.strip()) for x in termProperties[OFN_SOURCE.lower()]
                                        [0].split(MULTIPLE_VALUE_SEPARATOR)]
             # Definition
-            if archiBindings.OFN_DEFINITION in termProperties:
-                term.definition[termProperties[archiBindings.OFN_DEFINITION]
-                                [1]] = termProperties[archiBindings.OFN_DEFINITION][0]
+            if OFN_DEFINITION.lower() in termProperties:
+                term.definition[termProperties[OFN_DEFINITION.lower()]
+                                [1]] = termProperties[OFN_DEFINITION.lower()][0]
             # Description
-            if archiBindings.OFN_DESCRIPTION in termProperties:
-                term.description[termProperties[archiBindings.OFN_DESCRIPTION]
-                                 [1]] = termProperties[archiBindings.OFN_DESCRIPTION][0]
-            if archiBindings.OFN_DATATYPE in termProperties and isinstance(term, Trope):
-                term.datatype = termProperties[archiBindings.OFN_DATATYPE][0]
+            if OFN_DESCRIPTION.lower() in termProperties:
+                term.description[termProperties[OFN_DESCRIPTION.lower()]
+                                 [1]] = termProperties[OFN_DESCRIPTION.lower()][0]
+            if OFN_DATATYPE.lower() in termProperties and isinstance(term, Trope):
+                term.datatype = termProperties[OFN_DATATYPE.lower()][0]
             vocabulary.terms.append(term)
 
     for relationship in relationships:
@@ -123,7 +119,7 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                 continue
             # FIXME
             term = Relationship(domainTerm.getIRI(
-                vocabulary, defaultLanguage), rangeTerm.getIRI(vocabulary, defaultLanguage))
+                vocabulary, DEFAULT_LANGUAGE), rangeTerm.getIRI(vocabulary, DEFAULT_LANGUAGE))
             term.id = identifier
             # Name
             names = relationship.findall(
@@ -141,21 +137,16 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                 valueLang = value.attrib['{http://www.w3.org/XML/1998/namespace}lang']
                 valueText = value.text
                 propertyType = propertyDefinitions[identifier]
-                match propertyType:
-                    # Not interested in type
-                    # Source
-                    case archiBindings.OFN_RELATION:
-                        term.source = valueText
-                    # Definition
-                    case archiBindings.OFN_DEFINITION:
-                        term.definition[valueLang] = valueText
-                    # Description
-                    case archiBindings.OFN_DESCRIPTION:
-                        term.description[valueLang] = valueText
+                if propertyType == OFN_SOURCE.lower():
+                    term.source = valueText
+                elif propertyType == OFN_DEFINITION.lower():
+                    term.definition[valueLang] = valueText
+                elif propertyType == OFN_DESCRIPTION.lower():
+                    term.description[valueLang] = valueText
             for name in names:
                 lang = name.attrib['{http://www.w3.org/XML/1998/namespace}lang']
                 term.name[lang] = name.text
             vocabulary.terms.append(term)
     if (next(x for x in vocabulary.terms if isinstance(x, Trope) or isinstance(x, Relationship))):
         vocabulary.type = VocabularyType.CONCEPTUAL_MODEL
-    convertToRDF(vocabulary, "cs", outputLocation)
+    convertToRDF(vocabulary, DEFAULT_LANGUAGE, outputLocation)

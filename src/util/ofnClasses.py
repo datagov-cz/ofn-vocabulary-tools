@@ -45,9 +45,9 @@ class Vocabulary(Resource):
         self.terms: list[Term] = []
         self.type: VocabularyType = VocabularyType.THESAURUS
 
-    def getIRI(self, defaultLanguage: str) -> str:
+    def getIRI(self, DEFAULT_LANGUAGE: str) -> str:
         self.iri = "{}/{}".format(self.lkod,
-                                  self.name[defaultLanguage].strip().lower().replace(" ", "-"))
+                                  self.name[DEFAULT_LANGUAGE].strip().lower().replace(" ", "-"))
         return self.iri
 
 
@@ -66,8 +66,8 @@ class Term(Resource):
         self.rppPrivateTypeSource: str | None = None
         self.alternateName: list[Tuple[str, str]] = []
 
-    def getIRI(self, vocabulary: Vocabulary, defaultLanguage: str) -> str:
-        name: str = self.name[defaultLanguage].strip().lower()
+    def getIRI(self, vocabulary: Vocabulary, DEFAULT_LANGUAGE: str) -> str:
+        name: str = self.name[DEFAULT_LANGUAGE].strip().lower()
         result: str = ""
         for match in PN_LOCAL.finditer(name):
             m = match.group(0)
