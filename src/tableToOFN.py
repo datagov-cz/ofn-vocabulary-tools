@@ -1,13 +1,11 @@
 from typing import List
 import openpyxl
 import sys
-from src.util.ofnClasses import Relationship, Term, TermClass, Trope, Vocabulary, VocabularyType, getClass, getTrope, ClassType
-from src.output.outputToRDF import convertToRDF
-from src.util.ofnBindings import *
+from ofnClasses import Relationship, Term, TermClass, Trope, Vocabulary, VocabularyType, getClass, getTrope, ClassType
+from outputToRDF import convertToRDF
+from ofnBindings import *
 import csv
 import warnings
-
-from util.ofnBindings import MULTIPLE_VALUE_SEPARATOR
 
 
 def openXLSX(file: str):

@@ -1,6 +1,6 @@
 from rdflib import RDF, XSD, Graph, Literal, URIRef
-from src.util.ofnClasses import ClassType, Term, TermClass, RPPType
-from src.output.outputToRDF import getURIRefOrLiteral, testInputString
+from ofnClasses import ClassType, Term, TermClass, RPPType
+from outputUtil import getURIRefOrLiteral, testInputString
 
 # Remember to call AFTER the term's IRI has been initialized!
 

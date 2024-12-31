@@ -1,6 +1,5 @@
 from enum import Enum
 import re
-from typing import Tuple
 
 ClassType = Enum("ClassType", ['CLASS', 'SUBJECT', 'OBJECT'])
 
@@ -64,7 +63,7 @@ class Term(Resource):
         self.sharedInPPDF: bool | None = None
         self.rppType: RPPType | None = None
         self.rppPrivateTypeSource: str | None = None
-        self.alternateName: list[Tuple[str, str]] = []
+        self.alternateName: list[tuple[str, str]] = []
 
     def getIRI(self, vocabulary: Vocabulary, DEFAULT_LANGUAGE: str) -> str:
         name: str = self.name[DEFAULT_LANGUAGE].strip().lower()

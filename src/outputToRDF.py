@@ -1,47 +1,17 @@
 from rdflib import XSD, Graph, URIRef, Literal, BNode
-from rdflib.namespace import RDF, OWL, RDFS, SKOS, DCTERMS, TIME
-from src.util.ofnClasses import ClassType, RPPType, Relationship, Term, TermClass, Trope, VocabularyType, Vocabulary
+from rdflib.namespace import RDF, OWL, SKOS, DCTERMS, TIME
+from ofnClasses import VocabularyType, Vocabulary
 from datetime import datetime
-import traceback
 
 from outputToRDFBase import outputToRDFBase
 from outputToRDFRegistry import outputToRDFRegistry
+from outputUtil import getRDFoutput
 
 # TODO: Code lists
 # TODO: Error handling
 # TODO: Input validation
 # TODO: check for duplicate values
 # TODO: search for terms within file is IRI is not provided
-
-
-def getRDFoutput(graph: Graph, outputLocation: str):
-    with open(outputLocation, "w", encoding="utf-8") as outputFile:
-        format: str = outputLocation[len(outputLocation) - 3:]
-        outputFile.write(graph.serialize(format=format))
-
-
-def testInputString(string: str) -> bool:
-    return string is not None and string.strip() != ""
-
-
-def getURIRefOrLiteral(string: str):
-    result = URIRef(string)
-    try:
-        result.n3()
-        return result
-    except Exception:
-        print(traceback.format_exc())
-        return Literal(string)
-
-
-def checkForTerm(vocabulary: Vocabulary, string: str):
-    result = URIRef(string)
-    try:
-        result.n3()
-        return result
-    except Exception:
-
-        pass
 
 
 def convertToRDF(vocabulary: Vocabulary, DEFAULT_LANGUAGE: str, outputFile: str):

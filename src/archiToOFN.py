@@ -1,15 +1,16 @@
 import sys
 from lxml import etree
-from src.util.ofnClasses import ClassType, Relationship, Trope, Vocabulary, Term, VocabularyType, getClass, getTrope
-from src.output.outputToRDF import convertToRDF
-from util.ofnBindings import *
+from ofnClasses import ClassType, Relationship, Trope, Vocabulary, Term, VocabularyType, getClass, getTrope
+from outputToRDF import convertToRDF
+from ofnBindings import *
+from outputUtil import testInputString
 
 # TODO: Security!!!
 # TODO: Support multiple vocabularies?
 # ARCHIMATE_NAMESPACE = 'http://www.w3.org/2001/XMLSchema-instance'
 
-inputLocation = sys.argv[1]
-outputLocation = sys.argv[2]
+inputLocation = "C:\\Users\\alice\\Documents\\GitHub\\ofn-vocabulary-tools\\Slovník zákona o silničním provozu.xml"
+outputLocation = "output.ttl"
 propertyDefinitions = {}
 
 with open(inputLocation, "r", encoding="utf-8") as inputFile:
@@ -32,11 +33,24 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
         ".//{http://www.opengroup.org/xsd/archimate/3.0/}element[@{http://www.w3.org/2001/XMLSchema-instance}type]")
     relationships = root.findall(
         ".//{http://www.opengroup.org/xsd/archimate/3.0/}relationship[@{http://www.w3.org/2001/XMLSchema-instance}type]")
-    for property in properties:
-        name = property.find(
+    for vocabularyPropertyElement in properties:
+        name = vocabularyPropertyElement.find(
             ".//{http://www.opengroup.org/xsd/archimate/3.0/}name")
-        propertyDefinitions[property.attrib['identifier']
+        propertyDefinitions[vocabularyPropertyElement.attrib['identifier']
                             ] = getattr(name, "text", "name")
+    vocabularyPropertyElements = root.findall(
+        "./{http://www.opengroup.org/xsd/archimate/3.0/}properties/{http://www.opengroup.org/xsd/archimate/3.0/}property")
+    vocabularyProperties = dict[str, tuple[str, str]] = {}
+
+    for vocabularyPropertyElement in vocabularyPropertyElements:
+        identifier = vocabularyPropertyElement.attrib['propertyDefinitionRef']
+        value = vocabularyPropertyElement.find(
+            "{http://www.opengroup.org/xsd/archimate/3.0/}value")
+        valueLang = value.attrib['{http://www.w3.org/XML/1998/namespace}lang']
+        valueText = value.text
+        propertyType = propertyDefinitions[identifier]
+        vocabularyProperties[propertyType] = (valueText, valueLang)
+
     for element in elements:
         if element.attrib['{http://www.w3.org/2001/XMLSchema-instance}type'] == "BusinessObject":
             term = Term()
@@ -74,7 +88,7 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
             if OFN_SOURCE.lower() in termProperties:
                 term.source = termProperties[OFN_SOURCE.lower()][0]
             # Related source
-            if OFN_RELATED.lower() in termProperties:
+            if OFN_RELATED.lower() in termProperties and testInputString(termProperties[OFN_SOURCE.lower()]):
                 term.related += [x.strip() for x in termProperties[OFN_SOURCE.lower()]
                                  [0].split(MULTIPLE_VALUE_SEPARATOR)]
             # Alternative name
