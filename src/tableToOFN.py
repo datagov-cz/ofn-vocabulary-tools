@@ -1,7 +1,7 @@
 from typing import List
 import openpyxl  # type: ignore
 import sys
-from ofnClasses import Relationship, Term, TermClass, Trope, Vocabulary, VocabularyType, getClass, getTrope, ClassType
+from ofnClasses import *
 from outputToRDF import convertToRDF
 from ofnBindings import *
 import csv
@@ -244,7 +244,12 @@ def rlSheetToOFN(sheet) -> List[Relationship]:
                 else:
                     warnings.warn("warn")
             if row[rppTypeIndex]:
-                term.rppType = row[rppTypeIndex]
+                if row[rppTypeIndex].strip().lower() == YES.lower():
+                    term.rppType = RPPType.PUBLIC
+                elif row[rppTypeIndex].strip().lower() == NO.lower():
+                    term.rppType = RPPType.PRIVATE
+                else:
+                    warnings.warn("warn")
             if row[rppPrivateTypeSourceIndex]:
                 term.rppPrivateTypeSource = row[rppPrivateTypeSourceIndex]
             if row[relatedSourceIndex]:

@@ -1,6 +1,6 @@
 import sys
 from lxml import etree  # type: ignore
-from ofnClasses import ClassType, Relationship, Trope, Vocabulary, Term, VocabularyType, getClass, getTrope
+from ofnClasses import *
 from outputToRDF import convertToRDF
 from ofnBindings import *
 from outputUtil import testInputString
@@ -115,6 +115,29 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                                  [1]] = termProperties[OFN_DESCRIPTION.lower()][0]
             if OFN_DATATYPE.lower() in termProperties and isinstance(term, Trope):
                 term.datatype = termProperties[OFN_DATATYPE.lower()][0]
+
+            # RPP
+            if OFN_RPP_AIS.lower() in termProperties and isinstance(term, TermClass):
+                term.source = termProperties[OFN_RPP_AIS.lower()][0]
+            if OFN_RPP_AGENDA.lower() in termProperties and isinstance(term, TermClass):
+                term.source = termProperties[OFN_RPP_AGENDA.lower()][0]
+            if OFN_RPP_TYPE.lower() in termProperties and (isinstance(term, Trope) or isinstance(term, Relationship)):
+                if termProperties[OFN_RPP_TYPE.lower()][0].strip().lower() == YES.lower():
+                    term.rppType = RPPType.PUBLIC
+                elif termProperties[OFN_RPP_TYPE.lower()][0].strip().lower() == NO.lower():
+                    term.rppType = RPPType.PRIVATE
+                else:
+                    warnings.warn("warn")
+            if OFN_RPP_SHARED.lower() in termProperties and (isinstance(term, Trope) or isinstance(term, Relationship)):
+                if termProperties[OFN_RPP_SHARED.lower()][0].strip().lower() == YES.lower():
+                    term.sharedInPPDF = True
+                elif termProperties[OFN_RPP_SHARED.lower()][0].strip().lower() == NO.lower():
+                    term.sharedInPPDF = False
+                else:
+                    warnings.warn("warn")
+            if OFN_RPP_PRIVATE_SOURCE.lower() in termProperties and (isinstance(term, Trope) or isinstance(term, Relationship)):
+                term.source = termProperties[OFN_RPP_PRIVATE_SOURCE.lower()][0]
+
             vocabulary.terms.append(term)
 
     for relationship in relationships:
