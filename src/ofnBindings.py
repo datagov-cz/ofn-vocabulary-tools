@@ -8,6 +8,7 @@ SHEET_CLASS = "Subjekty a objekty"
 SHEET_TROPE = "Vlastnosti"
 SHEET_RELATIONSHIP = "Vztahy"
 
+OFN_LKOD = "Adresa lokálního katalogu dat, ve kterém bude slovník registrován"
 OFN_NAME = "Název"
 OFN_TYPE = "Typ"
 OFN_SUBCLASS = "Nadřazený pojem"

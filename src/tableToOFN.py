@@ -1,5 +1,5 @@
 from typing import List
-import openpyxl
+import openpyxl  # type: ignore
 import sys
 from ofnClasses import Relationship, Term, TermClass, Trope, Vocabulary, VocabularyType, getClass, getTrope, ClassType
 from outputToRDF import convertToRDF
@@ -50,16 +50,16 @@ def xlsxToSheets(file: str):
 
 def soSheetToOFN(sheet) -> List[TermClass]:
     header = True
-    nameIndex = None
-    descriptionIndex = None
-    definitionIndex = None
-    sourceIndex = None
-    subClassOfIndex = None
-    equivalentIndex = None
-    aisIndex = None
-    agendaIndex = None
-    iriIndex = None
-    typeIndex = None
+    nameIndex = -1
+    descriptionIndex = -1
+    definitionIndex = -1
+    sourceIndex = -1
+    subClassOfIndex = -1
+    equivalentIndex = -1
+    aisIndex = -1
+    agendaIndex = -1
+    iriIndex = -1
+    typeIndex = -1
     sos = []
     for lst in sheet:
         row = [cell.value for cell in lst]
@@ -118,18 +118,18 @@ def soSheetToOFN(sheet) -> List[TermClass]:
 
 def itSheetToOFN(sheet) -> List[Trope]:
     header = True
-    termClassIndex = None
-    datatypeIndex = None
-    nameIndex = None
-    descriptionIndex = None
-    definitionIndex = None
-    sourceIndex = None
-    subClassOfIndex = None
-    equivalentIndex = None
-    sharedInPPDFIndex = None
-    rppTypeIndex = None
-    rppPrivateTypeSourceIndex = None
-    iriIndex = None
+    termClassIndex = -1
+    datatypeIndex = -1
+    nameIndex = -1
+    descriptionIndex = -1
+    definitionIndex = -1
+    sourceIndex = -1
+    subClassOfIndex = -1
+    equivalentIndex = -1
+    sharedInPPDFIndex = -1
+    rppTypeIndex = -1
+    rppPrivateTypeSourceIndex = -1
+    iriIndex = -1
     tropes = []
     for lst in sheet:
         row = [cell.value for cell in lst]
@@ -187,15 +187,15 @@ def itSheetToOFN(sheet) -> List[Trope]:
 
 def rlSheetToOFN(sheet) -> List[Relationship]:
     header = True
-    termClassSourceIndex = None
-    termClassTargetIndex = None
-    nameIndex = None
-    descriptionIndex = None
-    definitionIndex = None
-    sourceIndex = None
-    subClassOfIndex = None
-    equivalentIndex = None
-    iriIndex = None
+    termClassSourceIndex = -1
+    termClassTargetIndex = -1
+    nameIndex = -1
+    descriptionIndex = -1
+    definitionIndex = -1
+    sourceIndex = -1
+    subClassOfIndex = -1
+    equivalentIndex = -1
+    iriIndex = -1
     relationships = []
     for lst in sheet:
         row = [cell.value for cell in lst]
@@ -242,7 +242,7 @@ def rlSheetToOFN(sheet) -> List[Relationship]:
                 elif row[sharedInPPDFIndex].strip().lower() == NO.lower():
                     term.sharedInPPDF = False
                 else:
-                    warnings("warn")
+                    warnings.warn("warn")
             if row[rppTypeIndex]:
                 term.rppType = row[rppTypeIndex]
             if row[rppPrivateTypeSourceIndex]:

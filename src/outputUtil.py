@@ -10,12 +10,14 @@ def getRDFoutput(graph: Graph, outputLocation: str):
         outputFile.write(graph.serialize(format=format))
 
 
-def testInputString(string: str) -> bool:
+def testInputString(string: str | None) -> bool:
     return string is not None and string.strip() != ""
 
 
-def getURIRefOrLiteral(string: str):
-    result = URIRef(string)
+def getURIRefOrLiteral(string: str | None):
+    if not testInputString(string):
+        raise Exception("")
+    result = URIRef(str(string))
     try:
         result.n3()
         return result

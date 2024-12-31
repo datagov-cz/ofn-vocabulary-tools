@@ -1,9 +1,10 @@
 import sys
-from lxml import etree
+from lxml import etree  # type: ignore
 from ofnClasses import ClassType, Relationship, Trope, Vocabulary, Term, VocabularyType, getClass, getTrope
 from outputToRDF import convertToRDF
 from ofnBindings import *
 from outputUtil import testInputString
+import warnings
 
 # TODO: Security!!!
 # TODO: Support multiple vocabularies?
@@ -33,6 +34,8 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
         ".//{http://www.opengroup.org/xsd/archimate/3.0/}element[@{http://www.w3.org/2001/XMLSchema-instance}type]")
     relationships = root.findall(
         ".//{http://www.opengroup.org/xsd/archimate/3.0/}relationship[@{http://www.w3.org/2001/XMLSchema-instance}type]")
+
+    # Vocabulary info
     for vocabularyPropertyElement in properties:
         name = vocabularyPropertyElement.find(
             ".//{http://www.opengroup.org/xsd/archimate/3.0/}name")
@@ -40,7 +43,7 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                             ] = getattr(name, "text", "name")
     vocabularyPropertyElements = root.findall(
         "./{http://www.opengroup.org/xsd/archimate/3.0/}properties/{http://www.opengroup.org/xsd/archimate/3.0/}property")
-    vocabularyProperties = dict[str, tuple[str, str]] = {}
+    vocabularyProperties: dict[str, tuple[str, str]] = {}
 
     for vocabularyPropertyElement in vocabularyPropertyElements:
         identifier = vocabularyPropertyElement.attrib['propertyDefinitionRef']
@@ -49,7 +52,14 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
         valueLang = value.attrib['{http://www.w3.org/XML/1998/namespace}lang']
         valueText = value.text
         propertyType = propertyDefinitions[identifier]
-        vocabularyProperties[propertyType] = (valueText, valueLang)
+        vocabularyProperties[propertyType] = (valueText.lower(), valueLang)
+
+    if OFN_LKOD.lower() in vocabularyProperties:
+        vocabulary.lkod = vocabularyProperties[OFN_LKOD.lower()][0]
+
+    if OFN_DESCRIPTION.lower() in vocabularyProperties:
+        vocabulary.description[DEFAULT_LANGUAGE] = vocabularyProperties[OFN_DESCRIPTION.lower(
+        )][0]
 
     for element in elements:
         if element.attrib['{http://www.w3.org/2001/XMLSchema-instance}type'] == "BusinessObject":
@@ -88,12 +98,12 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
             if OFN_SOURCE.lower() in termProperties:
                 term.source = termProperties[OFN_SOURCE.lower()][0]
             # Related source
-            if OFN_RELATED.lower() in termProperties and testInputString(termProperties[OFN_SOURCE.lower()]):
+            if OFN_RELATED.lower() in termProperties and testInputString(termProperties[OFN_RELATED.lower()][0]):
                 term.related += [x.strip() for x in termProperties[OFN_SOURCE.lower()]
                                  [0].split(MULTIPLE_VALUE_SEPARATOR)]
             # Alternative name
-            if OFN_ALTERNATIVE.lower() in termProperties:
-                term.alternateName += [(DEFAULT_LANGUAGE, x.strip()) for x in termProperties[OFN_SOURCE.lower()]
+            if OFN_ALTERNATIVE.lower() in termProperties and testInputString(termProperties[OFN_ALTERNATIVE.lower()][0]):
+                term.alternateName += [(DEFAULT_LANGUAGE, x.strip()) for x in termProperties[OFN_ALTERNATIVE.lower()]
                                        [0].split(MULTIPLE_VALUE_SEPARATOR)]
             # Definition
             if OFN_DEFINITION.lower() in termProperties:
@@ -124,12 +134,14 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
         if domainTerm is None or rangeTerm is None:
             continue
         if relationshipType == "Specialization":
+            # FIXME
             domainTerm.subClassOf.append(rangeTerm.iri)
         elif relationshipType == "Composition" and isinstance(rangeTerm, Trope):
             rangeTerm.target = domainTerm.iri
         elif relationshipType == "Association":
             isDirected = relationship.attrib.get("isDirected", False)
             if not isDirected or isDirected != "true":
+                warnings.warn("")
                 continue
             # FIXME
             term = Relationship(domainTerm.getIRI(

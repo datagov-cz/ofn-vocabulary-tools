@@ -1,5 +1,6 @@
 from enum import Enum
 import re
+from ofnBindings import *
 
 ClassType = Enum("ClassType", ['CLASS', 'SUBJECT', 'OBJECT'])
 
@@ -28,13 +29,10 @@ PN_LOCAL = re.compile("({})(({})*({}))?".format(PN_LOCAL_1.pattern,
 
 class Resource:
     def __init__(self) -> None:
-        self.id = None
-        self.iri = None
+        self.id: str = ""
+        self.iri: str = ""
         self.name: dict[str, str] = {}
         self.description: dict[str, str] = {}
-
-    def getIRI(self):
-        raise NotImplementedError()
 
 
 class Vocabulary(Resource):
@@ -44,9 +42,9 @@ class Vocabulary(Resource):
         self.terms: list[Term] = []
         self.type: VocabularyType = VocabularyType.THESAURUS
 
-    def getIRI(self, DEFAULT_LANGUAGE: str) -> str:
+    def getIRI(self, defaultLanguage: str = DEFAULT_LANGUAGE) -> str:
         self.iri = "{}/{}".format(self.lkod,
-                                  self.name[DEFAULT_LANGUAGE].strip().lower().replace(" ", "-"))
+                                  self.name[defaultLanguage].strip().lower().replace(" ", "-"))
         return self.iri
 
 
@@ -65,8 +63,8 @@ class Term(Resource):
         self.rppPrivateTypeSource: str | None = None
         self.alternateName: list[tuple[str, str]] = []
 
-    def getIRI(self, vocabulary: Vocabulary, DEFAULT_LANGUAGE: str) -> str:
-        name: str = self.name[DEFAULT_LANGUAGE].strip().lower()
+    def getIRI(self, vocabulary: Vocabulary, defaultLanguage: str) -> str:
+        name: str = self.name[defaultLanguage].strip().lower()
         result: str = ""
         for match in PN_LOCAL.finditer(name):
             m = match.group(0)
@@ -75,7 +73,7 @@ class Term(Resource):
             result += m
         result = re.sub("-+$", "", result)
         self.iri = "{}/pojem/{}".format(
-            vocabulary.getIRI(),
+            vocabulary.getIRI(defaultLanguage),
             result)
         return self.iri
 
