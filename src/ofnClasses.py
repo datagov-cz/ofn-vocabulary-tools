@@ -54,7 +54,7 @@ class Term(Resource):
         self.name: dict = {}
         self.description: dict = {}
         self.definition: dict = {}
-        self.source: str | None = None
+        self.source: str = ""
         self.related: list[str] = []
         self.subClassOf: list[str] = []
         self.equivalent: list[str] = []
@@ -96,8 +96,8 @@ class Relationship(TermClass):
 class Trope(TermClass):
     def __init__(self) -> None:
         super().__init__()
-        self.target: str | None = None
-        self.datatype: str | None = None
+        self.target: str = ""
+        self.datatype: str = ""
 
 
 def getClass(term: Term) -> TermClass:

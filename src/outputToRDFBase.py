@@ -1,12 +1,13 @@
 from rdflib import DCTERMS, OWL, RDF, RDFS, SKOS, Graph, Literal, URIRef
 from ofnClasses import Relationship, Term, TermClass, Trope
+from urllib.parse import unquote
 from outputUtil import getURIRefOrLiteral, testInputString
 
 # Remember to call AFTER the term's IRI has been initialized!
 
 
 def outputToRDFBase(term: Term, graph: Graph):
-    termIRI = URIRef(term.iri)
+    termIRI = URIRef(unquote(term.iri))
     # Basic term info
     graph.add((termIRI, RDF.type, SKOS.Concept))
     # prefLabel
@@ -28,16 +29,16 @@ def outputToRDFBase(term: Term, graph: Graph):
     for relation in term.related:
         if testInputString(relation):
             graph.add((termIRI, DCTERMS.relation,
-                       getURIRefOrLiteral(relation)))
+                       getURIRefOrLiteral(unquote(relation))))
     # conformsTo
     if testInputString(term.source):
         graph.add((termIRI, DCTERMS.conformsTo,
-                   getURIRefOrLiteral(term.source)))
+                   getURIRefOrLiteral(unquote(term.source))))
     # exactMatch
     for equivalent in term.equivalent:
         if testInputString(equivalent):
             graph.add((termIRI, SKOS.exactMatch,
-                       getURIRefOrLiteral(equivalent)))
+                       getURIRefOrLiteral(unquote(equivalent))))
     # broader
     if isinstance(term, Term):
         for broader in term.subClassOf:
@@ -60,10 +61,10 @@ def outputToRDFBase(term: Term, graph: Graph):
     # datatypeProperty (trope), domain, range (datatype)
     if isinstance(term, Trope):
         graph.add((termIRI, RDF.type, OWL.DatatypeProperty))
-        if term.target is not None:
+        if len(term.target) > 0:
             graph.add(
                 (termIRI, RDFS.domain, getURIRefOrLiteral(term.target)))
-        if term.datatype is not None:
+        if term.datatype is not None and len(term.datatype) > 0:
             graph.add(
                 (termIRI, RDFS.range, getURIRefOrLiteral(term.datatype)))
     # Object property (relationship), domain, range

@@ -10,8 +10,8 @@ import warnings
 # TODO: Support multiple vocabularies?
 # ARCHIMATE_NAMESPACE = 'http://www.w3.org/2001/XMLSchema-instance'
 
-inputLocation = "C:\\Users\\alice\\Documents\\GitHub\\ofn-vocabulary-tools\\Slovník zákona o silničním provozu.xml"
-outputLocation = "output.ttl"
+inputLocation = sys.argv[1]
+outputLocation = sys.argv[2]
 propertyDefinitions = {}
 
 with open(inputLocation, "r", encoding="utf-8") as inputFile:
@@ -51,6 +51,8 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
             "{http://www.opengroup.org/xsd/archimate/3.0/}value")
         valueLang = value.attrib['{http://www.w3.org/XML/1998/namespace}lang']
         valueText = value.text
+        if valueText is None:
+            continue
         propertyType = propertyDefinitions[identifier]
         vocabularyProperties[propertyType] = (valueText.lower(), valueLang)
 
@@ -99,7 +101,7 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                 term.source = termProperties[OFN_SOURCE.lower()][0]
             # Related source
             if OFN_RELATED.lower() in termProperties and testInputString(termProperties[OFN_RELATED.lower()][0]):
-                term.related += [x.strip() for x in termProperties[OFN_SOURCE.lower()]
+                term.related += [x.strip() for x in termProperties[OFN_RELATED.lower()]
                                  [0].split(MULTIPLE_VALUE_SEPARATOR)]
             # Alternative name
             if OFN_ALTERNATIVE.lower() in termProperties and testInputString(termProperties[OFN_ALTERNATIVE.lower()][0]):
@@ -121,14 +123,14 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                 term.source = termProperties[OFN_RPP_AIS.lower()][0]
             if OFN_RPP_AGENDA.lower() in termProperties and isinstance(term, TermClass):
                 term.source = termProperties[OFN_RPP_AGENDA.lower()][0]
-            if OFN_RPP_TYPE.lower() in termProperties and (isinstance(term, Trope) or isinstance(term, Relationship)):
+            if OFN_RPP_TYPE.lower() in termProperties and isinstance(termProperties[OFN_RPP_TYPE.lower()][0], str) and (isinstance(term, Trope) or isinstance(term, Relationship)):
                 if termProperties[OFN_RPP_TYPE.lower()][0].strip().lower() == YES.lower():
                     term.rppType = RPPType.PUBLIC
                 elif termProperties[OFN_RPP_TYPE.lower()][0].strip().lower() == NO.lower():
                     term.rppType = RPPType.PRIVATE
                 else:
                     warnings.warn("warn")
-            if OFN_RPP_SHARED.lower() in termProperties and (isinstance(term, Trope) or isinstance(term, Relationship)):
+            if OFN_RPP_SHARED.lower() in termProperties and isinstance(termProperties[OFN_RPP_SHARED.lower()][0], str) and (isinstance(term, Trope) or isinstance(term, Relationship)):
                 if termProperties[OFN_RPP_SHARED.lower()][0].strip().lower() == YES.lower():
                     term.sharedInPPDF = True
                 elif termProperties[OFN_RPP_SHARED.lower()][0].strip().lower() == NO.lower():
