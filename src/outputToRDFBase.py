@@ -6,8 +6,8 @@ from outputUtil import getURIRefOrLiteral, testInputString
 # Remember to call AFTER the term's IRI has been initialized!
 
 
-def outputToRDFBase(term: Term, graph: Graph):
-    termIRI = URIRef(unquote(term.iri))
+def outputToRDFBase(term: Term, iri: str, graph: Graph):
+    termIRI = URIRef(unquote(iri))
     # Basic term info
     graph.add((termIRI, RDF.type, SKOS.Concept))
     # prefLabel
@@ -39,12 +39,7 @@ def outputToRDFBase(term: Term, graph: Graph):
         if testInputString(equivalent):
             graph.add((termIRI, SKOS.exactMatch,
                        getURIRefOrLiteral(unquote(equivalent))))
-    # broader
-    if isinstance(term, Term):
-        for broader in term.subClassOf:
-            if testInputString(broader):
-                graph.add((termIRI, SKOS.broader,
-                           getURIRefOrLiteral(broader)))
+
     # owl:Class (class) and subClassOf
     if isinstance(term, TermClass):
         graph.add((termIRI, RDF.type, OWL.Class))
@@ -53,10 +48,16 @@ def outputToRDFBase(term: Term, graph: Graph):
                 graph.add((termIRI, RDFS.subClassOf,
                            getURIRefOrLiteral(broader)))
     # subPropertyOf (tropes or relationships)
-    if isinstance(term, Trope) or isinstance(term, Relationship):
+    elif isinstance(term, Trope) or isinstance(term, Relationship):
         for broader in term.subClassOf:
             if testInputString(broader):
                 graph.add((termIRI, RDFS.subPropertyOf,
+                           getURIRefOrLiteral(broader)))
+    # broader
+    elif isinstance(term, Term):
+        for broader in term.subClassOf:
+            if testInputString(broader):
+                graph.add((termIRI, SKOS.broader,
                            getURIRefOrLiteral(broader)))
     # datatypeProperty (trope), domain, range (datatype)
     if isinstance(term, Trope):

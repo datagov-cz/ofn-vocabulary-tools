@@ -27,12 +27,26 @@ PN_LOCAL = re.compile("({})(({})*({}))?".format(PN_LOCAL_1.pattern,
                                                 PN_LOCAL_2.pattern, PN_LOCAL_3.pattern), re.U)
 
 
+def sanitizeString(string: str) -> str:
+    result: str = ""
+    for match in PN_LOCAL.finditer(string):
+        m = match.group(0)
+        result = result.ljust(match.end(0), "-")
+        result = result[0:(match.end(0) - len(m))]
+        result += m
+    result = re.sub("-+$", "", result)
+    return result
+
+
 class Resource:
     def __init__(self) -> None:
         self.id: str = ""
-        self.iri: str = ""
+        self._iri: str = ""
         self.name: dict[str, str] = {}
         self.description: dict[str, str] = {}
+
+    def __str__(self):
+        return self.name[DEFAULT_LANGUAGE]
 
 
 class Vocabulary(Resource):
@@ -43,9 +57,9 @@ class Vocabulary(Resource):
         self.type: VocabularyType = VocabularyType.THESAURUS
 
     def getIRI(self, defaultLanguage: str = DEFAULT_LANGUAGE) -> str:
-        self.iri = "{}/{}".format(self.lkod,
-                                  self.name[defaultLanguage].strip().lower().replace(" ", "-"))
-        return self.iri
+        self._iri = "{}/{}".format("https://slovník.gov.cz",
+                                   sanitizeString(self.name[defaultLanguage].strip().lower()))
+        return self._iri
 
 
 class Term(Resource):
@@ -64,18 +78,10 @@ class Term(Resource):
         self.alternateName: list[tuple[str, str]] = []
 
     def getIRI(self, vocabulary: Vocabulary, defaultLanguage: str) -> str:
-        name: str = self.name[defaultLanguage].strip().lower()
-        result: str = ""
-        for match in PN_LOCAL.finditer(name):
-            m = match.group(0)
-            result = result.ljust(match.end(0), "-")
-            result = result[0:(match.end(0) - len(m))]
-            result += m
-        result = re.sub("-+$", "", result)
-        self.iri = "{}/pojem/{}".format(
+        self._iri = "{}/pojem/{}".format(
             vocabulary.getIRI(defaultLanguage),
-            result)
-        return self.iri
+            sanitizeString(self.name[defaultLanguage].strip().lower()))
+        return self._iri
 
 
 class TermClass(Term):
@@ -86,14 +92,14 @@ class TermClass(Term):
         self.type: ClassType = ClassType.CLASS
 
 
-class Relationship(TermClass):
+class Relationship(Term):
     def __init__(self, domain: str, range: str) -> None:
         super().__init__()
         self.domain: str = domain
         self.range: str = range
 
 
-class Trope(TermClass):
+class Trope(Term):
     def __init__(self) -> None:
         super().__init__()
         self.target: str = ""

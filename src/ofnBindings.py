@@ -4,7 +4,7 @@ NO = "Ne"
 DEFAULT_LANGUAGE = "cs"
 
 SHEET_VOCABULARY = "Slovník"
-SHEET_CLASS = "Subjekty a objekty"
+SHEET_CLASS = "Subjekty a objekty práva"
 SHEET_TROPE = "Vlastnosti"
 SHEET_RELATIONSHIP = "Vztahy"
 

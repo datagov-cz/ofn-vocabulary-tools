@@ -1,12 +1,13 @@
 from rdflib import RDF, XSD, Graph, Literal, URIRef
+
 from ofnClasses import ClassType, Term, TermClass, RPPType
 from outputUtil import getURIRefOrLiteral, testInputString
 
+
 # Remember to call AFTER the term's IRI has been initialized!
 
-
-def outputToRDFRegistry(term: Term, graph: Graph):
-    termIRI = URIRef(term.iri)
+def outputToRDFRegistry(term: Term, iri: str, graph: Graph):
+    termIRI = URIRef(iri)
     # shared in PPDF
     if term.sharedInPPDF is not None:
         graph.add((termIRI, URIRef("https://slovník.gov.cz/agendový/104/pojem/je-sdílen-v-propojeném-datovém-fondu"), Literal(
@@ -20,17 +21,18 @@ def outputToRDFRegistry(term: Term, graph: Graph):
     if isinstance(term, TermClass):
         if testInputString(term.ais):
             graph.add((termIRI, URIRef(
-                "https://slovník.gov.cz/agendový/104/pojem/údaje-jsou-v-ais"), getURIRefOrLiteral(term.ais)))
+                "https://slovník.gov.cz/agendový/104/pojem/údaje-jsou-v-ais"), URIRef(term.ais)))
         if testInputString(term.agenda):
             graph.add((termIRI, URIRef(
-                "https://slovník.gov.cz/agendový/104/pojem/sdružuje-údaje-vedené-nebo-vytvářené-v-rámci-agendy"), getURIRefOrLiteral(term.agenda)))
+                "https://slovník.gov.cz/agendový/104/pojem/sdružuje-údaje-vedené-nebo-vytvářené-v-rámci-agendy"), URIRef(term.agenda)))
     # RPP public/private types
     if term.rppType is not None:
         if term.rppType is RPPType.PUBLIC:
             graph.add((termIRI, RDF.type, URIRef(
                 "https://slovník.gov.cz/legislativní/sbírka/111/2009/pojem/veřejný-údaj")))
-        if term.rppType is RPPType.PRIVATE and term.rppPrivateTypeSource is not None:
+        if term.rppType is RPPType.PRIVATE:
             graph.add((termIRI, RDF.type, URIRef(
                 "https://slovník.gov.cz/legislativní/sbírka/111/2009/pojem/neveřejný-údaj")))
+        if term.rppPrivateTypeSource is not None:
             graph.add((termIRI, RDF.type, getURIRefOrLiteral(
                 term.rppPrivateTypeSource)))

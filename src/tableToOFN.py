@@ -8,10 +8,6 @@ import csv
 import warnings
 
 
-def openXLSX(file: str):
-    return openpyxl.load_workbook(file, data_only=True)
-
-
 def csvToSheets(vcCSV, soCSV, itCSV, rlCSV):
     wb = openpyxl.Workbook()
     vcSheet = wb.create_sheet(SHEET_VOCABULARY)

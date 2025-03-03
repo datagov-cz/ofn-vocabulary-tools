@@ -16,7 +16,6 @@ from outputUtil import getRDFoutput
 
 def convertToRDF(vocabulary: Vocabulary, DEFAULT_LANGUAGE: str, outputFile: str):
     graph = Graph()
-
     # Vocabulary
     vocabularyIRI = URIRef(vocabulary.getIRI(DEFAULT_LANGUAGE))
 
@@ -39,13 +38,10 @@ def convertToRDF(vocabulary: Vocabulary, DEFAULT_LANGUAGE: str, outputFile: str)
 
     # Terms
     for term in vocabulary.terms:
-        # create IRI if not available
-        if len(term.iri) == 0:
-            term.getIRI(vocabulary, DEFAULT_LANGUAGE)
         # associate with vocabulary
-        graph.add((URIRef(term.iri), SKOS.inScheme, vocabularyIRI))
+        graph.add((URIRef(term.getIRI(vocabulary, DEFAULT_LANGUAGE)), SKOS.inScheme, vocabularyIRI))
         # Base
-        outputToRDFBase(term, graph)
+        outputToRDFBase(term, term.getIRI(vocabulary, DEFAULT_LANGUAGE), graph)
         # RPP
-        outputToRDFRegistry(term, graph)
-    getRDFoutput(graph, outputFile)
+        outputToRDFRegistry(term, term.getIRI(vocabulary, DEFAULT_LANGUAGE), graph)
+    getRDFoutput(graph, vocabulary, outputFile)

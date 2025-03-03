@@ -7,5 +7,9 @@ __pycache__
 *.csv
 *.xml
 *.xlsx
+*.json-ld
+*.jsonld
+*.nq
 *.archimate*
 .idea
+test*

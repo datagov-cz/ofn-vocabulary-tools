@@ -6,6 +6,8 @@ from ofnBindings import *
 from outputUtil import testInputString
 import warnings
 
+from outputUtil import getAISODIRI, getAgendaODIRI
+
 # TODO: Security!!!
 # TODO: Support multiple vocabularies?
 # ARCHIMATE_NAMESPACE = 'http://www.w3.org/2001/XMLSchema-instance'
@@ -40,7 +42,7 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
         name = vocabularyPropertyElement.find(
             ".//{http://www.opengroup.org/xsd/archimate/3.0/}name")
         propertyDefinitions[vocabularyPropertyElement.attrib['identifier']
-                            ] = getattr(name, "text", "name")
+                            ] = getattr(name, "text", "name").lower()
     vocabularyPropertyElements = root.findall(
         "./{http://www.opengroup.org/xsd/archimate/3.0/}properties/{http://www.opengroup.org/xsd/archimate/3.0/}property")
     vocabularyProperties: dict[str, tuple[str, str]] = {}
@@ -97,7 +99,7 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                 elif valueTextNormalized == OFN_TROPE_TYPE.lower():
                     term = getTrope(term)
             # Source
-            if OFN_SOURCE.lower() in termProperties:
+            if OFN_SOURCE.lower() in termProperties and testInputString(termProperties[OFN_SOURCE.lower()][0]):
                 term.source = termProperties[OFN_SOURCE.lower()][0]
             # Related source
             if OFN_RELATED.lower() in termProperties and testInputString(termProperties[OFN_RELATED.lower()][0]):
@@ -117,26 +119,33 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                                  [1]] = termProperties[OFN_DESCRIPTION.lower()][0]
             if OFN_DATATYPE.lower() in termProperties and isinstance(term, Trope):
                 term.datatype = termProperties[OFN_DATATYPE.lower()][0]
+            # Equivalent
+            if OFN_EQUIVALENT.lower() in termProperties and testInputString(termProperties[OFN_EQUIVALENT.lower()][0]):
+                term.equivalent = [x.strip() for x in termProperties[OFN_EQUIVALENT.lower(
+                )][0].split(MULTIPLE_VALUE_SEPARATOR)]
 
             # RPP
-            if OFN_RPP_AIS.lower() in termProperties and isinstance(term, TermClass):
-                term.source = termProperties[OFN_RPP_AIS.lower()][0]
-            if OFN_RPP_AGENDA.lower() in termProperties and isinstance(term, TermClass):
-                term.source = termProperties[OFN_RPP_AGENDA.lower()][0]
-            if OFN_RPP_TYPE.lower() in termProperties and isinstance(termProperties[OFN_RPP_TYPE.lower()][0], str) and (isinstance(term, Trope) or isinstance(term, Relationship)):
-                if termProperties[OFN_RPP_TYPE.lower()][0].strip().lower() == YES.lower():
-                    term.rppType = RPPType.PUBLIC
-                elif termProperties[OFN_RPP_TYPE.lower()][0].strip().lower() == NO.lower():
-                    term.rppType = RPPType.PRIVATE
-                else:
-                    warnings.warn("warn")
-            if OFN_RPP_SHARED.lower() in termProperties and isinstance(termProperties[OFN_RPP_SHARED.lower()][0], str) and (isinstance(term, Trope) or isinstance(term, Relationship)):
-                if termProperties[OFN_RPP_SHARED.lower()][0].strip().lower() == YES.lower():
-                    term.sharedInPPDF = True
-                elif termProperties[OFN_RPP_SHARED.lower()][0].strip().lower() == NO.lower():
-                    term.sharedInPPDF = False
-                else:
-                    warnings.warn("warn")
+            if OFN_RPP_AIS.lower() in termProperties and testInputString(termProperties[OFN_RPP_AIS.lower()][0]) and isinstance(term, TermClass):
+                term.ais = getAISODIRI(termProperties[OFN_RPP_AIS.lower()][0])
+            if OFN_RPP_AGENDA.lower() in termProperties and testInputString(termProperties[OFN_RPP_AGENDA.lower()][0]) and isinstance(term, TermClass):
+                term.agenda = getAgendaODIRI(
+                    termProperties[OFN_RPP_AGENDA.lower()][0])
+            if OFN_RPP_TYPE.lower() in termProperties:
+                if testInputString(termProperties[OFN_RPP_TYPE.lower()][0]) and (isinstance(term, Trope) or isinstance(term, Relationship)):
+                    if termProperties[OFN_RPP_TYPE.lower()][0].strip().lower() == YES.lower():
+                        term.rppType = RPPType.PUBLIC
+                    elif termProperties[OFN_RPP_TYPE.lower()][0].strip().lower() == NO.lower():
+                        term.rppType = RPPType.PRIVATE
+                    else:
+                        warnings.warn("warn")
+            if OFN_RPP_SHARED.lower() in termProperties:
+                if testInputString(termProperties[OFN_RPP_SHARED.lower()][0]) and (isinstance(term, Trope) or isinstance(term, Relationship)):
+                    if termProperties[OFN_RPP_SHARED.lower()][0].strip().lower() == YES.lower():
+                        term.sharedInPPDF = True
+                    elif termProperties[OFN_RPP_SHARED.lower()][0].strip().lower() == NO.lower():
+                        term.sharedInPPDF = False
+                    else:
+                        warnings.warn("warn")
             if OFN_RPP_PRIVATE_SOURCE.lower() in termProperties and (isinstance(term, Trope) or isinstance(term, Relationship)):
                 term.source = termProperties[OFN_RPP_PRIVATE_SOURCE.lower()][0]
 
@@ -159,16 +168,15 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
         if domainTerm is None or rangeTerm is None:
             continue
         if relationshipType == "Specialization":
-            # FIXME
-            domainTerm.subClassOf.append(rangeTerm.iri)
+            domainTerm.subClassOf.append(
+                rangeTerm.getIRI(vocabulary, DEFAULT_LANGUAGE))
         elif relationshipType == "Composition" and isinstance(rangeTerm, Trope):
-            rangeTerm.target = domainTerm.iri
+            rangeTerm.target = domainTerm.getIRI(vocabulary, DEFAULT_LANGUAGE)
         elif relationshipType == "Association":
             isDirected = relationship.attrib.get("isDirected", False)
             if not isDirected or isDirected != "true":
                 warnings.warn("")
                 continue
-            # FIXME
             term = Relationship(domainTerm.getIRI(
                 vocabulary, DEFAULT_LANGUAGE), rangeTerm.getIRI(vocabulary, DEFAULT_LANGUAGE))
             term.id = identifier

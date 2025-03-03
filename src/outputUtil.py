@@ -1,13 +1,44 @@
+import json
 import traceback
 from rdflib import Graph, Literal, URIRef
+from os.path import splitext
 
 from ofnClasses import Vocabulary
+from outputJSON import getJSONLDfromVocabulary
+import re
 
 
-def getRDFoutput(graph: Graph, outputLocation: str):
+def getAgendaODIRI(input: str) -> str:
+    if re.search("^(https:\/\/rpp-opendata.egon.gov.cz\/odrpp\/zdroj\/agenda\/A)([0-9]+)$", input) is not None:
+        return input
+    elif re.search("^A([0-9]+)$", input):
+        return "https://rpp-opendata.egon.gov.cz/odrpp/zdroj/agenda/{}".format(input)
+    elif re.search("^([0-9]+)$", input):
+        return "https://rpp-opendata.egon.gov.cz/odrpp/zdroj/agenda/A{}".format(input)
+    else:
+        raise Exception()
+
+
+def getAISODIRI(input: str) -> str:
+    if re.search("^(https:\/\/rpp-opendata.egon.gov.cz\/odrpp\/zdroj\/informační-systém-veřejné-správy\/)([0-9]+)$", input) is not None:
+        return input
+    elif re.search("^([0-9]+)$", input):
+        return "https://rpp-opendata.egon.gov.cz/odrpp/zdroj/informační-systém-veřejné-správy/{}".format(input)
+    else:
+        raise Exception()
+
+
+def getRDFoutput(graph: Graph, vocabulary: Vocabulary, outputLocation: str):
+    format: str = splitext(outputLocation)[1][1:]
+    if format != "json-ld":
+        output = graph.serialize(format=format)
+    else:
+        output = getJSONLDfromVocabulary(vocabulary)
     with open(outputLocation, "w", encoding="utf-8") as outputFile:
-        format: str = outputLocation[len(outputLocation) - 3:]
-        outputFile.write(graph.serialize(format=format))
+        if format != "json-ld":
+            outputFile.write(output)
+        else:
+            json.dump(output, outputFile, ensure_ascii=False, indent=2)
 
 
 def testInputString(string: str | None) -> bool:
@@ -24,13 +55,3 @@ def getURIRefOrLiteral(string: str | None):
     except Exception:
         print(traceback.format_exc())
         return Literal(string)
-
-
-def checkForTerm(vocabulary: Vocabulary, string: str):
-    result = URIRef(string)
-    try:
-        result.n3()
-        return result
-    except Exception:
-
-        pass
