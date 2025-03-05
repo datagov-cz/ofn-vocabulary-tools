@@ -29,16 +29,16 @@ def outputToRDFBase(term: Term, iri: str, graph: Graph):
     for relation in term.related:
         if testInputString(relation):
             graph.add((termIRI, DCTERMS.relation,
-                       getURIRefOrLiteral(unquote(relation))))
+                       getURIRefOrLiteral(relation)))
     # conformsTo
     if testInputString(term.source):
         graph.add((termIRI, DCTERMS.conformsTo,
-                   getURIRefOrLiteral(unquote(term.source))))
+                   getURIRefOrLiteral(term.source)))
     # exactMatch
     for equivalent in term.equivalent:
         if testInputString(equivalent):
             graph.add((termIRI, SKOS.exactMatch,
-                       getURIRefOrLiteral(unquote(equivalent))))
+                       getURIRefOrLiteral(equivalent)))
 
     # owl:Class (class) and subClassOf
     if isinstance(term, TermClass):

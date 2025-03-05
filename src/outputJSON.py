@@ -1,5 +1,12 @@
 import json
 from ofnClasses import *
+import urllib.request
+import urllib.parse
+
+
+def getReference(uri: str) -> object:
+    with urllib.request.urlopen(urllib.parse.quote(uri)) as schema:
+        return schema
 
 
 def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> json:
@@ -11,7 +18,7 @@ def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> json:
         vocTypes.append("Konceptuální model")
     output["typ"] = vocTypes
     output["název"] = vocabulary.name
-    if vocabulary.description:
+    if DEFAULT_LANGUAGE in vocabulary.description and vocabulary.description[DEFAULT_LANGUAGE]:
         output["popis"] = vocabulary.description
     terms = []
     for term in vocabulary.terms:
@@ -54,10 +61,10 @@ def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> json:
             termTypes.append("Veřejný údaj")
         outputTerm["typ"] = termTypes
         outputTerm["název"] = term.name
-        if term.definition:
+        if DEFAULT_LANGUAGE in term.definition and term.definition[DEFAULT_LANGUAGE]:
             outputTerm["definice"] = {x: term.definition[x]
                                       for x in term.definition if term.definition[x] is not None}
-        if term.description:
+        if DEFAULT_LANGUAGE in term.description and term.description[DEFAULT_LANGUAGE]:
             outputTerm["popis"] = {x: term.description[x]
                                    for x in term.description if term.description[x] is not None}
         if term.equivalent:

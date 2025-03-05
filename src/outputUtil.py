@@ -5,30 +5,10 @@ from os.path import splitext
 
 from ofnClasses import Vocabulary
 from outputJSON import getJSONLDfromVocabulary
-import re
-
-
-def getAgendaODIRI(input: str) -> str:
-    if re.search("^(https:\/\/rpp-opendata.egon.gov.cz\/odrpp\/zdroj\/agenda\/A)([0-9]+)$", input) is not None:
-        return input
-    elif re.search("^A([0-9]+)$", input):
-        return "https://rpp-opendata.egon.gov.cz/odrpp/zdroj/agenda/{}".format(input)
-    elif re.search("^([0-9]+)$", input):
-        return "https://rpp-opendata.egon.gov.cz/odrpp/zdroj/agenda/A{}".format(input)
-    else:
-        raise Exception()
-
-
-def getAISODIRI(input: str) -> str:
-    if re.search("^(https:\/\/rpp-opendata.egon.gov.cz\/odrpp\/zdroj\/informační-systém-veřejné-správy\/)([0-9]+)$", input) is not None:
-        return input
-    elif re.search("^([0-9]+)$", input):
-        return "https://rpp-opendata.egon.gov.cz/odrpp/zdroj/informační-systém-veřejné-správy/{}".format(input)
-    else:
-        raise Exception()
 
 
 def getRDFoutput(graph: Graph, vocabulary: Vocabulary, outputLocation: str):
+    output = None
     format: str = splitext(outputLocation)[1][1:]
     if format != "json-ld":
         output = graph.serialize(format=format)

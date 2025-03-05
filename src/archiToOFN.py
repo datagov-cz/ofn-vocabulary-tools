@@ -6,8 +6,6 @@ from ofnBindings import *
 from outputUtil import testInputString
 import warnings
 
-from outputUtil import getAISODIRI, getAgendaODIRI
-
 # TODO: Security!!!
 # TODO: Support multiple vocabularies?
 # ARCHIMATE_NAMESPACE = 'http://www.w3.org/2001/XMLSchema-instance'
@@ -126,10 +124,9 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
 
             # RPP
             if OFN_RPP_AIS.lower() in termProperties and testInputString(termProperties[OFN_RPP_AIS.lower()][0]) and isinstance(term, TermClass):
-                term.ais = getAISODIRI(termProperties[OFN_RPP_AIS.lower()][0])
+                term.ais = termProperties[OFN_RPP_AIS.lower()][0]
             if OFN_RPP_AGENDA.lower() in termProperties and testInputString(termProperties[OFN_RPP_AGENDA.lower()][0]) and isinstance(term, TermClass):
-                term.agenda = getAgendaODIRI(
-                    termProperties[OFN_RPP_AGENDA.lower()][0])
+                term.agenda = termProperties[OFN_RPP_AGENDA.lower()][0]
             if OFN_RPP_TYPE.lower() in termProperties:
                 if testInputString(termProperties[OFN_RPP_TYPE.lower()][0]) and (isinstance(term, Trope) or isinstance(term, Relationship)):
                     if termProperties[OFN_RPP_TYPE.lower()][0].strip().lower() == YES.lower():

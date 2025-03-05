@@ -6,6 +6,7 @@ from datetime import datetime
 from outputToRDFBase import outputToRDFBase
 from outputToRDFRegistry import outputToRDFRegistry
 from outputUtil import getRDFoutput
+from preprocessOutput import preprocessVocabulary
 
 # TODO: Code lists
 # TODO: Error handling
@@ -16,6 +17,7 @@ from outputUtil import getRDFoutput
 
 def convertToRDF(vocabulary: Vocabulary, DEFAULT_LANGUAGE: str, outputFile: str):
     graph = Graph()
+    vocabulary = preprocessVocabulary(vocabulary)
     # Vocabulary
     vocabularyIRI = URIRef(vocabulary.getIRI(DEFAULT_LANGUAGE))
 
@@ -39,9 +41,11 @@ def convertToRDF(vocabulary: Vocabulary, DEFAULT_LANGUAGE: str, outputFile: str)
     # Terms
     for term in vocabulary.terms:
         # associate with vocabulary
-        graph.add((URIRef(term.getIRI(vocabulary, DEFAULT_LANGUAGE)), SKOS.inScheme, vocabularyIRI))
+        graph.add((URIRef(term.getIRI(vocabulary, DEFAULT_LANGUAGE)),
+                  SKOS.inScheme, vocabularyIRI))
         # Base
         outputToRDFBase(term, term.getIRI(vocabulary, DEFAULT_LANGUAGE), graph)
         # RPP
-        outputToRDFRegistry(term, term.getIRI(vocabulary, DEFAULT_LANGUAGE), graph)
+        outputToRDFRegistry(term, term.getIRI(
+            vocabulary, DEFAULT_LANGUAGE), graph)
     getRDFoutput(graph, vocabulary, outputFile)

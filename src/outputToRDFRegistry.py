@@ -21,10 +21,10 @@ def outputToRDFRegistry(term: Term, iri: str, graph: Graph):
     if isinstance(term, TermClass):
         if testInputString(term.ais):
             graph.add((termIRI, URIRef(
-                "https://slovník.gov.cz/agendový/104/pojem/údaje-jsou-v-ais"), URIRef(term.ais)))
+                "https://slovník.gov.cz/agendový/104/pojem/údaje-jsou-v-ais"), getURIRefOrLiteral(term.ais)))
         if testInputString(term.agenda):
             graph.add((termIRI, URIRef(
-                "https://slovník.gov.cz/agendový/104/pojem/sdružuje-údaje-vedené-nebo-vytvářené-v-rámci-agendy"), URIRef(term.agenda)))
+                "https://slovník.gov.cz/agendový/104/pojem/sdružuje-údaje-vedené-nebo-vytvářené-v-rámci-agendy"), getURIRefOrLiteral(term.agenda)))
     # RPP public/private types
     if term.rppType is not None:
         if term.rppType is RPPType.PUBLIC:
