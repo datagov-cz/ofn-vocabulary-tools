@@ -45,7 +45,7 @@ def preprocessVocabulary(vocabulary: Vocabulary) -> Vocabulary:
             if term.agenda:
                 term.agenda = getAgendaODIRI(unquote(term.agenda))
             if term.ais:
-                term.ais = getAgendaODIRI(unquote(term.ais))
+                term.ais = getAISODIRI(unquote(term.ais))
         if isinstance(term, Relationship):
             if term.domain:
                 term.domain = unquote(term.domain)

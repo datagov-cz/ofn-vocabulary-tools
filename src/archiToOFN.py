@@ -143,8 +143,10 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                         term.sharedInPPDF = False
                     else:
                         warnings.warn("warn")
-            if OFN_RPP_PRIVATE_SOURCE.lower() in termProperties and (isinstance(term, Trope) or isinstance(term, Relationship)):
-                term.source = termProperties[OFN_RPP_PRIVATE_SOURCE.lower()][0]
+            if OFN_RPP_PRIVATE_SOURCE.lower() in termProperties:
+                if testInputString(termProperties[OFN_RPP_PRIVATE_SOURCE.lower()][0]) and (isinstance(term, Trope) or isinstance(term, Relationship)):
+                    term.rppPrivateTypeSource = termProperties[OFN_RPP_PRIVATE_SOURCE.lower(
+                    )][0]
 
             vocabulary.terms.append(term)
 

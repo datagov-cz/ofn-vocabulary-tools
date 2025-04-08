@@ -68,6 +68,9 @@ def outputToRDFBase(term: Term, iri: str, graph: Graph):
         if term.datatype is not None and len(term.datatype) > 0:
             graph.add(
                 (termIRI, RDFS.range, getURIRefOrLiteral(term.datatype)))
+        else:
+            graph.add(
+                (termIRI, RDFS.range, getURIRefOrLiteral(RDFS.Literal)))
     # Object property (relationship), domain, range
     if isinstance(term, Relationship):
         graph.add((termIRI, RDF.type, OWL.ObjectProperty))

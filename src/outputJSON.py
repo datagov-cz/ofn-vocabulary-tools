@@ -2,6 +2,7 @@ import json
 from ofnClasses import *
 import urllib.request
 import urllib.parse
+from rdflib import RDFS
 
 
 def getReference(uri: str) -> object:
@@ -50,8 +51,7 @@ def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> json:
         elif isinstance(term, Trope):
             termTypes.append("Vlastnost")
             outputTerm["definiční-obor"] = term.target
-            if term.datatype:
-                outputTerm["obor-hodnot"] = term.datatype
+            outputTerm["obor-hodnot"] = term.datatype if term.datatype else RDFS.Literal
             if term.subClassOf:
                 outputTerm["nadřazený-vztah"] = [
                     x for x in term.subClassOf if len(x) != 0 or x is not None]
