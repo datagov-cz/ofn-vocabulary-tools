@@ -6,10 +6,6 @@ from ofnBindings import *
 from outputUtil import testInputString
 import warnings
 
-# TODO: Security!!!
-# TODO: Support multiple vocabularies?
-# ARCHIMATE_NAMESPACE = 'http://www.w3.org/2001/XMLSchema-instance'
-
 inputLocation = sys.argv[1]
 outputLocation = sys.argv[2]
 propertyDefinitions = {}
