@@ -1,6 +1,7 @@
 from ofnClasses import Relationship, TermClass, Trope, Vocabulary
 import re
 from urllib.parse import unquote
+import warnings
 
 
 def getAgendaODIRI(input: str) -> str:

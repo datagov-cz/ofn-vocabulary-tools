@@ -6,8 +6,8 @@ from ofnBindings import *
 from outputUtil import testInputString
 import warnings
 
-inputLocation = sys.argv[1]
-outputLocation = sys.argv[2]
+inputLocation = "Slovník registru živnostenského podnikání.xml"
+outputLocation = "output-ržp.ttl"
 propertyDefinitions = {}
 
 with open(inputLocation, "r", encoding="utf-8") as inputFile:
@@ -35,8 +35,9 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
     for vocabularyPropertyElement in properties:
         name = vocabularyPropertyElement.find(
             ".//{http://www.opengroup.org/xsd/archimate/3.0/}name")
-        propertyDefinitions[vocabularyPropertyElement.attrib['identifier']
-                            ] = getattr(name, "text", "name").lower()
+        if name is not None and name.text is not None:
+            propertyDefinitions[vocabularyPropertyElement.attrib['identifier']
+                                ] = getattr(name, "text", "name").lower()
     vocabularyPropertyElements = root.findall(
         "./{http://www.opengroup.org/xsd/archimate/3.0/}properties/{http://www.opengroup.org/xsd/archimate/3.0/}property")
     vocabularyProperties: dict[str, tuple[str, str]] = {}
@@ -81,6 +82,9 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
                 valueText = value.text
                 propertyType = propertyDefinitions[identifier]
                 termProperties[propertyType] = (valueText, valueLang)
+            if OFN_IRI.lower() in termProperties and termProperties[OFN_IRI.lower()][0] is not None:
+                print(termProperties[OFN_IRI.lower()][0])
+                term._iri = termProperties[OFN_IRI.lower()][0].strip()
             if OFN_TYPE.lower() in termProperties and termProperties[OFN_TYPE.lower()][0] is not None:
                 valueTextNormalized = termProperties[OFN_TYPE.lower()][0].strip(
                 ).lower()

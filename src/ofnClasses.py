@@ -1,6 +1,7 @@
 from enum import Enum
 import re
 from ofnBindings import *
+import traceback
 
 ClassType = Enum("ClassType", ['CLASS', 'SUBJECT', 'OBJECT'])
 
@@ -57,8 +58,13 @@ class Vocabulary(Resource):
         self.type: VocabularyType = VocabularyType.THESAURUS
 
     def getIRI(self, defaultLanguage: str = DEFAULT_LANGUAGE) -> str:
-        self._iri = "{}/{}".format("https://slovník.gov.cz",
-                                   sanitizeString(self.name[defaultLanguage].strip().lower()))
+        if self._iri == "":
+            namespace = "https://slovník.gov.cz" if self.lkod == "" else self.lkod
+            namespace = re.sub("\/$", "", namespace)
+            while namespace.endswith("/"):
+                namespace = namespace[:-1]
+            self._iri = "{}/{}".format("https://slovník.gov.cz",
+                                       sanitizeString(self.name[defaultLanguage].strip().lower()))
         return self._iri
 
 
@@ -78,9 +84,11 @@ class Term(Resource):
         self.alternateName: list[tuple[str, str]] = []
 
     def getIRI(self, vocabulary: Vocabulary, defaultLanguage: str) -> str:
-        self._iri = "{}/pojem/{}".format(
-            vocabulary.getIRI(defaultLanguage),
-            sanitizeString(self.name[defaultLanguage].strip().lower()))
+        if self._iri == "":
+            self._iri = "{}/pojem/{}".format(
+                vocabulary.getIRI(defaultLanguage),
+                sanitizeString(self.name[defaultLanguage].strip().lower()))
+            print(self._iri, traceback.format_exc())
         return self._iri
 
 
