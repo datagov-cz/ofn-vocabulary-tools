@@ -97,7 +97,7 @@ def soSheetToOFN(sheet) -> List[TermClass]:
             if row[equivalentIndex]:
                 term.equivalent.append(row[equivalentIndex])
             if row[iriIndex]:
-                term.iri = row[iriIndex]
+                term._iri = row[iriIndex]
             if row[aisIndex]:
                 term.ais = row[aisIndex]
             if row[agendaIndex]:
@@ -162,7 +162,7 @@ def itSheetToOFN(sheet) -> List[Trope]:
             if row[equivalentIndex]:
                 term.equivalent.append(row[equivalentIndex])
             if row[iriIndex]:
-                term.iri = row[iriIndex]
+                term._iri = row[iriIndex]
             if row[sharedInPPDFIndex]:
                 term.sharedInPPDF = row[sharedInPPDFIndex]
             if row[datatypeIndex]:
@@ -231,7 +231,7 @@ def rlSheetToOFN(sheet) -> List[Relationship]:
             if row[equivalentIndex]:
                 term.equivalent.append(row[equivalentIndex])
             if row[iriIndex]:
-                term.iri = row[iriIndex]
+                term._iri = row[iriIndex]
             if row[sharedInPPDFIndex]:
                 if row[sharedInPPDFIndex].strip().lower() == YES.lower():
                     term.sharedInPPDF = True

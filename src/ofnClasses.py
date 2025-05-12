@@ -60,7 +60,7 @@ class Vocabulary(Resource):
     def getIRI(self, defaultLanguage: str = DEFAULT_LANGUAGE) -> str:
         if self._iri == "":
             namespace = "https://slovník.gov.cz" if self.lkod == "" else self.lkod
-            namespace = re.sub("\/$", "", namespace)
+            namespace = re.sub("/$", "", namespace)
             while namespace.endswith("/"):
                 namespace = namespace[:-1]
             self._iri = "{}/{}".format("https://slovník.gov.cz",
@@ -88,7 +88,6 @@ class Term(Resource):
             self._iri = "{}/pojem/{}".format(
                 vocabulary.getIRI(defaultLanguage),
                 sanitizeString(self.name[defaultLanguage].strip().lower()))
-            print(self._iri, traceback.format_exc())
         return self._iri
 
 
@@ -117,6 +116,7 @@ class Trope(Term):
 def getClass(term: Term) -> TermClass:
     termClass = TermClass()
     termClass.id = term.id
+    termClass._iri = term._iri
     termClass.name = term.name
     termClass.description = term.description
     termClass.definition = term.definition
@@ -131,32 +131,34 @@ def getClass(term: Term) -> TermClass:
 
 
 def getTrope(term: Term) -> Trope:
-    termClass = Trope()
-    termClass.id = term.id
-    termClass.name = term.name
-    termClass.description = term.description
-    termClass.definition = term.definition
-    termClass.source = term.source
-    termClass.related = term.related
-    termClass.subClassOf = term.subClassOf
-    termClass.equivalent = term.equivalent
-    termClass.sharedInPPDF = term.sharedInPPDF
-    termClass.rppType = term.rppType
-    termClass.rppPrivateTypeSource = term.rppPrivateTypeSource
-    return termClass
+    trope = Trope()
+    trope.id = term.id
+    trope._iri = term._iri
+    trope.name = term.name
+    trope.description = term.description
+    trope.definition = term.definition
+    trope.source = term.source
+    trope.related = term.related
+    trope.subClassOf = term.subClassOf
+    trope.equivalent = term.equivalent
+    trope.sharedInPPDF = term.sharedInPPDF
+    trope.rppType = term.rppType
+    trope.rppPrivateTypeSource = term.rppPrivateTypeSource
+    return trope
 
 
 def getRelationship(term: Term, domain: str, range: str) -> Relationship:
-    termClass = Relationship(domain, range)
-    termClass.id = term.id
-    termClass.name = term.name
-    termClass.description = term.description
-    termClass.definition = term.definition
-    termClass.source = term.source
-    termClass.related = term.related
-    termClass.subClassOf = term.subClassOf
-    termClass.equivalent = term.equivalent
-    termClass.sharedInPPDF = term.sharedInPPDF
-    termClass.rppType = term.rppType
-    termClass.rppPrivateTypeSource = term.rppPrivateTypeSource
-    return termClass
+    relationship = Relationship(domain, range)
+    relationship.id = term.id
+    relationship._iri = term._iri
+    relationship.name = term.name
+    relationship.description = term.description
+    relationship.definition = term.definition
+    relationship.source = term.source
+    relationship.related = term.related
+    relationship.subClassOf = term.subClassOf
+    relationship.equivalent = term.equivalent
+    relationship.sharedInPPDF = term.sharedInPPDF
+    relationship.rppType = term.rppType
+    relationship.rppPrivateTypeSource = term.rppPrivateTypeSource
+    return relationship
