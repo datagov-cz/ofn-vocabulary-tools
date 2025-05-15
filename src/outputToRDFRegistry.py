@@ -34,5 +34,6 @@ def outputToRDFRegistry(term: Term, iri: str, graph: Graph):
             graph.add((termIRI, RDF.type, URIRef(
                 "https://slovník.gov.cz/legislativní/sbírka/111/2009/pojem/neveřejný-údaj")))
         if term.rppPrivateTypeSource is not None:
-            graph.add((termIRI, RDF.type, getURIRefOrLiteral(
+            graph.add((termIRI, URIRef(
+                "https://slovník.gov.cz/legislativní/sbírka/111/2009/pojem/je-vymezen-ustanovení-stanovujícím-jeho-neveřejnost"), getURIRefOrLiteral(
                 term.rppPrivateTypeSource)))

@@ -1,7 +1,9 @@
+from ofnBindings import DEFAULT_LANGUAGE
 from ofnClasses import Relationship, TermClass, Trope, Vocabulary
 import re
 from urllib.parse import unquote
-import warnings
+
+reportWarning = False
 
 
 def getAgendaODIRI(input: str) -> str:
@@ -25,15 +27,24 @@ def getAISODIRI(input: str) -> str:
 
 
 def getSourceODIRI(input: str) -> str:
+    if input == "":
+        return input
     eliPart = re.search("eli\/cz\/sb\/.*$", input)
     control = re.search("^https\:\/\/.*\/eli\/cz\/sb\/.*$", input)
     if control and eliPart:
         return "https://opendata.eselpoint.cz/esel-esb/{}".format(eliPart.group())
     else:
-        return input
+        print("Zdroj {} je nevalidní. Vymazávám.".format(input))
+        global reportWarning
+        reportWarning = True
+        return ""
 
 
 def preprocessVocabulary(vocabulary: Vocabulary) -> Vocabulary:
+    global reportWarning
+    reportWarning = False
+    vocabulary.terms = sorted(vocabulary.terms,
+                              key=lambda x: x._iri)
     for term in vocabulary.terms:
         term.related = [getSourceODIRI(unquote(x)) for x in term.related]
         term.source = getSourceODIRI(unquote(term.source))
@@ -57,4 +68,9 @@ def preprocessVocabulary(vocabulary: Vocabulary) -> Vocabulary:
                 term.datatype = unquote(term.datatype)
             if term.target:
                 term.target = unquote(term.target)
+
+        if reportWarning:
+            print(
+                "\tProblémy výše byly nalezeny u pojmu {}.\n------".format(term.name[DEFAULT_LANGUAGE]))
+            reportWarning = False
     return vocabulary

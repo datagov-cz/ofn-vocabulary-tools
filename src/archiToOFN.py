@@ -6,19 +6,22 @@ from ofnBindings import *
 from outputUtil import testInputString
 import warnings
 
-inputLocation = ""
-outputLocation = ""
+inputLocation = sys.argv[1]
+outputLocation = sys.argv[2]
 propertyDefinitions = {}
 
-def getTermFromElement(element) -> Term:
-    term = Term()
+
+def getTermFromElement(element, term) -> Term:
     term.id = element.attrib['identifier']
     # Name
     names = element.findall(
+        
         "{http://www.opengroup.org/xsd/archimate/3.0/}name")
     for name in names:
         lang = name.attrib['{http://www.w3.org/XML/1998/namespace}lang']
         term.name[lang] = name.text
+        while term.name[lang].endswith("/"):
+            term.name[lang] = term.name[lang][:-1]
     # Properties
     termProperties: dict[str, tuple[str, str]] = {}
     termPropertyElements = element.findall(
@@ -50,19 +53,19 @@ def getTermFromElement(element) -> Term:
     # Related source
     if OFN_RELATED.lower() in termProperties and testInputString(termProperties[OFN_RELATED.lower()][0]):
         term.related += [x.strip() for x in termProperties[OFN_RELATED.lower()]
-        [0].split(MULTIPLE_VALUE_SEPARATOR)]
+                         [0].split(MULTIPLE_VALUE_SEPARATOR)]
     # Alternative name
     if OFN_ALTERNATIVE.lower() in termProperties and testInputString(termProperties[OFN_ALTERNATIVE.lower()][0]):
         term.alternateName += [(DEFAULT_LANGUAGE, x.strip()) for x in termProperties[OFN_ALTERNATIVE.lower()]
-        [0].split(MULTIPLE_VALUE_SEPARATOR)]
+                               [0].split(MULTIPLE_VALUE_SEPARATOR)]
     # Definition
     if OFN_DEFINITION.lower() in termProperties:
         term.definition[termProperties[OFN_DEFINITION.lower()]
-        [1]] = termProperties[OFN_DEFINITION.lower()][0]
+                        [1]] = termProperties[OFN_DEFINITION.lower()][0]
     # Description
     if OFN_DESCRIPTION.lower() in termProperties:
         term.description[termProperties[OFN_DESCRIPTION.lower()]
-        [1]] = termProperties[OFN_DESCRIPTION.lower()][0]
+                         [1]] = termProperties[OFN_DESCRIPTION.lower()][0]
     if OFN_DATATYPE.lower() in termProperties and isinstance(term, Trope):
         term.datatype = termProperties[OFN_DATATYPE.lower()][0]
     # Equivalent
@@ -101,6 +104,7 @@ def getTermFromElement(element) -> Term:
             term.rppPrivateTypeSource = termProperties[OFN_RPP_PRIVATE_SOURCE.lower(
             )][0]
     return term
+
 
 with open(inputLocation, "r", encoding="utf-8") as inputFile:
     tree = etree.parse(inputLocation, parser=etree.XMLParser())
@@ -154,7 +158,7 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
 
     for element in elements:
         if element.attrib['{http://www.w3.org/2001/XMLSchema-instance}type'] == "BusinessObject":
-            vocabulary.terms.append(getTermFromElement(element))
+            vocabulary.terms.append(getTermFromElement(element, Term()))
 
     for relationship in relationships:
         identifier = relationship.attrib['identifier']
@@ -182,9 +186,8 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
             if not isDirected or isDirected != "true":
                 warnings.warn("")
                 continue
-            term = getTermFromElement(relationship)
-            term = getRelationship(term, domainTerm.getIRI(
-                vocabulary, DEFAULT_LANGUAGE), rangeTerm.getIRI(vocabulary, DEFAULT_LANGUAGE))
+            term = getTermFromElement(relationship, Relationship(domainTerm.getIRI(
+                vocabulary, DEFAULT_LANGUAGE), rangeTerm.getIRI(vocabulary, DEFAULT_LANGUAGE)))
             vocabulary.terms.append(term)
     if next(x for x in vocabulary.terms if isinstance(x, Trope) or isinstance(x, Relationship)):
         vocabulary.type = VocabularyType.CONCEPTUAL_MODEL

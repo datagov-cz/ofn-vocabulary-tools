@@ -1,7 +1,7 @@
 from rdflib import XSD, Graph, URIRef, Literal, BNode
 from rdflib.namespace import RDF, OWL, SKOS, DCTERMS, TIME
 from ofnClasses import VocabularyType, Vocabulary
-from datetime import datetime
+from datetime import datetime, timezone
 
 from outputToRDFBase import outputToRDFBase
 from outputToRDFRegistry import outputToRDFRegistry
@@ -30,13 +30,14 @@ def convertToRDF(vocabulary: Vocabulary, DEFAULT_LANGUAGE: str, outputFile: str)
         graph.add((URIRef(vocabularyIRI), SKOS.prefLabel, Literal(name, lang)))
     # description
     for lang, name in vocabulary.description.items():
-        graph.add((URIRef(vocabularyIRI), DCTERMS.description, Literal(name, lang)))
+        graph.add((URIRef(vocabularyIRI),
+                  DCTERMS.description, Literal(name, lang)))
     # TODO: creation date (requires NDC module)
     modifiedBNode = BNode()
     graph.add((URIRef(vocabularyIRI), DCTERMS.modified, modifiedBNode))
     graph.add((modifiedBNode, RDF.type, TIME.Instant))
     graph.add((modifiedBNode, TIME.inXSDDateTimeStamp,
-              Literal(datetime.now().isoformat(), datatype=XSD.dateTimeStamp)))
+              Literal(datetime.now(timezone.utc).isoformat(), datatype=XSD.dateTimeStamp)))
 
     # Terms
     for term in vocabulary.terms:

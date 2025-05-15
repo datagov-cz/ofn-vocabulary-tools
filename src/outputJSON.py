@@ -28,11 +28,12 @@ def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> json:
         outputTerm["iri"] = term.getIRI(vocabulary, DEFAULT_LANGUAGE)
         # typ
         termTypes = ["Pojem"]
+        termSubClassOf = [
+            x for x in term.subClassOf if x and len(x) != 0 and x is not None]
         if isinstance(term, TermClass):
             termTypes.append("Třída")
-            if term.subClassOf:
-                outputTerm["nadřazená-třída"] = [
-                    x for x in term.subClassOf if len(x) != 0 or x is not None]
+            if len(termSubClassOf) > 0:
+                outputTerm["nadřazená-třída"] = termSubClassOf
             if term.type == ClassType.OBJECT:
                 termTypes.append("Typ objektu práva")
             elif term.type == ClassType.SUBJECT:
@@ -45,16 +46,14 @@ def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> json:
             termTypes.append("Vztah")
             outputTerm["definiční-obor"] = term.domain
             outputTerm["obor-hodnot"] = term.range
-            if term.subClassOf:
-                outputTerm["nadřazená-vlastnost"] = [
-                    x for x in term.subClassOf if len(x) != 0 or x is not None]
+            if len(termSubClassOf) > 0:
+                outputTerm["nadřazený-vztah"] = termSubClassOf
         elif isinstance(term, Trope):
             termTypes.append("Vlastnost")
             outputTerm["definiční-obor"] = term.target
             outputTerm["obor-hodnot"] = term.datatype if term.datatype else RDFS.Literal
-            if term.subClassOf:
-                outputTerm["nadřazený-vztah"] = [
-                    x for x in term.subClassOf if len(x) != 0 or x is not None]
+            if len(termSubClassOf) > 0:
+                outputTerm["nadřazená-vlastnost"] = termSubClassOf
         if term.rppType == RPPType.PRIVATE:
             termTypes.append("Neveřejný údaj")
         elif term.rppType == RPPType.PUBLIC:
@@ -69,9 +68,10 @@ def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> json:
                                    for x in term.description if term.description[x] is not None}
         if term.equivalent:
             outputTerm["ekvivalentní-pojem"] = [
-                x for x in term.equivalent if len(x) != 0 or x is not None]
+                x for x in term.equivalent if x and len(x) != 0 and x is not None]
         if term.related:
-            outputTerm["související-ustanovení-právního-předpisu"] = term.related
+            outputTerm["související-ustanovení-právního-předpisu"] = [
+                x for x in term.related if x and len(x) != 0 and x is not None]
         if term.source:
             outputTerm["definující-ustanovení-právního-předpisu"] = [term.source]
         if term.sharedInPPDF:
