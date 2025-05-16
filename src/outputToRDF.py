@@ -1,5 +1,6 @@
 from rdflib import XSD, Graph, URIRef, Literal, BNode
 from rdflib.namespace import RDF, OWL, SKOS, DCTERMS, TIME
+from checkVocabulary import checkVocabulary
 from ofnClasses import VocabularyType, Vocabulary
 from datetime import datetime, timezone
 
@@ -18,6 +19,7 @@ from preprocessOutput import preprocessVocabulary
 def convertToRDF(vocabulary: Vocabulary, DEFAULT_LANGUAGE: str, outputFile: str):
     graph = Graph()
     vocabulary = preprocessVocabulary(vocabulary)
+    checkVocabulary(vocabulary)
     # Vocabulary
     vocabularyIRI = vocabulary.getIRI(DEFAULT_LANGUAGE)
 

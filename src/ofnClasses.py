@@ -67,6 +67,9 @@ class Vocabulary(Resource):
                                        sanitizeString(self.name[defaultLanguage].strip().lower()))
         return self._iri
 
+    def __str__(self):
+        return super().__str__()
+
 
 class Term(Resource):
     def __init__(self) -> None:
@@ -90,6 +93,9 @@ class Term(Resource):
                 sanitizeString(self.name[defaultLanguage].strip().lower()))
         return self._iri
 
+    def __str__(self):
+        return super().__str__()
+
 
 class TermClass(Term):
     def __init__(self) -> None:
@@ -98,6 +104,9 @@ class TermClass(Term):
         self.agenda: str | None = None
         self.type: ClassType = ClassType.CLASS
 
+    def __str__(self):
+        return super().__str__()
+
 
 class Relationship(Term):
     def __init__(self, domain: str, range: str) -> None:
@@ -105,12 +114,18 @@ class Relationship(Term):
         self.domain: str = domain
         self.range: str = range
 
+    def __str__(self):
+        return super().__str__()
+
 
 class Trope(Term):
     def __init__(self) -> None:
         super().__init__()
         self.target: str = ""
         self.datatype: str = ""
+
+    def __str__(self):
+        return super().__str__()
 
 
 def getClass(term: Term) -> TermClass:
