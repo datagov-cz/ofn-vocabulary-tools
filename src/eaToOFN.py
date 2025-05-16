@@ -8,8 +8,8 @@ from outputUtil import testInputString
 from dataclasses import dataclass
 import warnings
 
-inputLocation = "C:\\Users\\AliceBinderová\\data.gov.cz\\přílohy\\popis-dat\\šablony\\Příkladový-slovník.xml"
-outputLocation = "eaTest.ttl"
+inputLocation = sys.argv[1]
+outputLocation = sys.argv[2]
 
 
 @dataclass
@@ -36,19 +36,3 @@ with open(inputLocation, "r") as inputFile:
     for packageElement in packageElements:
         packages[packageElement.get("{http://schema.omg.org/spec/XMI/2.1}id")] = {
             "parent": model.get("package"), "isSP": properties.get("stereotype") == "slovnikyPackage"}
-
-    # packageElements = root.findall(
-    #     ".//element[@{http://schema.omg.org/spec/XMI/2.1}type='uml:Package']")
-    # packages = {}
-    # terms = []
-    # for packageElement in packageElements:
-    #     model = packageElement.find("model")
-    #     properties = packageElement.find("properties")
-    #     if model is None or properties is None:
-    #         continue
-    #     packages[packageElement.get("{http://schema.omg.org/spec/XMI/2.1}idref")] = {
-    #         "parent": model.get("package"), "isSP": properties.get("stereotype") == "slovnikyPackage"}
-    # # if not True in [x["isSP"] for x in packages.values()]:
-    # #     raise Exception(
-    # #         "Provided file has no package of stereotype 'slovnikyPackage'.")
-    # termElements = root.findall(.//element)

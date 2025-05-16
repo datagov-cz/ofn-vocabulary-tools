@@ -1,6 +1,7 @@
 from rdflib import XSD, Graph, URIRef, Literal, BNode
 from rdflib.namespace import RDF, OWL, SKOS, DCTERMS, TIME
-from ofnClasses import VocabularyType, Vocabulary
+from checkVocabulary import checkVocabulary
+from ofnClasses import VocabularyType, Vocabulary, Term
 from datetime import datetime, timezone
 
 from outputToRDFBase import outputToRDFBase
@@ -18,6 +19,7 @@ from preprocessOutput import preprocessVocabulary
 def convertToRDF(vocabulary: Vocabulary, DEFAULT_LANGUAGE: str, outputFile: str):
     graph = Graph()
     vocabulary = preprocessVocabulary(vocabulary)
+    checkVocabulary(vocabulary)
     # Vocabulary
     vocabularyIRI = vocabulary.getIRI(DEFAULT_LANGUAGE)
 
@@ -43,6 +45,8 @@ def convertToRDF(vocabulary: Vocabulary, DEFAULT_LANGUAGE: str, outputFile: str)
     for term in vocabulary.terms:
         termIRI = term.getIRI(vocabulary, DEFAULT_LANGUAGE)
         if not termIRI.startswith(vocabularyIRI):
+            continue
+        if term.name[DEFAULT_LANGUAGE] in ["Objekt", "Subjekt", "Vlastnost"]:
             continue
         # associate with vocabulary
         graph.add((URIRef(termIRI),
