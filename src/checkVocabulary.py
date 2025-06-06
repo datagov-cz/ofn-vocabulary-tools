@@ -8,18 +8,27 @@ def checkVocabulary(vocabulary: Vocabulary):
 
 
 def checkCycles(vocabulary: Vocabulary):
+    visited: List[str] = []
+    stack: List[str] = []
+    rStack: List[str] = []
     for term in vocabulary.terms:
-        trail: List[str] = [term._iri]
-        stack: List[str] = [term._iri]
+        if term.getIRI(vocabulary, DEFAULT_LANGUAGE) in visited:
+            continue
+        stack.append(term.getIRI(vocabulary, DEFAULT_LANGUAGE))
         while len(stack) > 0:
-            iterIRI: str = stack.pop()
-            try:
-                iterTerm = next(
-                    x for x in vocabulary.terms if x._iri == iterIRI)
-                trail += set(iterTerm.subClassOf)
-                stack += set(iterTerm.subClassOf)
-                if len(trail) > len(set(trail)):
+            iterID: str = stack[-1]
+            if iterID in visited:
+                if iterID in rStack:
+                    rStack.remove(iterID)
+                stack.pop()
+                continue
+            visited.append(iterID)
+            rStack.append(iterID)
+            iterTerm = next(
+                x for x in vocabulary.terms if x._iri == iterID)
+            for sco in iterTerm.subClassOf:
+                if sco not in visited:
+                    stack.append(sco)
+                elif sco in rStack:
                     raise Exception(
-                        "Byl nalezen cyklus nadřazených pojmů mezi následujícími pojmy: {}".format([next(x.name[DEFAULT_LANGUAGE] for x in vocabulary.terms if x._iri == y) for y in set(trail)]))
-            except StopIteration:
-                break
+                        "Byl nalezen cyklus nadřazených pojmů mezi následujícími pojmy: {}".format([next(x.name[DEFAULT_LANGUAGE] for x in vocabulary.terms if x._iri == y) for y in set(rStack)]))

@@ -7,23 +7,7 @@ from ofnBindings import *
 import csv
 import warnings
 
-
-def csvToSheets(vcCSV, soCSV, itCSV, rlCSV):
-    wb = openpyxl.Workbook()
-    vcSheet = wb.create_sheet(SHEET_VOCABULARY)
-    soSheet = wb.create_sheet(SHEET_CLASS)
-    itSheet = wb.create_sheet(SHEET_TROPE)
-    rlSheet = wb.create_sheet(SHEET_RELATIONSHIP)
-
-    for x in [(vcCSV, vcSheet), (soCSV, soSheet), (itCSV, itSheet), (rlCSV, rlSheet)]:
-        if not x[0].endswith("csv"):
-            raise Exception()
-        with open(x[0]) as f:
-            reader = csv.reader(f, delimiter=",")
-            for row in reader:
-                x[1].append(row)
-
-    return (soSheet, itSheet, rlSheet, vcSheet)
+# TODO: datatypes
 
 
 def xlsxToSheets(file: str):
@@ -33,12 +17,13 @@ def xlsxToSheets(file: str):
     vcSheet = None
     if file.endswith("xlsx"):
         wb = openpyxl.load_workbook(file, data_only=True)
-        vcSheet = wb[SHEET_VOCABULARY]
+        if SHEET_VOCABULARY in wb:
+            vcSheet = wb[SHEET_VOCABULARY]
         soSheet = wb[SHEET_CLASS]
         itSheet = wb[SHEET_TROPE]
         rlSheet = wb[SHEET_RELATIONSHIP]
 
-    if soSheet is not None and itSheet is not None and rlSheet is not None and vcSheet is not None:
+    if soSheet is not None and itSheet is not None and rlSheet is not None:
         return (soSheet, itSheet, rlSheet, vcSheet)
     else:
         raise Exception()
@@ -93,9 +78,11 @@ def soSheetToOFN(sheet) -> List[TermClass]:
             if row[sourceIndex]:
                 term.source = row[sourceIndex]
             if row[subClassOfIndex]:
-                term.subClassOf.append(row[subClassOfIndex])
+                term.subClassOf += [x.strip()
+                                    for x in row[subClassOfIndex].split(MULTIPLE_VALUE_SEPARATOR)]
             if row[equivalentIndex]:
-                term.equivalent.append(row[equivalentIndex])
+                term.equivalent += [x.strip()
+                                    for x in row[equivalentIndex].split(MULTIPLE_VALUE_SEPARATOR)]
             if row[iriIndex]:
                 term._iri = row[iriIndex]
             if row[aisIndex]:
@@ -158,17 +145,25 @@ def itSheetToOFN(sheet) -> List[Trope]:
             if row[sourceIndex]:
                 term.source = row[sourceIndex]
             if row[subClassOfIndex]:
-                term.subClassOf.append(row[subClassOfIndex])
+                term.subClassOf += [x.strip()
+                                    for x in row[subClassOfIndex].split(MULTIPLE_VALUE_SEPARATOR)]
             if row[equivalentIndex]:
-                term.equivalent.append(row[equivalentIndex])
+                term.equivalent += [x.strip()
+                                    for x in row[equivalentIndex].split(MULTIPLE_VALUE_SEPARATOR)]
             if row[iriIndex]:
                 term._iri = row[iriIndex]
             if row[sharedInPPDFIndex]:
-                term.sharedInPPDF = row[sharedInPPDFIndex]
+                if row[sharedInPPDFIndex].lower() == YES.lower():
+                    term.sharedInPPDF = True
+                elif row[sharedInPPDFIndex].lower() == NO.lower():
+                    term.sharedInPPDF = False
             if row[datatypeIndex]:
                 term.datatype = row[datatypeIndex]
             if row[rppTypeIndex]:
-                term.rppType = row[rppTypeIndex]
+                if row[rppTypeIndex].lower() == YES.lower():
+                    term.rppType = RPPType.PUBLIC
+                elif row[rppTypeIndex].lower() == NO.lower():
+                    term.rppType = RPPType.PRIVATE
             if row[rppPrivateTypeSourceIndex]:
                 term.rppPrivateTypeSource = row[rppPrivateTypeSourceIndex]
             if row[relatedSourceIndex]:
@@ -227,9 +222,11 @@ def rlSheetToOFN(sheet) -> List[Relationship]:
             if row[sourceIndex]:
                 term.source = row[sourceIndex]
             if row[subClassOfIndex]:
-                term.subClassOf.append(row[subClassOfIndex])
+                term.subClassOf += [x.strip()
+                                    for x in row[subClassOfIndex].split(MULTIPLE_VALUE_SEPARATOR)]
             if row[equivalentIndex]:
-                term.equivalent.append(row[equivalentIndex])
+                term.equivalent += [x.strip()
+                                    for x in row[equivalentIndex].split(MULTIPLE_VALUE_SEPARATOR)]
             if row[iriIndex]:
                 term._iri = row[iriIndex]
             if row[sharedInPPDFIndex]:
@@ -260,8 +257,8 @@ def rlSheetToOFN(sheet) -> List[Relationship]:
 
 def vcSheetToOFN(sheet):
     name = None
-    desc = None
-    lkod = None
+    desc = ""
+    lkod = "https://slovník.gov.cz/"
     for lst in sheet:
         row = [cell.value for cell in lst]
         if name is None:
@@ -275,7 +272,7 @@ def vcSheetToOFN(sheet):
             continue
         else:
             break
-    if name is None or desc is None or lkod is None:
+    if name is None:
         raise Exception()
     return (name, desc, lkod)
 
@@ -285,30 +282,23 @@ outputLocation = sys.argv[2]
 
 
 def tableToOFN():
-    soSheet = None
-    itSheet = None
-    rlSheet = None
-    vcSheet = None
-    if len(sys.argv) == 3:
-        (soSheet, itSheet, rlSheet, vcSheet) = xlsxToSheets(inputLocation)
-    elif len(sys.argv) == 6:
-        (soSheet, itSheet, rlSheet, vcSheet) = csvToSheets(inputLocation)
-    else:
-        raise Exception()
+    (soSheet, itSheet, rlSheet, vcSheet) = xlsxToSheets(inputLocation)
     soList = soSheetToOFN(soSheet)
     itList = itSheetToOFN(itSheet)
     rlList = rlSheetToOFN(rlSheet)
-    (name, desc, lkod) = vcSheetToOFN(vcSheet)
     vocabulary = Vocabulary()
-    vocabulary.name[DEFAULT_LANGUAGE] = name
-    vocabulary.description[DEFAULT_LANGUAGE] = desc
-    vocabulary.lkod = lkod
+    if vcSheet:
+        (name, desc, lkod) = vcSheetToOFN(vcSheet)
+        vocabulary.name[DEFAULT_LANGUAGE] = str(name)
+        vocabulary.description[DEFAULT_LANGUAGE] = str(desc)
+        vocabulary.lkod = str(lkod)
+    else:
+        raise Exception()
     vocabulary.terms.extend(soList)
     vocabulary.terms.extend(itList)
     vocabulary.terms.extend(rlList)
     if len(itList) > 0 or len(rlList) > 0:
         vocabulary.type = VocabularyType.CONCEPTUAL_MODEL
-    vocabulary.name = {DEFAULT_LANGUAGE: "test"}
     convertToRDF(vocabulary, DEFAULT_LANGUAGE, outputLocation)
 
 

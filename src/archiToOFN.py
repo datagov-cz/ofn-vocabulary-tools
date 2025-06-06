@@ -10,12 +10,13 @@ inputLocation = sys.argv[1]
 outputLocation = sys.argv[2]
 propertyDefinitions = {}
 
+# TODO: 360/2023
+
 
 def getTermFromElement(element, term) -> Term:
     term.id = element.attrib['identifier']
     # Name
     names = element.findall(
-        
         "{http://www.opengroup.org/xsd/archimate/3.0/}name")
     for name in names:
         lang = name.attrib['{http://www.w3.org/XML/1998/namespace}lang']

@@ -9,6 +9,15 @@ VocabularyType = Enum("VocabularyType", ["THESAURUS", "CONCEPTUAL_MODEL"])
 
 RPPType = Enum("RPPType", ["PUBLIC", "PRIVATE"])
 
+GetValueType = Enum(
+    "GetValueType", ["BASE_REGISTRY", "OTHER_AGENDA", "OWN_AGENDA", "OPERATING"])
+
+ShareValueType = Enum(
+    "ShareValueType", ["PUBLIC", "ON_REQUEST", "FOR_AGENDAS", "PRIVATE"])
+
+ContentValueType = Enum("ContentValueType", [
+                        "IDENTIFICATION", "RECORD", "STATISTICAL"])
+
 # https://www.w3.org/TR/sparql11-query/#rPN_LOCAL
 PN_CHARS_U = re.compile(
     "[A-Za-z]|[\u00C0-\u00D6]|[\u00D8-\u00F6]|[\u00F8-\u02FF]|[\u0370-\u037D]|[\u037F-\u1FFF]|[\u200C-\u200D]|[\u2070-\u218F]|[\u2C00-\u2FEF]|[\u3001-\uD7FF]|[\uF900-\uFDCF]|[\uFDF0-\uFFFD]|[\U00010000-\U000EFFFF]|_", re.U)
@@ -85,6 +94,9 @@ class Term(Resource):
         self.rppType: RPPType | None = None
         self.rppPrivateTypeSource: str | None = None
         self.alternateName: list[tuple[str, str]] = []
+        self.getValueType: GetValueType | None = None
+        self.shareValueType: ShareValueType | None = None
+        self.contentValueType: ContentValueType | None = None
 
     def getIRI(self, vocabulary: Vocabulary, defaultLanguage: str) -> str:
         if self._iri == "":
@@ -109,7 +121,7 @@ class TermClass(Term):
 
 
 class Relationship(Term):
-    def __init__(self, domain: str, range: str) -> None:
+    def __init__(self, domain: str = "", range: str = "") -> None:
         super().__init__()
         self.domain: str = domain
         self.range: str = range
@@ -159,6 +171,9 @@ def getTrope(term: Term) -> Trope:
     trope.sharedInPPDF = term.sharedInPPDF
     trope.rppType = term.rppType
     trope.rppPrivateTypeSource = term.rppPrivateTypeSource
+    trope.getValueType = term.getValueType
+    trope.shareValueType = term.shareValueType
+    trope.contentValueType = term.contentValueType
     return trope
 
 
@@ -176,4 +191,7 @@ def getRelationship(term: Term, domain: str, range: str) -> Relationship:
     relationship.sharedInPPDF = term.sharedInPPDF
     relationship.rppType = term.rppType
     relationship.rppPrivateTypeSource = term.rppPrivateTypeSource
+    relationship.getValueType = term.getValueType
+    relationship.shareValueType = term.shareValueType
+    relationship.contentValueType = term.contentValueType
     return relationship
