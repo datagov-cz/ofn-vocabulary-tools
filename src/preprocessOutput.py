@@ -68,7 +68,7 @@ def preprocessVocabulary(vocabulary: Vocabulary) -> Vocabulary:
             term.subClassOf.remove(sco)
             term.subClassOf.append(replace)
         term.related = [getSourceODIRI(unquote(x)) for x in term.related]
-        term.source = getSourceODIRI(unquote(term.source))
+        term.source = [getSourceODIRI(unquote(x)) for x in term.source]
         if term.rppPrivateTypeSource:
             term.rppPrivateTypeSource = getSourceODIRI(
                 unquote(term.rppPrivateTypeSource))

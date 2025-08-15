@@ -42,12 +42,17 @@ def convertToRDF(vocabulary: Vocabulary, DEFAULT_LANGUAGE: str, outputFile: str)
               Literal(datetime.now(timezone.utc).isoformat(), datatype=XSD.dateTimeStamp)))
 
     # Terms
+    prevTerm = ""
     for term in vocabulary.terms:
         termIRI = term.getIRI(vocabulary, DEFAULT_LANGUAGE)
         if not termIRI.startswith(vocabularyIRI):
             continue
         if term.name[DEFAULT_LANGUAGE] in ["Objekt", "Subjekt", "Vlastnost"]:
             continue
+        if prevTerm == termIRI:
+            print("Pojem {} je duplicitní!".format(
+                term.name[DEFAULT_LANGUAGE]))
+        prevTerm = termIRI
         # associate with vocabulary
         graph.add((URIRef(termIRI),
                   SKOS.inScheme, URIRef(vocabularyIRI)))

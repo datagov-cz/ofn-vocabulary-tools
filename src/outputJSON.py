@@ -73,7 +73,8 @@ def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> json:
             outputTerm["související-ustanovení-právního-předpisu"] = [
                 x for x in term.related if x and len(x) != 0 and x is not None]
         if term.source:
-            outputTerm["definující-ustanovení-právního-předpisu"] = [term.source]
+            outputTerm["definující-ustanovení-právního-předpisu"] = [
+                x for x in term.source if x and len(x) != 0 and x is not None]
         if term.sharedInPPDF:
             outputTerm["je-sdílen-v-ppdf"] = term.sharedInPPDF
         if term.rppPrivateTypeSource:

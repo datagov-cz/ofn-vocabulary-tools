@@ -1,6 +1,8 @@
 from typing import List
 import openpyxl  # type: ignore
 import sys
+
+from rdflib import RDFS, XSD
 from ofnClasses import *
 from outputToRDF import convertToRDF
 from ofnBindings import *
@@ -41,6 +43,8 @@ def soSheetToOFN(sheet) -> List[TermClass]:
     agendaIndex = -1
     iriIndex = -1
     typeIndex = -1
+    relatedSourceIndex = -1
+    alternativeNameIndex = -1
     sos = []
     for lst in sheet:
         row = [cell.value for cell in lst]
@@ -72,11 +76,14 @@ def soSheetToOFN(sheet) -> List[TermClass]:
                 else:
                     warnings.warn("warn")
             if row[definitionIndex]:
-                term.definition = {DEFAULT_LANGUAGE: row[definitionIndex]}
+                term.definition = {
+                    DEFAULT_LANGUAGE: row[definitionIndex].strip()}
             if row[descriptionIndex]:
-                term.description = {DEFAULT_LANGUAGE: row[descriptionIndex]}
+                term.description = {
+                    DEFAULT_LANGUAGE: row[descriptionIndex].strip()}
             if row[sourceIndex]:
-                term.source = row[sourceIndex]
+                term.source = [x.strip()
+                               for x in row[sourceIndex].split(MULTIPLE_VALUE_SEPARATOR)]
             if row[subClassOfIndex]:
                 term.subClassOf += [x.strip()
                                     for x in row[subClassOfIndex].split(MULTIPLE_VALUE_SEPARATOR)]
@@ -84,11 +91,11 @@ def soSheetToOFN(sheet) -> List[TermClass]:
                 term.equivalent += [x.strip()
                                     for x in row[equivalentIndex].split(MULTIPLE_VALUE_SEPARATOR)]
             if row[iriIndex]:
-                term._iri = row[iriIndex]
+                term._iri = row[iriIndex].strip()
             if row[aisIndex]:
-                term.ais = row[aisIndex]
+                term.ais = str(row[aisIndex]).strip()
             if row[agendaIndex]:
-                term.agenda = row[agendaIndex]
+                term.agenda = row[agendaIndex].strip()
             if row[relatedSourceIndex]:
                 term.related += [x.strip()
                                  for x in row[relatedSourceIndex].split(MULTIPLE_VALUE_SEPARATOR)]
@@ -113,6 +120,8 @@ def itSheetToOFN(sheet) -> List[Trope]:
     rppTypeIndex = -1
     rppPrivateTypeSourceIndex = -1
     iriIndex = -1
+    relatedSourceIndex = -1
+    alternativeNameIndex = -1
     tropes = []
     for lst in sheet:
         row = [cell.value for cell in lst]
@@ -136,14 +145,17 @@ def itSheetToOFN(sheet) -> List[Trope]:
             if row[nameIndex] is None or row[termClassIndex] is None:
                 continue
             term = Trope()
-            term.name = {DEFAULT_LANGUAGE: row[nameIndex]}
-            term.target = row[termClassIndex]
+            term.name = {DEFAULT_LANGUAGE: row[nameIndex].strip()}
+            term.target = row[termClassIndex].strip()
             if row[definitionIndex]:
-                term.definition = {DEFAULT_LANGUAGE: row[definitionIndex]}
+                term.definition = {
+                    DEFAULT_LANGUAGE: row[definitionIndex].strip()}
             if row[descriptionIndex]:
-                term.description = {DEFAULT_LANGUAGE: row[descriptionIndex]}
+                term.description = {
+                    DEFAULT_LANGUAGE: row[descriptionIndex].strip()}
             if row[sourceIndex]:
-                term.source = row[sourceIndex]
+                term.source = [x.strip()
+                               for x in row[sourceIndex].split(MULTIPLE_VALUE_SEPARATOR)]
             if row[subClassOfIndex]:
                 term.subClassOf += [x.strip()
                                     for x in row[subClassOfIndex].split(MULTIPLE_VALUE_SEPARATOR)]
@@ -151,21 +163,43 @@ def itSheetToOFN(sheet) -> List[Trope]:
                 term.equivalent += [x.strip()
                                     for x in row[equivalentIndex].split(MULTIPLE_VALUE_SEPARATOR)]
             if row[iriIndex]:
-                term._iri = row[iriIndex]
+                term._iri = row[iriIndex].strip()
             if row[sharedInPPDFIndex]:
-                if row[sharedInPPDFIndex].lower() == YES.lower():
+                if row[sharedInPPDFIndex].strip().lower() == YES.lower():
                     term.sharedInPPDF = True
-                elif row[sharedInPPDFIndex].lower() == NO.lower():
+                elif row[sharedInPPDFIndex].strip().lower() == NO.lower():
                     term.sharedInPPDF = False
             if row[datatypeIndex]:
-                term.datatype = row[datatypeIndex]
+                datatype = row[datatypeIndex].strip().lower()
+                if datatype.startswith("http://www.w3.org/2001/XMLSchema#"):
+                    term.datatype = datatype
+                elif datatype == OFN_DATATYPE_BOOLEAN.lower():
+                    datatype = XSD.boolean
+                elif datatype == OFN_DATATYPE_DATE.lower():
+                    datatype = XSD.date
+                elif datatype == OFN_DATATYPE_TIME.lower():
+                    datatype = XSD.time
+                elif datatype == OFN_DATATYPE_DATETIME.lower():
+                    datatype = XSD.dateTimeStamp
+                elif datatype == OFN_DATATYPE_INTEGER.lower():
+                    datatype = XSD.integer
+                elif datatype == OFN_DATATYPE_DECIMAL.lower():
+                    datatype = XSD.double
+                elif datatype == OFN_DATATYPE_IRI.lower():
+                    datatype = XSD.anyURI
+                elif datatype == OFN_DATATYPE_STRING.lower():
+                    datatype = XSD.string
+                else:
+                    datatype = RDFS.Literal
+                term.datatype = datatype
             if row[rppTypeIndex]:
-                if row[rppTypeIndex].lower() == YES.lower():
+                if row[rppTypeIndex].strip().lower() == YES.lower():
                     term.rppType = RPPType.PUBLIC
-                elif row[rppTypeIndex].lower() == NO.lower():
+                elif row[rppTypeIndex].strip().lower() == NO.lower():
                     term.rppType = RPPType.PRIVATE
             if row[rppPrivateTypeSourceIndex]:
-                term.rppPrivateTypeSource = row[rppPrivateTypeSourceIndex]
+                term.rppPrivateTypeSource = row[rppPrivateTypeSourceIndex].strip(
+                )
             if row[relatedSourceIndex]:
                 term.related += [x.strip()
                                  for x in row[relatedSourceIndex].split(MULTIPLE_VALUE_SEPARATOR)]
@@ -187,6 +221,11 @@ def rlSheetToOFN(sheet) -> List[Relationship]:
     subClassOfIndex = -1
     equivalentIndex = -1
     iriIndex = -1
+    relatedSourceIndex = -1
+    alternativeNameIndex = -1
+    sharedInPPDFIndex = -1
+    rppTypeIndex = -1
+    rppPrivateTypeSourceIndex = -1
     relationships = []
     for lst in sheet:
         row = [cell.value for cell in lst]
@@ -212,15 +251,18 @@ def rlSheetToOFN(sheet) -> List[Relationship]:
         else:
             if row[nameIndex] is None or row[termClassSourceIndex] is None or row[termClassTargetIndex] is None:
                 continue
-            term = Relationship(row[termClassSourceIndex],
-                                row[termClassTargetIndex])
-            term.name = {DEFAULT_LANGUAGE: row[nameIndex]}
+            term = Relationship(row[termClassSourceIndex].strip(),
+                                row[termClassTargetIndex].strip())
+            term.name = {DEFAULT_LANGUAGE: row[nameIndex].strip()}
             if row[definitionIndex]:
-                term.definition = {DEFAULT_LANGUAGE: row[definitionIndex]}
+                term.definition = {
+                    DEFAULT_LANGUAGE: row[definitionIndex].strip()}
             if row[descriptionIndex]:
-                term.description = {DEFAULT_LANGUAGE: row[descriptionIndex]}
+                term.description = {
+                    DEFAULT_LANGUAGE: row[descriptionIndex].strip()}
             if row[sourceIndex]:
-                term.source = row[sourceIndex]
+                term.source = [x.strip()
+                               for x in row[sourceIndex].split(MULTIPLE_VALUE_SEPARATOR)]
             if row[subClassOfIndex]:
                 term.subClassOf += [x.strip()
                                     for x in row[subClassOfIndex].split(MULTIPLE_VALUE_SEPARATOR)]
@@ -228,7 +270,7 @@ def rlSheetToOFN(sheet) -> List[Relationship]:
                 term.equivalent += [x.strip()
                                     for x in row[equivalentIndex].split(MULTIPLE_VALUE_SEPARATOR)]
             if row[iriIndex]:
-                term._iri = row[iriIndex]
+                term._iri = row[iriIndex].strip()
             if row[sharedInPPDFIndex]:
                 if row[sharedInPPDFIndex].strip().lower() == YES.lower():
                     term.sharedInPPDF = True
@@ -244,7 +286,8 @@ def rlSheetToOFN(sheet) -> List[Relationship]:
                 else:
                     warnings.warn("warn")
             if row[rppPrivateTypeSourceIndex]:
-                term.rppPrivateTypeSource = row[rppPrivateTypeSourceIndex]
+                term.rppPrivateTypeSource = row[rppPrivateTypeSourceIndex].strip(
+                )
             if row[relatedSourceIndex]:
                 term.related += [x.strip()
                                  for x in row[relatedSourceIndex].split(MULTIPLE_VALUE_SEPARATOR)]

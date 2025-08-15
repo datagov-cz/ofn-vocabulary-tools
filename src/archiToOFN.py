@@ -50,7 +50,7 @@ def getTermFromElement(element, term) -> Term:
             term = getTrope(term)
     # Source
     if OFN_SOURCE.lower() in termProperties and testInputString(termProperties[OFN_SOURCE.lower()][0]):
-        term.source = termProperties[OFN_SOURCE.lower()][0]
+        term.source = [termProperties[OFN_SOURCE.lower()][0]]
     # Related source
     if OFN_RELATED.lower() in termProperties and testInputString(termProperties[OFN_RELATED.lower()][0]):
         term.related += [x.strip() for x in termProperties[OFN_RELATED.lower()]

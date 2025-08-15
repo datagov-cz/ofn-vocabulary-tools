@@ -31,9 +31,10 @@ def outputToRDFBase(term: Term, iri: str, graph: Graph):
             graph.add((termIRI, DCTERMS.relation,
                        getURIRefOrLiteral(relation)))
     # conformsTo
-    if testInputString(term.source):
-        graph.add((termIRI, DCTERMS.conformsTo,
-                   getURIRefOrLiteral(term.source)))
+    for source in term.source:
+        if testInputString(source):
+            graph.add((termIRI, DCTERMS.conformsTo,
+                       getURIRefOrLiteral(source)))
     # exactMatch
     for equivalent in term.equivalent:
         if testInputString(equivalent):

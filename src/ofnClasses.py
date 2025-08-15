@@ -86,7 +86,7 @@ class Term(Resource):
         self.name: dict = {}
         self.description: dict = {}
         self.definition: dict = {}
-        self.source: str = ""
+        self.source: list[str] = []
         self.related: list[str] = []
         self.subClassOf: list[str] = []
         self.equivalent: list[str] = []
