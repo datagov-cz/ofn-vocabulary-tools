@@ -10,7 +10,13 @@ inputLocation = sys.argv[1]
 outputLocation = sys.argv[2]
 propertyDefinitions = {}
 
-# TODO: 360/2023
+
+def getSimilar(termProperties, input):
+    for x in list(termProperties.keys()):
+        if input.lower().strip() in x.lower():
+            if termProperties[x] is not None and testInputString(termProperties[x][0]):
+                return x
+    return False
 
 
 def getTermFromElement(element, term) -> Term:
@@ -35,10 +41,12 @@ def getTermFromElement(element, term) -> Term:
         valueText = value.text
         propertyType = propertyDefinitions[identifier]
         termProperties[propertyType] = (valueText, valueLang)
-    if OFN_IRI.lower() in termProperties and termProperties[OFN_IRI.lower()][0] is not None:
-        term._iri = termProperties[OFN_IRI.lower()][0].strip()
-    if OFN_TYPE.lower() in termProperties and termProperties[OFN_TYPE.lower()][0] is not None:
-        valueTextNormalized = termProperties[OFN_TYPE.lower()][0].strip(
+    ofnIRI = getSimilar(termProperties, OFN_IRI)
+    if ofnIRI:
+        term._iri = termProperties[ofnIRI][0].strip()
+    ofnType = getSimilar(termProperties, OFN_TYPE)
+    if ofnType:
+        valueTextNormalized = termProperties[ofnType][0].strip(
         ).lower()
         if valueTextNormalized == OFN_SUBJECT_TYPE.lower():
             term = getClass(term)
@@ -49,61 +57,100 @@ def getTermFromElement(element, term) -> Term:
         elif valueTextNormalized == OFN_TROPE_TYPE.lower():
             term = getTrope(term)
     # Source
-    if OFN_SOURCE.lower() in termProperties and testInputString(termProperties[OFN_SOURCE.lower()][0]):
-        term.source = [termProperties[OFN_SOURCE.lower()][0]]
+    ofnSource = getSimilar(termProperties, OFN_SOURCE)
+    if ofnSource:
+        term.source = [termProperties[ofnSource][0]]
     # Related source
-    if OFN_RELATED.lower() in termProperties and testInputString(termProperties[OFN_RELATED.lower()][0]):
-        term.related += [x.strip() for x in termProperties[OFN_RELATED.lower()]
+    ofnRelated = getSimilar(termProperties, OFN_RELATED)
+    if ofnRelated:
+        term.related += [x.strip() for x in termProperties[ofnRelated]
                          [0].split(MULTIPLE_VALUE_SEPARATOR)]
     # Alternative name
-    if OFN_ALTERNATIVE.lower() in termProperties and testInputString(termProperties[OFN_ALTERNATIVE.lower()][0]):
-        term.alternateName += [(DEFAULT_LANGUAGE, x.strip()) for x in termProperties[OFN_ALTERNATIVE.lower()]
+    ofnAlternate = getSimilar(termProperties, OFN_ALTERNATIVE)
+    if ofnAlternate:
+        term.alternateName += [(DEFAULT_LANGUAGE, x.strip()) for x in termProperties[ofnAlternate]
                                [0].split(MULTIPLE_VALUE_SEPARATOR)]
     # Definition
-    if OFN_DEFINITION.lower() in termProperties:
-        term.definition[termProperties[OFN_DEFINITION.lower()]
-                        [1]] = termProperties[OFN_DEFINITION.lower()][0]
+    ofnDefinition = getSimilar(termProperties, OFN_DEFINITION)
+    if ofnDefinition:
+        term.definition[termProperties[ofnDefinition]
+                        [1]] = termProperties[ofnDefinition][0]
     # Description
-    if OFN_DESCRIPTION.lower() in termProperties:
-        term.description[termProperties[OFN_DESCRIPTION.lower()]
-                         [1]] = termProperties[OFN_DESCRIPTION.lower()][0]
-    if OFN_DATATYPE.lower() in termProperties and isinstance(term, Trope):
-        term.datatype = termProperties[OFN_DATATYPE.lower()][0]
+    ofnDescription = getSimilar(termProperties, OFN_DESCRIPTION)
+    if ofnDescription:
+        term.description[termProperties[ofnDescription]
+                         [1]] = termProperties[ofnDescription][0]
+    ofnDatatype = getSimilar(termProperties, OFN_DATATYPE)
+    if ofnDatatype and isinstance(term, Trope):
+        term.datatype = termProperties[ofnDatatype][0]
     # Equivalent
-    if OFN_EQUIVALENT.lower() in termProperties and testInputString(termProperties[OFN_EQUIVALENT.lower()][0]):
-        term.equivalent = [x.strip() for x in termProperties[OFN_EQUIVALENT.lower(
-        )][0].split(MULTIPLE_VALUE_SEPARATOR)]
+    ofnEquivalent = getSimilar(termProperties, OFN_EQUIVALENT)
+    if ofnEquivalent:
+        term.equivalent = [x.strip() for x in termProperties[ofnEquivalent][0].split(
+            MULTIPLE_VALUE_SEPARATOR)]
 
     # RPP
-    if OFN_RPP_AIS.lower() in termProperties and testInputString(termProperties[OFN_RPP_AIS.lower()][0]) and isinstance(
-            term, TermClass):
-        term.ais = termProperties[OFN_RPP_AIS.lower()][0]
-    if OFN_RPP_AGENDA.lower() in termProperties and testInputString(
-            termProperties[OFN_RPP_AGENDA.lower()][0]) and isinstance(term, TermClass):
-        term.agenda = termProperties[OFN_RPP_AGENDA.lower()][0]
-    if OFN_RPP_TYPE.lower() in termProperties:
-        if testInputString(termProperties[OFN_RPP_TYPE.lower()][0]) and (
-                isinstance(term, Trope) or isinstance(term, Relationship)):
-            if termProperties[OFN_RPP_TYPE.lower()][0].strip().lower() == YES.lower():
-                term.rppType = RPPType.PUBLIC
-            elif termProperties[OFN_RPP_TYPE.lower()][0].strip().lower() == NO.lower():
-                term.rppType = RPPType.PRIVATE
-            else:
-                warnings.warn("warn")
-    if OFN_RPP_SHARED.lower() in termProperties:
-        if testInputString(termProperties[OFN_RPP_SHARED.lower()][0]) and (
-                isinstance(term, Trope) or isinstance(term, Relationship)):
-            if termProperties[OFN_RPP_SHARED.lower()][0].strip().lower() == YES.lower():
-                term.sharedInPPDF = True
-            elif termProperties[OFN_RPP_SHARED.lower()][0].strip().lower() == NO.lower():
-                term.sharedInPPDF = False
-            else:
-                warnings.warn("warn")
-    if OFN_RPP_PRIVATE_SOURCE.lower() in termProperties:
-        if testInputString(termProperties[OFN_RPP_PRIVATE_SOURCE.lower()][0]) and (
-                isinstance(term, Trope) or isinstance(term, Relationship)):
-            term.rppPrivateTypeSource = termProperties[OFN_RPP_PRIVATE_SOURCE.lower(
-            )][0]
+    ofnAIS = getSimilar(termProperties, OFN_RPP_AIS)
+    if ofnAIS and isinstance(term, TermClass):
+        term.ais = termProperties[ofnAIS][0]
+    ofnAgenda = getSimilar(termProperties, OFN_RPP_AGENDA)
+    if ofnAgenda and isinstance(term, TermClass):
+        term.agenda = termProperties[ofnAgenda][0]
+    ofnRPPtype = getSimilar(termProperties, OFN_RPP_TYPE)
+    if ofnRPPtype and (
+            isinstance(term, Trope) or isinstance(term, Relationship)):
+        if termProperties[ofnRPPtype][0].strip().lower() == YES.lower():
+            term.rppType = RPPType.PUBLIC
+        elif termProperties[ofnRPPtype][0].strip().lower() == NO.lower():
+            term.rppType = RPPType.PRIVATE
+        else:
+            warnings.warn("warn")
+    ofnShared = getSimilar(termProperties, OFN_RPP_SHARED)
+    if ofnShared and (
+            isinstance(term, Trope) or isinstance(term, Relationship)):
+        if termProperties[ofnShared][0].strip().lower() == YES.lower():
+            term.sharedInPPDF = True
+        elif termProperties[ofnShared][0].strip().lower() == NO.lower():
+            term.sharedInPPDF = False
+        else:
+            warnings.warn("warn")
+    ofnPrivate = getSimilar(termProperties, OFN_RPP_PRIVATE_SOURCE)
+    if ofnPrivate and (
+            isinstance(term, Trope) or isinstance(term, Relationship)):
+        term.rppPrivateTypeSource = termProperties[ofnPrivate][0]
+
+    # 360
+    ofn360get = getSimilar(termProperties, OFN_360_2023_GET)
+    if ofn360get and isinstance(term, Trope):
+        get360 = termProperties[ofn360get][0].strip().lower()
+        if OFN_360_2023_GET_BASE_REGISTRY.lower() in get360:
+            term.getValueType = GetValueType.BASE_REGISTRY
+        elif OFN_360_2023_GET_OTHER_AGENDA.lower() in get360:
+            term.getValueType = GetValueType.OTHER_AGENDA
+        elif OFN_360_2023_GET_OWN_AGENDA.lower() in get360:
+            term.getValueType = GetValueType.OWN_AGENDA
+        elif OFN_360_2023_GET_OPERATING.lower() in get360:
+            term.getValueType = GetValueType.OPERATING
+    ofn360share = getSimilar(termProperties, OFN_360_2023_SHARE)
+    if ofn360share and isinstance(term, Trope):
+        share360 = termProperties[ofn360share][0].strip().lower()
+        if OFN_360_2023_SHARE_PUBLIC.lower() in share360:
+            term.shareValueType.append(ShareValueType.PUBLIC)
+        elif OFN_360_2023_SHARE_ON_REQUEST.lower() in share360:
+            term.shareValueType.append(ShareValueType.ON_REQUEST)
+        elif OFN_360_2023_SHARE_FOR_AGENDAS.lower() in share360:
+            term.shareValueType.append(ShareValueType.FOR_AGENDAS)
+        elif OFN_360_2023_SHARE_PRIVATE.lower() in share360:
+            term.shareValueType.append(ShareValueType.PRIVATE)
+    ofn360content = getSimilar(termProperties, OFN_360_2023_CONTENT)
+    if ofn360content and isinstance(term, Trope):
+        content360 = termProperties[ofn360content][0].strip().lower()
+        if OFN_360_2023_CONTENT_IDENTIFICATION.lower() in content360:
+            term.contentValueType = ContentValueType.IDENTIFICATION
+        elif OFN_360_2023_CONTENT_RECORD.lower() in content360:
+            term.contentValueType = ContentValueType.RECORD
+        elif OFN_360_2023_CONTENT_STATISTICAL.lower() in content360:
+            term.contentValueType = ContentValueType.STATISTICAL
     return term
 
 
@@ -150,12 +197,13 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
         propertyType = propertyDefinitions[identifier]
         vocabularyProperties[propertyType] = (valueText.lower(), valueLang)
 
-    if OFN_LKOD.lower() in vocabularyProperties:
-        vocabulary.lkod = vocabularyProperties[OFN_LKOD.lower()][0]
+    ofnLKOD = getSimilar(vocabularyProperties, OFN_LKOD)
+    if ofnLKOD:
+        vocabulary.lkod = vocabularyProperties[ofnLKOD][0]
 
-    if OFN_DESCRIPTION.lower() in vocabularyProperties:
-        vocabulary.description[DEFAULT_LANGUAGE] = vocabularyProperties[OFN_DESCRIPTION.lower(
-        )][0]
+    ofnDescription = getSimilar(vocabularyProperties, OFN_DESCRIPTION)
+    if ofnDescription:
+        vocabulary.description[DEFAULT_LANGUAGE] = vocabularyProperties[ofnDescription][0]
 
     for element in elements:
         if element.attrib['{http://www.w3.org/2001/XMLSchema-instance}type'] == "BusinessObject":
@@ -190,6 +238,10 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
             term = getTermFromElement(relationship, Relationship(domainTerm.getIRI(
                 vocabulary, DEFAULT_LANGUAGE), rangeTerm.getIRI(vocabulary, DEFAULT_LANGUAGE)))
             vocabulary.terms.append(term)
-    if next(x for x in vocabulary.terms if isinstance(x, Trope) or isinstance(x, Relationship)):
-        vocabulary.type = VocabularyType.CONCEPTUAL_MODEL
+    try:
+        if next(x for x in vocabulary.terms if isinstance(x, Trope) or isinstance(x, Relationship)):
+            vocabulary.type = VocabularyType.CONCEPTUAL_MODEL
+    except:
+        pass
+
     convertToRDF(vocabulary, DEFAULT_LANGUAGE, outputLocation)

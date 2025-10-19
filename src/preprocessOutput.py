@@ -34,7 +34,7 @@ def getAISODIRI(input: str) -> str:
         return ""
 
 
-def getSourceODIRI(input: str) -> str:
+def getPrivateSourceODIRI(input: str) -> str:
     if input == "":
         return input
     eliPart = re.search("eli\/cz\/sb\/.*$", input)
@@ -67,10 +67,10 @@ def preprocessVocabulary(vocabulary: Vocabulary) -> Vocabulary:
             replace = processLink(sco, vocabulary)
             term.subClassOf.remove(sco)
             term.subClassOf.append(replace)
-        term.related = [getSourceODIRI(unquote(x)) for x in term.related]
-        term.source = [getSourceODIRI(unquote(x)) for x in term.source]
+        # term.related = [getSourceODIRI(unquote(x)) for x in term.related]
+        # term.source = [getSourceODIRI(unquote(x)) for x in term.source]
         if term.rppPrivateTypeSource:
-            term.rppPrivateTypeSource = getSourceODIRI(
+            term.rppPrivateTypeSource = getPrivateSourceODIRI(
                 unquote(term.rppPrivateTypeSource))
         term.equivalent = [unquote(x) for x in term.equivalent]
         term.subClassOf = [unquote(x) for x in term.subClassOf]

@@ -1,9 +1,37 @@
-from rdflib import DCTERMS, OWL, RDF, RDFS, SKOS, Graph, Literal, URIRef
+from rdflib import DCTERMS, OWL, RDF, RDFS, SKOS, Graph, Literal, URIRef, BNode
 from ofnClasses import Relationship, Term, TermClass, Trope
 from urllib.parse import unquote
 from outputUtil import getURIRefOrLiteral, testInputString
+import rfc3987
+import re
 
 # Remember to call AFTER the term's IRI has been initialized!
+
+
+def processSource(input: str, termIRI: URIRef, graph: Graph, main: bool):
+    eliPart = re.search("eli\/cz\/sb\/.*$", input)
+    control = re.search("^https\:\/\/.*\/eli\/cz\/sb\/.*$", input)
+    if control and eliPart:
+        eliSource = "https://opendata.eselpoint.cz/esel-esb/{}".format(
+            eliPart.group())
+        if main:
+            graph.add((termIRI, DCTERMS.conformsTo, URIRef(eliSource)))
+        else:
+            graph.add((termIRI, DCTERMS.relation, URIRef(eliSource)))
+    else:
+        bn = BNode()
+        graph.add((bn, RDF.type, URIRef(
+            "https://slovník.gov.cz/generický/digitální-objekty/pojem/digitální-objekt")))
+        if rfc3987.match(input, rule="IRI"):
+            graph.add((bn, URIRef("http://schema.org/url"), URIRef(input)))
+        else:
+            graph.add((bn, DCTERMS.title, Literal(input)))
+        if main:
+            graph.add((termIRI, URIRef(
+                "https://slovník.gov.cz/generický/datový-slovník-ofn-slovníků/pojem/definující-nelegislativní-zdroj"), bn))
+        else:
+            graph.add((termIRI, URIRef(
+                "https://slovník.gov.cz/generický/datový-slovník-ofn-slovníků/pojem/související-nelegislativní-zdroj"), bn))
 
 
 def outputToRDFBase(term: Term, iri: str, graph: Graph):
@@ -28,13 +56,11 @@ def outputToRDFBase(term: Term, iri: str, graph: Graph):
     # relation
     for relation in term.related:
         if testInputString(relation):
-            graph.add((termIRI, DCTERMS.relation,
-                       getURIRefOrLiteral(relation)))
+            processSource(relation, termIRI, graph, False)
     # conformsTo
     for source in term.source:
         if testInputString(source):
-            graph.add((termIRI, DCTERMS.conformsTo,
-                       getURIRefOrLiteral(source)))
+            processSource(source, termIRI, graph, True)
     # exactMatch
     for equivalent in term.equivalent:
         if testInputString(equivalent):

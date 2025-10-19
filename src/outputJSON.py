@@ -3,6 +3,8 @@ from ofnClasses import *
 import urllib.request
 import urllib.parse
 from rdflib import RDFS
+import re
+import rfc3987
 
 
 def getReference(uri: str) -> object:
@@ -10,9 +12,42 @@ def getReference(uri: str) -> object:
         return schema
 
 
+def processSource(input: str, outputTerm: dict, main: bool):
+    eliPart = re.search("eli\/cz\/sb\/.*$", input)
+    control = re.search("^https\:\/\/.*\/eli\/cz\/sb\/.*$", input)
+    if control and eliPart:
+        eliSource = "https://opendata.eselpoint.cz/esel-esb/{}".format(
+            eliPart.group())
+        if main:
+            if "definující-ustanovení-právního-předpisu" not in outputTerm:
+                outputTerm["definující-ustanovení-právního-předpisu"] = []
+            outputTerm["definující-ustanovení-právního-předpisu"].append(
+                eliSource)
+        else:
+            if "související-ustanovení-právního-předpisu" not in outputTerm:
+                outputTerm["související-ustanovení-právního-předpisu"] = []
+            outputTerm["související-ustanovení-právního-předpisu"].append(
+                eliSource)
+    else:
+        do = {"typ": "Digitální objekt"}
+        if rfc3987.match(input, rule="IRI"):
+            do["url"] = input
+        else:
+            do["název"] = input
+        if main:
+            if "definující-nelegislativní-zdroj" not in outputTerm:
+                outputTerm["definující-nelegislativní-zdroj"] = []
+            outputTerm["definující-nelegislativní-zdroj"].append(do)
+        else:
+            if "související-nelegislativní-zdroj" not in outputTerm:
+                outputTerm["související-nelegislativní-zdroj"] = []
+            outputTerm["související-nelegislativní-zdroj"].append(do)
+
+
 def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> json:
     output = {}
     output["@context"] = "https://ofn.gov.cz/slovníky/draft/kontexty/slovníky.jsonld"
+    # output["@context"] = "https://ofn.gov.cz/slovníky/draft2/kompletní/kontext.jsonld"
     output["iri"] = vocabulary.getIRI()
     vocTypes = ["Slovník", "Tezaurus"]
     if vocabulary.type == VocabularyType.CONCEPTUAL_MODEL:
@@ -60,6 +95,13 @@ def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> json:
             termTypes.append("Veřejný údaj")
         outputTerm["typ"] = termTypes
         outputTerm["název"] = term.name
+        altNames: dict[str, list[str]] = {}
+        for l, v in term.alternateName:
+            if l not in altNames:
+                altNames[l] = []
+            altNames[l].append(v)
+        if len(altNames) > 0:
+            outputTerm["alternativní-název"] = altNames
         if DEFAULT_LANGUAGE in term.definition and term.definition[DEFAULT_LANGUAGE]:
             outputTerm["definice"] = {x: term.definition[x]
                                       for x in term.definition if term.definition[x] is not None}
@@ -70,15 +112,47 @@ def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> json:
             outputTerm["ekvivalentní-pojem"] = [
                 x for x in term.equivalent if x and len(x) != 0 and x is not None]
         if term.related:
-            outputTerm["související-ustanovení-právního-předpisu"] = [
-                x for x in term.related if x and len(x) != 0 and x is not None]
+            for x in [x for x in term.related if x and len(x) != 0 and x is not None]:
+                processSource(x, outputTerm, False)
         if term.source:
-            outputTerm["definující-ustanovení-právního-předpisu"] = [
-                x for x in term.source if x and len(x) != 0 and x is not None]
+            for x in [x for x in term.source if x and len(x) != 0 and x is not None]:
+                processSource(x, outputTerm, True)
         if term.sharedInPPDF:
             outputTerm["je-sdílen-v-ppdf"] = term.sharedInPPDF
         if term.rppPrivateTypeSource:
             outputTerm["ustanovení-dokládající-neveřejnost-údaje"] = [term.rppPrivateTypeSource]
+        if term.getValueType is not None:
+            if term.getValueType is GetValueType.BASE_REGISTRY:
+                outputTerm["způsob-získání-údaje"] = "https://data.dia.gov.cz/zdroj/číselníky/způsoby-získání-údajů/položky/základních-registrů"
+            if term.getValueType is GetValueType.OTHER_AGENDA:
+                outputTerm["způsob-získání-údaje"] = "https://data.dia.gov.cz/zdroj/číselníky/způsoby-získání-údajů/položky/jiných-agend"
+            if term.getValueType is GetValueType.OWN_AGENDA:
+                outputTerm["způsob-získání-údaje"] = "https://data.dia.gov.cz/zdroj/číselníky/způsoby-získání-údajů/položky/vlastní"
+            if term.getValueType is GetValueType.OPERATING:
+                outputTerm["způsob-získání-údaje"] = "https://data.dia.gov.cz/zdroj/číselníky/způsoby-získání-údajů/položky/provozní"
+        if len(term.shareValueType) > 0:
+            outputTermSVT = []
+            for svt in term.shareValueType:
+                if svt is ShareValueType.PUBLIC:
+                    outputTermSVT.append(
+                        "https://data.dia.gov.cz/zdroj/číselníky/způsoby-sdílení-údajů/položky/veřejně-přístupné")
+                if svt is ShareValueType.ON_REQUEST:
+                    outputTermSVT.append(
+                        "https://data.dia.gov.cz/zdroj/číselníky/způsoby-sdílení-údajů/položky/poskytované-na-žádost")
+                if svt is ShareValueType.FOR_AGENDAS:
+                    outputTermSVT.append(
+                        "https://data.dia.gov.cz/zdroj/číselníky/způsoby-sdílení-údajů/položky/zpřístupňované-pro-výkon-agendy")
+                if svt is ShareValueType.PRIVATE:
+                    outputTermSVT.append(
+                        "https://data.dia.gov.cz/zdroj/číselníky/způsoby-sdílení-údajů/položky/nesdílené")
+            outputTerm["způsoby-sdílení-údaje"] = outputTermSVT
+        if term.contentValueType is not None:
+            if term.getValueType is ContentValueType.IDENTIFICATION:
+                outputTerm["typ-obsahu-údaje"] = "https://data.dia.gov.cz/zdroj/číselníky/typy-obsahu-údajů/položky/identifikační"
+            if term.getValueType is ContentValueType.RECORD:
+                outputTerm["typ-obsahu-údaje"] = "https://data.dia.gov.cz/zdroj/číselníky/typy-obsahu-údajů/položky/evidenční"
+            if term.getValueType is ContentValueType.STATISTICAL:
+                outputTerm["typ-obsahu-údaje"] = "https://data.dia.gov.cz/zdroj/číselníky/typy-obsahu-údajů/položky/statistické"
         terms.append(outputTerm)
     output["pojmy"] = terms
     return output

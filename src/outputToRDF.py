@@ -4,6 +4,7 @@ from checkVocabulary import checkVocabulary
 from ofnClasses import VocabularyType, Vocabulary, Term
 from datetime import datetime, timezone
 
+from outputToRDF360 import outputToRDF360
 from outputToRDFBase import outputToRDFBase
 from outputToRDFRegistry import outputToRDFRegistry
 from outputUtil import getRDFoutput
@@ -13,7 +14,6 @@ from preprocessOutput import preprocessVocabulary
 # TODO: Error handling
 # TODO: Input validation
 # TODO: check for duplicate values
-# TODO: search for terms within file is IRI is not provided
 
 
 def convertToRDF(vocabulary: Vocabulary, DEFAULT_LANGUAGE: str, outputFile: str):
@@ -60,5 +60,8 @@ def convertToRDF(vocabulary: Vocabulary, DEFAULT_LANGUAGE: str, outputFile: str)
         outputToRDFBase(term, termIRI, graph)
         # RPP
         outputToRDFRegistry(term, term.getIRI(
+            vocabulary, DEFAULT_LANGUAGE), graph)
+        # 360
+        outputToRDF360(term, term.getIRI(
             vocabulary, DEFAULT_LANGUAGE), graph)
     getRDFoutput(graph, vocabulary, outputFile)

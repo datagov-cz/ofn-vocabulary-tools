@@ -95,7 +95,7 @@ class Term(Resource):
         self.rppPrivateTypeSource: str | None = None
         self.alternateName: list[tuple[str, str]] = []
         self.getValueType: GetValueType | None = None
-        self.shareValueType: ShareValueType | None = None
+        self.shareValueType: list[ShareValueType] = []
         self.contentValueType: ContentValueType | None = None
 
     def getIRI(self, vocabulary: Vocabulary, defaultLanguage: str) -> str:

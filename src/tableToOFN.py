@@ -6,10 +6,14 @@ from rdflib import RDFS, XSD
 from ofnClasses import *
 from outputToRDF import convertToRDF
 from ofnBindings import *
-import csv
 import warnings
 
-# TODO: datatypes
+
+def getSimilar(arr: List[str], target: str) -> int:
+    for i, x in enumerate(arr):
+        if x is not None and target.lower() in x.lower():
+            return i
+    return -1
 
 
 def xlsxToSheets(file: str):
@@ -32,7 +36,6 @@ def xlsxToSheets(file: str):
 
 
 def soSheetToOFN(sheet) -> List[TermClass]:
-    header = True
     nameIndex = -1
     descriptionIndex = -1
     definitionIndex = -1
@@ -48,20 +51,20 @@ def soSheetToOFN(sheet) -> List[TermClass]:
     sos = []
     for lst in sheet:
         row = [cell.value for cell in lst]
-        if header:
-            nameIndex = row.index(OFN_NAME)
-            descriptionIndex = row.index(OFN_DESCRIPTION)
-            definitionIndex = row.index(OFN_DEFINITION)
-            sourceIndex = row.index(OFN_SOURCE)
-            subClassOfIndex = row.index(OFN_SUBCLASS)
-            equivalentIndex = row.index(OFN_EQUIVALENT)
-            iriIndex = row.index(OFN_IRI)
-            aisIndex = row.index(OFN_RPP_AIS)
-            agendaIndex = row.index(OFN_RPP_AGENDA)
-            typeIndex = row.index(OFN_TYPE)
-            relatedSourceIndex = row.index(OFN_RELATED)
-            alternativeNameIndex = row.index(OFN_ALTERNATIVE)
-            header = False
+        if nameIndex == -1:
+            nameIndex = getSimilar(row, OFN_NAME)
+            descriptionIndex = getSimilar(row, OFN_DESCRIPTION)
+            definitionIndex = getSimilar(row, OFN_DEFINITION)
+            sourceIndex = getSimilar(row, OFN_SOURCE)
+            subClassOfIndex = getSimilar(row, OFN_SUBCLASS)
+            equivalentIndex = getSimilar(row, OFN_EQUIVALENT)
+            iriIndex = getSimilar(row, OFN_IRI)
+            aisIndex = getSimilar(row, OFN_RPP_AIS)
+            agendaIndex = getSimilar(row, OFN_RPP_AGENDA)
+            typeIndex = getSimilar(row, OFN_TYPE)
+            relatedSourceIndex = getSimilar(row, OFN_RELATED)
+            alternativeNameIndex = getSimilar(row, OFN_ALTERNATIVE)
+            continue
         else:
             term = TermClass()
             if row[nameIndex] is None:
@@ -107,7 +110,6 @@ def soSheetToOFN(sheet) -> List[TermClass]:
 
 
 def itSheetToOFN(sheet) -> List[Trope]:
-    header = True
     termClassIndex = -1
     datatypeIndex = -1
     nameIndex = -1
@@ -122,25 +124,31 @@ def itSheetToOFN(sheet) -> List[Trope]:
     iriIndex = -1
     relatedSourceIndex = -1
     alternativeNameIndex = -1
+    get360Index = -1
+    share360Index = -1
+    content360Index = -1
     tropes = []
     for lst in sheet:
         row = [cell.value for cell in lst]
-        if header:
-            nameIndex = row.index(OFN_NAME)
-            descriptionIndex = row.index(OFN_DESCRIPTION)
-            definitionIndex = row.index(OFN_DEFINITION)
-            sourceIndex = row.index(OFN_SOURCE)
-            subClassOfIndex = row.index(OFN_SUBCLASS)
-            equivalentIndex = row.index(OFN_EQUIVALENT)
-            iriIndex = row.index(OFN_IRI)
-            termClassIndex = row.index(OFN_SUBJECT_OR_OBJECT)
-            datatypeIndex = row.index(OFN_DATATYPE)
-            sharedInPPDFIndex = row.index(OFN_RPP_SHARED)
-            rppTypeIndex = row.index(OFN_RPP_TYPE)
-            rppPrivateTypeSourceIndex = row.index(OFN_RPP_PRIVATE_SOURCE)
-            relatedSourceIndex = row.index(OFN_RELATED)
-            alternativeNameIndex = row.index(OFN_ALTERNATIVE)
-            header = False
+        if nameIndex == -1:
+            nameIndex = getSimilar(row, OFN_NAME)
+            descriptionIndex = getSimilar(row, OFN_DESCRIPTION)
+            definitionIndex = getSimilar(row, OFN_DEFINITION)
+            sourceIndex = getSimilar(row, OFN_SOURCE)
+            subClassOfIndex = getSimilar(row, OFN_SUBCLASS)
+            equivalentIndex = getSimilar(row, OFN_EQUIVALENT)
+            iriIndex = getSimilar(row, OFN_IRI)
+            relatedSourceIndex = getSimilar(row, OFN_RELATED)
+            alternativeNameIndex = getSimilar(row, OFN_ALTERNATIVE)
+            get360Index = getSimilar(row, OFN_360_2023_GET)
+            share360Index = getSimilar(row, OFN_360_2023_SHARE)
+            content360Index = getSimilar(row, OFN_360_2023_CONTENT)
+            termClassIndex = getSimilar(row, OFN_SUBJECT_OR_OBJECT)
+            datatypeIndex = getSimilar(row, OFN_DATATYPE)
+            sharedInPPDFIndex = getSimilar(row, OFN_RPP_SHARED)
+            rppTypeIndex = getSimilar(row, OFN_RPP_TYPE)
+            rppPrivateTypeSourceIndex = getSimilar(row, OFN_RPP_PRIVATE_SOURCE)
+            continue
         else:
             if row[nameIndex] is None or row[termClassIndex] is None:
                 continue
@@ -206,12 +214,39 @@ def itSheetToOFN(sheet) -> List[Trope]:
             if row[alternativeNameIndex]:
                 term.alternateName += [(DEFAULT_LANGUAGE, x.strip())
                                        for x in row[alternativeNameIndex].split(MULTIPLE_VALUE_SEPARATOR)]
+            if row[get360Index]:
+                get360 = row[get360Index].strip().lower()
+                if OFN_360_2023_GET_BASE_REGISTRY.lower() in get360:
+                    term.getValueType = GetValueType.BASE_REGISTRY
+                elif OFN_360_2023_GET_OTHER_AGENDA.lower() in get360:
+                    term.getValueType = GetValueType.OTHER_AGENDA
+                elif OFN_360_2023_GET_OWN_AGENDA.lower() in get360:
+                    term.getValueType = GetValueType.OWN_AGENDA
+                elif OFN_360_2023_GET_OPERATING.lower() in get360:
+                    term.getValueType = GetValueType.OPERATING
+            if row[share360Index]:
+                share360 = row[get360Index].strip().lower()
+                if OFN_360_2023_SHARE_PUBLIC.lower() in share360:
+                    term.shareValueType.append(ShareValueType.PUBLIC)
+                elif OFN_360_2023_SHARE_ON_REQUEST.lower() in share360:
+                    term.shareValueType.append(ShareValueType.ON_REQUEST)
+                elif OFN_360_2023_SHARE_FOR_AGENDAS.lower() in share360:
+                    term.shareValueType.append(ShareValueType.FOR_AGENDAS)
+                elif OFN_360_2023_SHARE_PRIVATE.lower() in share360:
+                    term.shareValueType.append(ShareValueType.PRIVATE)
+            if row[content360Index]:
+                content360 = row[get360Index].strip().lower()
+                if OFN_360_2023_CONTENT_IDENTIFICATION.lower() in content360:
+                    term.contentValueType = ContentValueType.IDENTIFICATION
+                elif OFN_360_2023_CONTENT_RECORD.lower() in content360:
+                    term.contentValueType = ContentValueType.RECORD
+                elif OFN_360_2023_CONTENT_STATISTICAL.lower() in content360:
+                    term.contentValueType = ContentValueType.STATISTICAL
             tropes.append(term)
     return tropes
 
 
 def rlSheetToOFN(sheet) -> List[Relationship]:
-    header = True
     termClassSourceIndex = -1
     termClassTargetIndex = -1
     nameIndex = -1
@@ -229,25 +264,25 @@ def rlSheetToOFN(sheet) -> List[Relationship]:
     relationships = []
     for lst in sheet:
         row = [cell.value for cell in lst]
-        if header:
-            nameIndex = row.index(OFN_NAME)
-            descriptionIndex = row.index(OFN_DESCRIPTION)
-            definitionIndex = row.index(OFN_DEFINITION)
-            sourceIndex = row.index(OFN_SOURCE)
-            subClassOfIndex = row.index(OFN_SUBCLASS)
-            equivalentIndex = row.index(OFN_EQUIVALENT)
-            iriIndex = row.index(OFN_IRI)
+        if nameIndex == -1:
+            nameIndex = getSimilar(row, OFN_NAME)
+            descriptionIndex = getSimilar(row, OFN_DESCRIPTION)
+            definitionIndex = getSimilar(row, OFN_DEFINITION)
+            sourceIndex = getSimilar(row, OFN_SOURCE)
+            subClassOfIndex = getSimilar(row, OFN_SUBCLASS)
+            equivalentIndex = getSimilar(row, OFN_EQUIVALENT)
+            iriIndex = getSimilar(row, OFN_IRI)
             termClassIndices = [x for x, y in enumerate(
                 row) if y == OFN_SUBJECT_OR_OBJECT]
-            termClassSourceIndex = termClassIndices[0]
-            termClassTargetIndex = termClassIndices[1]
-            relatedSourceIndex = row.index(OFN_RELATED)
-            alternativeNameIndex = row.index(OFN_ALTERNATIVE)
-            sharedInPPDFIndex = row.index(OFN_RPP_SHARED)
-            rppTypeIndex = row.index(OFN_RPP_TYPE)
-            rppPrivateTypeSourceIndex = row.index(OFN_RPP_PRIVATE_SOURCE)
-
-            header = False
+            if len(termClassIndices) == 2:
+                termClassSourceIndex = termClassIndices[0]
+                termClassTargetIndex = termClassIndices[1]
+            relatedSourceIndex = getSimilar(row, OFN_RELATED)
+            alternativeNameIndex = getSimilar(row, OFN_ALTERNATIVE)
+            sharedInPPDFIndex = getSimilar(row, OFN_RPP_SHARED)
+            rppTypeIndex = getSimilar(row, OFN_RPP_TYPE)
+            rppPrivateTypeSourceIndex = getSimilar(row, OFN_RPP_PRIVATE_SOURCE)
+            continue
         else:
             if row[nameIndex] is None or row[termClassSourceIndex] is None or row[termClassTargetIndex] is None:
                 continue
