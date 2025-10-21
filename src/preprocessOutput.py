@@ -89,7 +89,6 @@ def preprocessVocabulary(vocabulary: Vocabulary) -> Vocabulary:
                 term.datatype = unquote(term.datatype)
             if term.target:
                 term.target = processLink(unquote(term.target), vocabulary)
-            term.datatype = ""
 
         if reportWarning:
             print(

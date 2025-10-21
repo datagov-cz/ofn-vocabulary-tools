@@ -5,15 +5,16 @@ from outputToRDF import convertToRDF
 from ofnBindings import *
 from outputUtil import testInputString
 import warnings
+from rdflib import XSD, RDFS
 
 inputLocation = sys.argv[1]
 outputLocation = sys.argv[2]
 propertyDefinitions = {}
 
 
-def getSimilar(termProperties, input):
+def getSimilar(termProperties, input, compare="n/a"):
     for x in list(termProperties.keys()):
-        if input.lower().strip() in x.lower():
+        if input.lower().strip() in x.lower() and x is not compare:
             if termProperties[x] is not None and testInputString(termProperties[x][0]):
                 return x
     return False
@@ -56,15 +57,17 @@ def getTermFromElement(element, term) -> Term:
             term.type = ClassType.OBJECT
         elif valueTextNormalized == OFN_TROPE_TYPE.lower():
             term = getTrope(term)
-    # Source
-    ofnSource = getSimilar(termProperties, OFN_SOURCE)
-    if ofnSource:
-        term.source = [termProperties[ofnSource][0]]
     # Related source
     ofnRelated = getSimilar(termProperties, OFN_RELATED)
     if ofnRelated:
         term.related += [x.strip() for x in termProperties[ofnRelated]
                          [0].split(MULTIPLE_VALUE_SEPARATOR)]
+    # Source
+    ofnSource = getSimilar(termProperties, OFN_SOURCE, ofnRelated)
+    if ofnSource and ofnRelated != ofnSource:
+        term.source += [x.strip() for x in termProperties[ofnSource]
+                        [0].split(MULTIPLE_VALUE_SEPARATOR)]
+
     # Alternative name
     ofnAlternate = getSimilar(termProperties, OFN_ALTERNATIVE)
     if ofnAlternate:
@@ -82,7 +85,33 @@ def getTermFromElement(element, term) -> Term:
                          [1]] = termProperties[ofnDescription][0]
     ofnDatatype = getSimilar(termProperties, OFN_DATATYPE)
     if ofnDatatype and isinstance(term, Trope):
-        term.datatype = termProperties[ofnDatatype][0]
+        datatype = termProperties[ofnDatatype][0].strip()
+        if datatype.startswith("http://www.w3.org/2001/XMLSchema#"):
+            term.datatype = datatype
+        elif datatype.startswith("xsd:"):
+            term.datatype = "http://www.w3.org/2001/XMLSchema#{}".format(
+                datatype[4:])
+        else:
+            datatype = datatype.lower()
+            if datatype == OFN_DATATYPE_BOOLEAN.lower():
+                datatype = XSD.boolean
+            elif datatype == OFN_DATATYPE_DATE.lower():
+                datatype = XSD.date
+            elif datatype == OFN_DATATYPE_TIME.lower():
+                datatype = XSD.time
+            elif datatype == OFN_DATATYPE_DATETIME.lower():
+                datatype = XSD.dateTimeStamp
+            elif datatype == OFN_DATATYPE_INTEGER.lower():
+                datatype = XSD.integer
+            elif datatype == OFN_DATATYPE_DECIMAL.lower():
+                datatype = XSD.double
+            elif datatype == OFN_DATATYPE_IRI.lower():
+                datatype = XSD.anyURI
+            elif datatype == OFN_DATATYPE_STRING.lower():
+                datatype = XSD.string
+            else:
+                datatype = RDFS.Literal
+            term.datatype = datatype
     # Equivalent
     ofnEquivalent = getSimilar(termProperties, OFN_EQUIVALENT)
     if ofnEquivalent:
@@ -195,7 +224,7 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
         if valueText is None:
             continue
         propertyType = propertyDefinitions[identifier]
-        vocabularyProperties[propertyType] = (valueText.lower(), valueLang)
+        vocabularyProperties[propertyType] = (valueText, valueLang)
 
     ofnLKOD = getSimilar(vocabularyProperties, OFN_LKOD)
     if ofnLKOD:

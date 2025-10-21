@@ -181,6 +181,9 @@ def itSheetToOFN(sheet) -> List[Trope]:
                 datatype = row[datatypeIndex].strip().lower()
                 if datatype.startswith("http://www.w3.org/2001/XMLSchema#"):
                     term.datatype = datatype
+                elif datatype.startswith("xsd:"):
+                    term.datatype = "http://www.w3.org/2001/XMLSchema#{}".format(
+                        datatype[4:])
                 elif datatype == OFN_DATATYPE_BOOLEAN.lower():
                     datatype = XSD.boolean
                 elif datatype == OFN_DATATYPE_DATE.lower():

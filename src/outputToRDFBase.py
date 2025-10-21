@@ -16,14 +16,19 @@ def processSource(input: str, termIRI: URIRef, graph: Graph, main: bool):
             eliPart.group())
         if main:
             graph.add((termIRI, DCTERMS.conformsTo, URIRef(eliSource)))
+            graph.add((termIRI, URIRef(
+                "https://slovník.gov.cz/generický/datový-slovník-ofn-slovníků/pojem/definující-ustanovení"), URIRef(eliSource)))
         else:
             graph.add((termIRI, DCTERMS.relation, URIRef(eliSource)))
+            graph.add((termIRI, URIRef(
+                "https://slovník.gov.cz/generický/datový-slovník-ofn-slovníků/pojem/související-ustanovení"), URIRef(eliSource)))
     else:
         bn = BNode()
         graph.add((bn, RDF.type, URIRef(
             "https://slovník.gov.cz/generický/digitální-objekty/pojem/digitální-objekt")))
         if rfc3987.match(input, rule="IRI"):
-            graph.add((bn, URIRef("http://schema.org/url"), URIRef(input)))
+            graph.add((bn, URIRef("http://schema.org/url"),
+                      URIRef(unquote(input))))
         else:
             graph.add((bn, DCTERMS.title, Literal(input)))
         if main:

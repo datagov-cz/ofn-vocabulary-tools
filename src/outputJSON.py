@@ -31,9 +31,9 @@ def processSource(input: str, outputTerm: dict, main: bool):
     else:
         do = {"typ": "Digitální objekt"}
         if rfc3987.match(input, rule="IRI"):
-            do["url"] = input
+            do["url"] = urllib.parse.unquote(input)
         else:
-            do["název"] = input
+            do["název"] = {"cs": input}
         if main:
             if "definující-nelegislativní-zdroj" not in outputTerm:
                 outputTerm["definující-nelegislativní-zdroj"] = []
@@ -46,8 +46,8 @@ def processSource(input: str, outputTerm: dict, main: bool):
 
 def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> json:
     output = {}
-    output["@context"] = "https://ofn.gov.cz/slovníky/draft/kontexty/slovníky.jsonld"
-    # output["@context"] = "https://ofn.gov.cz/slovníky/draft2/kompletní/kontext.jsonld"
+    # output["@context"] = "https://ofn.gov.cz/slovníky/draft/kontexty/slovníky.jsonld"
+    output["@context"] = "https://ofn.gov.cz/slovníky/draft2/kompletní/kontext.jsonld"
     output["iri"] = vocabulary.getIRI()
     vocTypes = ["Slovník", "Tezaurus"]
     if vocabulary.type == VocabularyType.CONCEPTUAL_MODEL:
@@ -62,7 +62,7 @@ def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> json:
         # iri
         outputTerm["iri"] = term.getIRI(vocabulary, DEFAULT_LANGUAGE)
         # typ
-        termTypes = ["Pojem"]
+        termTypes = ["Pojem", "Koncept"]
         termSubClassOf = [
             x for x in term.subClassOf if x and len(x) != 0 and x is not None]
         if isinstance(term, TermClass):
@@ -86,7 +86,7 @@ def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> json:
         elif isinstance(term, Trope):
             termTypes.append("Vlastnost")
             outputTerm["definiční-obor"] = term.target
-            outputTerm["obor-hodnot"] = term.datatype if term.datatype else RDFS.Literal
+            outputTerm["obor-hodnot"] = term.datatype
             if len(termSubClassOf) > 0:
                 outputTerm["nadřazená-vlastnost"] = termSubClassOf
         if term.rppType == RPPType.PRIVATE:
@@ -123,36 +123,36 @@ def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> json:
             outputTerm["ustanovení-dokládající-neveřejnost-údaje"] = [term.rppPrivateTypeSource]
         if term.getValueType is not None:
             if term.getValueType is GetValueType.BASE_REGISTRY:
-                outputTerm["způsob-získání-údaje"] = "https://data.dia.gov.cz/zdroj/číselníky/způsoby-získání-údajů/položky/základních-registrů"
+                outputTerm["způsob-získání-údaje"] = "způsoby-získání:základních-registrů"
             if term.getValueType is GetValueType.OTHER_AGENDA:
-                outputTerm["způsob-získání-údaje"] = "https://data.dia.gov.cz/zdroj/číselníky/způsoby-získání-údajů/položky/jiných-agend"
+                outputTerm["způsob-získání-údaje"] = "způsoby-získání:jiných-agend"
             if term.getValueType is GetValueType.OWN_AGENDA:
-                outputTerm["způsob-získání-údaje"] = "https://data.dia.gov.cz/zdroj/číselníky/způsoby-získání-údajů/položky/vlastní"
+                outputTerm["způsob-získání-údaje"] = "způsoby-získání:vlastní"
             if term.getValueType is GetValueType.OPERATING:
-                outputTerm["způsob-získání-údaje"] = "https://data.dia.gov.cz/zdroj/číselníky/způsoby-získání-údajů/položky/provozní"
+                outputTerm["způsob-získání-údaje"] = "způsoby-získání:provozní"
         if len(term.shareValueType) > 0:
             outputTermSVT = []
             for svt in term.shareValueType:
                 if svt is ShareValueType.PUBLIC:
                     outputTermSVT.append(
-                        "https://data.dia.gov.cz/zdroj/číselníky/způsoby-sdílení-údajů/položky/veřejně-přístupné")
+                        "způsoby-sdílení:veřejně-přístupné")
                 if svt is ShareValueType.ON_REQUEST:
                     outputTermSVT.append(
-                        "https://data.dia.gov.cz/zdroj/číselníky/způsoby-sdílení-údajů/položky/poskytované-na-žádost")
+                        "způsoby-sdílení:poskytované-na-žádost")
                 if svt is ShareValueType.FOR_AGENDAS:
                     outputTermSVT.append(
-                        "https://data.dia.gov.cz/zdroj/číselníky/způsoby-sdílení-údajů/položky/zpřístupňované-pro-výkon-agendy")
+                        "způsoby-sdílení:zpřístupňované-pro-výkon-agendy")
                 if svt is ShareValueType.PRIVATE:
                     outputTermSVT.append(
-                        "https://data.dia.gov.cz/zdroj/číselníky/způsoby-sdílení-údajů/položky/nesdílené")
+                        "způsoby-sdílení:nesdílené")
             outputTerm["způsoby-sdílení-údaje"] = outputTermSVT
         if term.contentValueType is not None:
-            if term.getValueType is ContentValueType.IDENTIFICATION:
-                outputTerm["typ-obsahu-údaje"] = "https://data.dia.gov.cz/zdroj/číselníky/typy-obsahu-údajů/položky/identifikační"
-            if term.getValueType is ContentValueType.RECORD:
-                outputTerm["typ-obsahu-údaje"] = "https://data.dia.gov.cz/zdroj/číselníky/typy-obsahu-údajů/položky/evidenční"
-            if term.getValueType is ContentValueType.STATISTICAL:
-                outputTerm["typ-obsahu-údaje"] = "https://data.dia.gov.cz/zdroj/číselníky/typy-obsahu-údajů/položky/statistické"
+            if term.contentValueType is ContentValueType.IDENTIFICATION:
+                outputTerm["typ-obsahu-údaje"] = "typy-obsahu:identifikační"
+            if term.contentValueType is ContentValueType.RECORD:
+                outputTerm["typ-obsahu-údaje"] = "typy-obsahu:evidenční"
+            if term.contentValueType is ContentValueType.STATISTICAL:
+                outputTerm["typ-obsahu-údaje"] = "typy-obsahu:statistické"
         terms.append(outputTerm)
     output["pojmy"] = terms
     return output
