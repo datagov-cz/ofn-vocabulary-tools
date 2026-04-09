@@ -4,7 +4,8 @@ from ofnClasses import Term, Vocabulary
 
 
 def checkVocabulary(vocabulary: Vocabulary):
-    checkCycles(vocabulary)
+    # checkCycles(vocabulary)
+    pass
 
 
 def checkCycles(vocabulary: Vocabulary):

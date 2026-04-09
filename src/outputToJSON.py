@@ -2,9 +2,15 @@ import json
 from ofnClasses import *
 import urllib.request
 import urllib.parse
-from rdflib import RDFS
 import re
 import rfc3987
+from jsonschema import validate
+
+
+def validateJSON(voc: object):
+    with open("schéma.json", "r", encoding="utf-8") as schemaFile:
+        schema = json.load(schemaFile)
+        validate(voc, schema=schema)
 
 
 def getReference(uri: str) -> object:
@@ -44,10 +50,10 @@ def processSource(input: str, outputTerm: dict, main: bool):
             outputTerm["související-nelegislativní-zdroj"].append(do)
 
 
-def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> json:
+def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> object:
     output = {}
+    output["@context"] = "https://ofn.gov.cz/slovníky/2026-02-26/kompletní/kontext.jsonld"
     # output["@context"] = "https://ofn.gov.cz/slovníky/draft/kontexty/slovníky.jsonld"
-    output["@context"] = "https://ofn.gov.cz/slovníky/draft2/kompletní/kontext.jsonld"
     output["iri"] = vocabulary.getIRI()
     vocTypes = ["Slovník", "Tezaurus"]
     if vocabulary.type == VocabularyType.CONCEPTUAL_MODEL:
@@ -57,10 +63,20 @@ def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> json:
     if DEFAULT_LANGUAGE in vocabulary.description and vocabulary.description[DEFAULT_LANGUAGE]:
         output["popis"] = vocabulary.description
     terms = []
-    for term in vocabulary.terms:
+    prevTerm = ""
+    for term in sorted(vocabulary.terms,
+                       key=lambda x: x._iri):
         outputTerm = {}
         # iri
         outputTerm["iri"] = term.getIRI(vocabulary, DEFAULT_LANGUAGE)
+        if prevTerm == outputTerm["iri"]:
+            print("Pojem {} je duplicitní!".format(
+                term.name[DEFAULT_LANGUAGE]))
+        if not outputTerm["iri"].startswith(output["iri"]):
+            continue
+        if term.name[DEFAULT_LANGUAGE] in ["Objekt", "Subjekt", "Vlastnost"]:
+            continue
+        prevTerm = outputTerm["iri"]
         # typ
         termTypes = ["Pojem", "Koncept"]
         termSubClassOf = [
@@ -91,6 +107,9 @@ def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> json:
                 outputTerm["nadřazená-vlastnost"] = termSubClassOf
         if term.rppType == RPPType.PRIVATE:
             termTypes.append("Neveřejný údaj")
+            if isinstance(term, Trope) and not term.rppPrivateTypeSource:
+                print(
+                    "Neveřejný údaj {} nemá ustanovení dokládající neveřejnost.".format(prevTerm))
         elif term.rppType == RPPType.PUBLIC:
             termTypes.append("Veřejný údaj")
         outputTerm["typ"] = termTypes
@@ -117,7 +136,7 @@ def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> json:
         if term.source:
             for x in [x for x in term.source if x and len(x) != 0 and x is not None]:
                 processSource(x, outputTerm, True)
-        if term.sharedInPPDF:
+        if term.sharedInPPDF is not None:
             outputTerm["je-sdílen-v-ppdf"] = term.sharedInPPDF
         if term.rppPrivateTypeSource:
             outputTerm["ustanovení-dokládající-neveřejnost-údaje"] = [term.rppPrivateTypeSource]
@@ -154,5 +173,12 @@ def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> json:
             if term.contentValueType is ContentValueType.STATISTICAL:
                 outputTerm["typ-obsahu-údaje"] = "typy-obsahu:statistické"
         terms.append(outputTerm)
+    termIRIs = []
+    for x in terms:
+        if x["iri"] in termIRIs:
+            raise Exception
+        else:
+            termIRIs.append(x["iri"])
     output["pojmy"] = terms
+    validateJSON(output)
     return output

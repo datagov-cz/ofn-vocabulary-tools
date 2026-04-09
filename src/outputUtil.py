@@ -4,7 +4,7 @@ from rdflib import Graph, Literal, URIRef
 from os.path import splitext
 
 from ofnClasses import Vocabulary
-from outputJSON import getJSONLDfromVocabulary
+from outputToJSON import getJSONLDfromVocabulary
 
 
 def getRDFoutput(graph: Graph, vocabulary: Vocabulary, outputLocation: str):
@@ -28,8 +28,8 @@ def testInputString(string: str | None) -> bool:
 def getURIRefOrLiteral(string: str | None):
     if not testInputString(string):
         raise Exception("")
-    result = URIRef(str(string))
     try:
+        result = URIRef(str(string))
         result.n3()
         return result
     except Exception:

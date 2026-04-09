@@ -70,7 +70,7 @@ def soSheetToOFN(sheet) -> List[TermClass]:
             if row[nameIndex] is None:
                 warnings.warn("warn")
                 continue
-            term.name = {DEFAULT_LANGUAGE: row[nameIndex]}
+            term.name = {DEFAULT_LANGUAGE: row[nameIndex].strip()}
             if (row[typeIndex]):
                 if row[typeIndex].strip().lower() == OFN_SUBJECT.lower():
                     term.type = ClassType.SUBJECT
@@ -264,6 +264,9 @@ def rlSheetToOFN(sheet) -> List[Relationship]:
     sharedInPPDFIndex = -1
     rppTypeIndex = -1
     rppPrivateTypeSourceIndex = -1
+    get360Index = -1
+    share360Index = -1
+    content360Index = -1
     relationships = []
     for lst in sheet:
         row = [cell.value for cell in lst]
@@ -285,6 +288,9 @@ def rlSheetToOFN(sheet) -> List[Relationship]:
             sharedInPPDFIndex = getSimilar(row, OFN_RPP_SHARED)
             rppTypeIndex = getSimilar(row, OFN_RPP_TYPE)
             rppPrivateTypeSourceIndex = getSimilar(row, OFN_RPP_PRIVATE_SOURCE)
+            get360Index = getSimilar(row, OFN_360_2023_GET)
+            share360Index = getSimilar(row, OFN_360_2023_SHARE)
+            content360Index = getSimilar(row, OFN_360_2023_CONTENT)
             continue
         else:
             if row[nameIndex] is None or row[termClassSourceIndex] is None or row[termClassTargetIndex] is None:
@@ -332,6 +338,34 @@ def rlSheetToOFN(sheet) -> List[Relationship]:
             if row[alternativeNameIndex]:
                 term.alternateName += [(DEFAULT_LANGUAGE, x.strip())
                                        for x in row[alternativeNameIndex].split(MULTIPLE_VALUE_SEPARATOR)]
+            if row[get360Index]:
+                get360 = row[get360Index].strip().lower()
+                if OFN_360_2023_GET_BASE_REGISTRY.lower() in get360:
+                    term.getValueType = GetValueType.BASE_REGISTRY
+                elif OFN_360_2023_GET_OTHER_AGENDA.lower() in get360:
+                    term.getValueType = GetValueType.OTHER_AGENDA
+                elif OFN_360_2023_GET_OWN_AGENDA.lower() in get360:
+                    term.getValueType = GetValueType.OWN_AGENDA
+                elif OFN_360_2023_GET_OPERATING.lower() in get360:
+                    term.getValueType = GetValueType.OPERATING
+            if row[share360Index]:
+                share360 = row[get360Index].strip().lower()
+                if OFN_360_2023_SHARE_PUBLIC.lower() in share360:
+                    term.shareValueType.append(ShareValueType.PUBLIC)
+                elif OFN_360_2023_SHARE_ON_REQUEST.lower() in share360:
+                    term.shareValueType.append(ShareValueType.ON_REQUEST)
+                elif OFN_360_2023_SHARE_FOR_AGENDAS.lower() in share360:
+                    term.shareValueType.append(ShareValueType.FOR_AGENDAS)
+                elif OFN_360_2023_SHARE_PRIVATE.lower() in share360:
+                    term.shareValueType.append(ShareValueType.PRIVATE)
+            if row[content360Index]:
+                content360 = row[get360Index].strip().lower()
+                if OFN_360_2023_CONTENT_IDENTIFICATION.lower() in content360:
+                    term.contentValueType = ContentValueType.IDENTIFICATION
+                elif OFN_360_2023_CONTENT_RECORD.lower() in content360:
+                    term.contentValueType = ContentValueType.RECORD
+                elif OFN_360_2023_CONTENT_STATISTICAL.lower() in content360:
+                    term.contentValueType = ContentValueType.STATISTICAL
             relationships.append(term)
     return relationships
 
@@ -342,13 +376,13 @@ def vcSheetToOFN(sheet):
     lkod = "https://slovník.gov.cz/"
     for lst in sheet:
         row = [cell.value for cell in lst]
-        if name is None:
+        if not name:
             name = row[1]
             continue
-        elif desc is None:
+        elif not desc:
             desc = row[1]
             continue
-        elif lkod is None:
+        elif not lkod:
             lkod = row[1]
             continue
         else:

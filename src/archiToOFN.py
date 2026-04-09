@@ -133,7 +133,8 @@ def getTermFromElement(element, term) -> Term:
         elif termProperties[ofnRPPtype][0].strip().lower() == NO.lower():
             term.rppType = RPPType.PRIVATE
         else:
-            warnings.warn("warn")
+            warnings.warn("Pojem {} má nesprávně vyplněn neveřejnost:{}".format(
+                term.name[DEFAULT_LANGUAGE], termProperties[ofnRPPtype][0]))
     ofnShared = getSimilar(termProperties, OFN_RPP_SHARED)
     if ofnShared and (
             isinstance(term, Trope) or isinstance(term, Relationship)):
@@ -142,7 +143,8 @@ def getTermFromElement(element, term) -> Term:
         elif termProperties[ofnShared][0].strip().lower() == NO.lower():
             term.sharedInPPDF = False
         else:
-            warnings.warn("warn")
+            warnings.warn("Pojem {} má nesprávně vyplněn ppdf:{}".format(
+                term.name[DEFAULT_LANGUAGE], termProperties[ofnShared][0]))
     ofnPrivate = getSimilar(termProperties, OFN_RPP_PRIVATE_SOURCE)
     if ofnPrivate and (
             isinstance(term, Trope) or isinstance(term, Relationship)):
@@ -150,7 +152,7 @@ def getTermFromElement(element, term) -> Term:
 
     # 360
     ofn360get = getSimilar(termProperties, OFN_360_2023_GET)
-    if ofn360get and isinstance(term, Trope):
+    if ofn360get and (isinstance(term, Trope) or isinstance(term, Relationship)):
         get360 = termProperties[ofn360get][0].strip().lower()
         if OFN_360_2023_GET_BASE_REGISTRY.lower() in get360:
             term.getValueType = GetValueType.BASE_REGISTRY
@@ -161,7 +163,7 @@ def getTermFromElement(element, term) -> Term:
         elif OFN_360_2023_GET_OPERATING.lower() in get360:
             term.getValueType = GetValueType.OPERATING
     ofn360share = getSimilar(termProperties, OFN_360_2023_SHARE)
-    if ofn360share and isinstance(term, Trope):
+    if ofn360share and (isinstance(term, Trope) or isinstance(term, Relationship)):
         share360 = termProperties[ofn360share][0].strip().lower()
         if OFN_360_2023_SHARE_PUBLIC.lower() in share360:
             term.shareValueType.append(ShareValueType.PUBLIC)
@@ -172,7 +174,7 @@ def getTermFromElement(element, term) -> Term:
         elif OFN_360_2023_SHARE_PRIVATE.lower() in share360:
             term.shareValueType.append(ShareValueType.PRIVATE)
     ofn360content = getSimilar(termProperties, OFN_360_2023_CONTENT)
-    if ofn360content and isinstance(term, Trope):
+    if ofn360content and (isinstance(term, Trope) or isinstance(term, Relationship)):
         content360 = termProperties[ofn360content][0].strip().lower()
         if OFN_360_2023_CONTENT_IDENTIFICATION.lower() in content360:
             term.contentValueType = ContentValueType.IDENTIFICATION
@@ -226,9 +228,9 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
         propertyType = propertyDefinitions[identifier]
         vocabularyProperties[propertyType] = (valueText, valueLang)
 
-    ofnLKOD = getSimilar(vocabularyProperties, OFN_LKOD)
-    if ofnLKOD:
-        vocabulary.lkod = vocabularyProperties[ofnLKOD][0]
+    # ofnLKOD = getSimilar(vocabularyProperties, OFN_LKOD)
+    # if ofnLKOD:
+    #     vocabulary.lkod = vocabularyProperties[ofnLKOD][0]
 
     ofnDescription = getSimilar(vocabularyProperties, OFN_DESCRIPTION)
     if ofnDescription:
@@ -252,6 +254,7 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
             if domainTerm is not None and rangeTerm is not None:
                 break
         if domainTerm is None or rangeTerm is None:
+            warnings.warn("Přeskakuji nekompletní vztah {}".format(identifier))
             continue
         relationshipType = relationship.attrib['{http://www.w3.org/2001/XMLSchema-instance}type']
         if relationshipType == "Specialization":
@@ -262,7 +265,8 @@ with open(inputLocation, "r", encoding="utf-8") as inputFile:
         elif relationshipType == "Association":
             isDirected = relationship.attrib.get("isDirected", False)
             if not isDirected or isDirected != "true":
-                warnings.warn("")
+                warnings.warn(
+                    "Přeskakuji non-directed vztah {}".format(identifier))
                 continue
             term = getTermFromElement(relationship, Relationship(domainTerm.getIRI(
                 vocabulary, DEFAULT_LANGUAGE), rangeTerm.getIRI(vocabulary, DEFAULT_LANGUAGE)))

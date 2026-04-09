@@ -48,6 +48,7 @@ def sanitizeString(string: str) -> str:
     return result
 
 
+
 class Resource:
     def __init__(self) -> None:
         self.id: str = ""
@@ -68,11 +69,11 @@ class Vocabulary(Resource):
 
     def getIRI(self, defaultLanguage: str = DEFAULT_LANGUAGE) -> str:
         if self._iri == "":
-            namespace = "https://slovník.gov.cz" if self.lkod == "" else self.lkod
+            namespace = "https://slovník.gov.cz" if not self.lkod else self.lkod
             namespace = re.sub("/$", "", namespace)
             while namespace.endswith("/"):
                 namespace = namespace[:-1]
-            self._iri = "{}/{}".format("https://slovník.gov.cz",
+            self._iri = "{}/{}".format(namespace,
                                        sanitizeString(self.name[defaultLanguage].strip().lower()))
         return self._iri
 

@@ -3,6 +3,7 @@ from ofnClasses import Relationship, TermClass, Trope, Vocabulary
 import re
 from urllib.parse import unquote
 import rfc3987
+from rdflib import RDFS
 
 reportWarning = False
 
@@ -87,6 +88,8 @@ def preprocessVocabulary(vocabulary: Vocabulary) -> Vocabulary:
         if isinstance(term, Trope):
             if term.datatype:
                 term.datatype = unquote(term.datatype)
+            else:
+                term.datatype = RDFS.Literal
             if term.target:
                 term.target = processLink(unquote(term.target), vocabulary)
 
@@ -94,4 +97,5 @@ def preprocessVocabulary(vocabulary: Vocabulary) -> Vocabulary:
             print(
                 "------\tProblémy výše byly nalezeny u pojmu {}.".format(term.name[DEFAULT_LANGUAGE]))
             reportWarning = False
+
     return vocabulary

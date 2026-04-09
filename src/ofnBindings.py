@@ -31,7 +31,7 @@ OFN_RPP_AIS = "Agendový informační systém"
 OFN_RPP_AGENDA = "Agenda"
 OFN_RPP_TYPE = "Je pojem veřejný?"
 OFN_RPP_SHARED = "Je pojem sdílen v PPDF?"
-OFN_RPP_PRIVATE_SOURCE = "Ustanovení dokládající neveřejnost pojmu"
+OFN_RPP_PRIVATE_SOURCE = "Ustanovení dokládající neveřejnost"
 
 OFN_360_2023_GET = "Způsob získání údaje"
 OFN_360_2023_GET_BASE_REGISTRY = "Základních registrů"

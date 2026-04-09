@@ -13,3 +13,5 @@ __pycache__
 *.archimate*
 .idea
 test*
+bodge*
+schéma.json
