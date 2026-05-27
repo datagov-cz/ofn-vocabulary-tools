@@ -19,8 +19,8 @@ def getReference(uri: str) -> object:
 
 
 def processSource(input: str, outputTerm: dict, main: bool):
-    eliPart = re.search("eli\/cz\/sb\/.*$", input)
-    control = re.search("^https\:\/\/.*\/eli\/cz\/sb\/.*$", input)
+    eliPart = re.search("eli/cz/sb/.*$", input)
+    control = re.search("^https://.*/eli/cz/sb/.*$", input)
     if control and eliPart:
         eliSource = "https://opendata.eselpoint.cz/esel-esb/{}".format(
             eliPart.group())
