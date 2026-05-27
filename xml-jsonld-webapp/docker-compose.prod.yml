@@ -1,0 +1,10 @@
+services:
+  xml-jsonld-webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    ports:
+      - "5000:5000"
+    environment:
+      JSON_SCHEMA_URL: ${JSON_SCHEMA_URL:-}
+    restart: unless-stopped

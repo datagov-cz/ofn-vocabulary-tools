@@ -1,0 +1,12 @@
+services:
+  xml-jsonld-webapp-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5000:5000"
+    environment:
+      JSON_SCHEMA_URL: ${JSON_SCHEMA_URL:-}
+      FLASK_DEBUG: "1"
+    volumes:
+      - .:/app
