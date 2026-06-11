@@ -2,7 +2,7 @@
 
 This is a small standalone Flask app. It serves one page with an XML upload form and returns a generated JSON-LD file for download.
 
-The XML conversion is currently only a skeleton. It parses the XML, reads the root element name, and emits a minimal JSON-LD document. The real XML parsing can be added later in `parse_xml()` in `xml_processing.py`, and the real JSON-LD mapping can be added in `create_jsonld()` in `jsonld_creation.py`.
+The XML conversion is currently only a skeleton. It parses the XML, reads the root element name, and emits a minimal JSON-LD document. The real XML parsing can be added later in `parse_xml()` in `xml_processing.py`, and the real JSON-LD mapping can be added in `create_jsonld_files()` in `jsonld_creation.py`.
 
 ## Project Structure
 
@@ -10,9 +10,11 @@ The XML conversion is currently only a skeleton. It parses the XML, reads the ro
 - `routes.py` connects the upload form to the conversion flow.
 - `file_upload.py` loads and checks the uploaded XML file.
 - `xml_processing.py` parses XML and contains the marked setup area for custom XML parsing.
-- `jsonld_creation.py` creates JSON-LD and contains the marked setup area for custom JSON-LD mapping.
+- `jsonld_creation.py` creates one or more JSON-LD files and contains the marked setup area for custom JSON-LD mapping.
 - `jsonld_validation.py` validates generated JSON-LD against `JSON_SCHEMA_URL` when configured.
-- `jsonld_download.py` returns the generated JSON-LD as a file download.
+- `jsonld_download.py` returns one generated JSON-LD file directly, or multiple JSON-LD files as a ZIP download.
+- `texts.json` contains the user-facing front-end text and displayed error messages.
+- `texts.py` loads text from `texts.json`.
 - `templates/index.html` and `static/styles.css` contain the front end.
 
 ## Setup

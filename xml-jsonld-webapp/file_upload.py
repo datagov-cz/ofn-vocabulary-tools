@@ -1,6 +1,12 @@
 from dataclasses import dataclass
 
 
+class UploadError(ValueError):
+    def __init__(self, text_key):
+        super().__init__(text_key)
+        self.text_key = text_key
+
+
 @dataclass(frozen=True)
 class UploadedXml:
     filename: str
@@ -9,10 +15,10 @@ class UploadedXml:
 
 def read_xml_upload(uploaded_file):
     if uploaded_file is None or uploaded_file.filename == "":
-        raise ValueError("Choose an XML file to upload.")
+        raise UploadError("missing_file")
 
     if not uploaded_file.filename.lower().endswith(".xml"):
-        raise ValueError("Only .xml files are accepted.")
+        raise UploadError("invalid_file_type")
 
     return UploadedXml(
         filename=uploaded_file.filename,

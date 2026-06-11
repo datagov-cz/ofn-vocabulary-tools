@@ -176,7 +176,7 @@ def getJSONLDfromVocabulary(vocabulary: Vocabulary) -> object:
     termIRIs = []
     for x in terms:
         if x["iri"] in termIRIs:
-            raise Exception
+            raise Exception("Existují pojmy se stejnými IRI")
         else:
             termIRIs.append(x["iri"])
     output["pojmy"] = terms

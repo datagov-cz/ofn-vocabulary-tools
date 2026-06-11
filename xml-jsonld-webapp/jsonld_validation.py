@@ -22,3 +22,8 @@ def validate_jsonld(document):
         return
 
     validate(instance=document, schema=schema)
+
+
+def validate_jsonld_files(jsonld_files):
+    for jsonld_file in jsonld_files:
+        validate_jsonld(jsonld_file.document)

@@ -3,18 +3,18 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>XML to JSON-LD</title>
+    <title>{{ texts.page.title }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   </head>
   <body>
     <main>
       <section class="panel">
-        <h1>XML to JSON-LD</h1>
-        <p>Upload an XML file. The app will convert it to a basic JSON-LD skeleton and return it as a download.</p>
+        <h1>{{ texts.page.heading }}</h1>
+        <p>{{ texts.page.description }}</p>
         <form method="post" enctype="multipart/form-data">
-          <label for="xml_file">XML file</label>
+          <label for="xml_file">{{ texts.form.file_label }}</label>
           <input id="xml_file" name="xml_file" type="file" accept=".xml,application/xml,text/xml" required>
-          <button type="submit">Convert and download</button>
+          <button type="submit">{{ texts.form.submit_button }}</button>
         </form>
         {% if error %}
           <div class="error">{{ error }}</div>

@@ -1,0 +1,18 @@
+{
+  "page": {
+    "title": "XML to JSON-LD",
+    "heading": "XML to JSON-LD",
+    "description": "Upload an XML file. The app will convert it to a basic JSON-LD skeleton and return it as a download."
+  },
+  "form": {
+    "file_label": "XML file",
+    "submit_button": "Convert and download"
+  },
+  "errors": {
+    "missing_file": "Choose an XML file to upload.",
+    "invalid_file_type": "Only .xml files are accepted.",
+    "invalid_xml": "Invalid XML: {details}",
+    "schema_load_failed": "Could not load JSON schema: {details}",
+    "schema_validation_failed": "Generated JSON-LD failed schema validation: {details}"
+  }
+}
