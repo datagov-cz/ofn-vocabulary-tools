@@ -21,6 +21,16 @@ PN_LOCAL_3 = re.compile("({})|:|({})".format(
     PN_CHARS.pattern, PLX.pattern))
 PN_LOCAL = re.compile("({})(({})*({}))?".format(PN_LOCAL_1.pattern,
                                                 PN_LOCAL_2.pattern, PN_LOCAL_3.pattern), re.U)
+HTTPS_REGEX = r"^https://.*$"
+FORMAT_REGEX = r"^formáty:.*$"
+MEDIA_TYPE_REGEX = r"^mediaTypes:.*$"
+PROVIDER_REGEX = r"^ovm:[^/]+$"
+THEME_REGEX = r"^témata:.*$"
+FREQUENCY_REGEX = r"^frekvence:.*$"
+EUROVOC_REGEX = r"^euroVoc:.*$"
+ISVS_REGEX = r"^isvs:[^/]+$"
+DATE_REGEX = r"^\d{4}-\d{2}-\d{2}$"
+EMAIL_REGEX = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
 
 
 def sanitizeString(string: str) -> str:
@@ -61,10 +71,67 @@ def createDatasetIRI(name: str) -> str:
 def addProperty(key: str, value, element: ArchimateElement | ArchimateRelationship, property=None) -> dict:
     if not property:
         property = key
-    if property in element.resolved_properties:
+    if getProperty(property) in element.resolved_properties:
         return {key: value}
     else:
         return {}
+
+
+def regexWarning(element: ArchimateElement | ArchimateRelationship, property: str, value, regex: str):
+    warnings.warn(
+        "Skipping property {} of element ID {} because value {!r} doesn't satisfy regex {}".format(
+            property,
+            element.identifier,
+            value,
+            regex,
+        )
+    )
+
+
+def regexFilterValue(value, regex: str, element: ArchimateElement | ArchimateRelationship, property: str):
+    if isinstance(value, str):
+        if re.fullmatch(regex, value):
+            return value
+        regexWarning(element, property, value, regex)
+        return None
+
+    if isinstance(value, list):
+        filtered = [
+            item
+            for item in (
+                regexFilterValue(item, regex, element, property)
+                for item in value
+            )
+            if item is not None
+        ]
+        return filtered if filtered else None
+
+    if isinstance(value, dict):
+        filtered = {
+            key: filtered_value
+            for key, filtered_value in (
+                (key, regexFilterValue(item, regex, element, property))
+                for key, item in value.items()
+            )
+            if filtered_value is not None
+        }
+        return filtered if filtered else None
+
+    regexWarning(element, property, value, regex)
+    return None
+
+
+def addRegexProperty(key: str, value, regex: str, element: ArchimateElement | ArchimateRelationship, property=None) -> dict:
+    if not property:
+        property = key
+    if getProperty(property) not in element.resolved_properties:
+        return {}
+
+    filtered_value = regexFilterValue(value, regex, element, property)
+    if filtered_value is None:
+        return {}
+
+    return {key: filtered_value}
 
 
 def addPropertyHelper(input: str | list[str] | None):
@@ -77,9 +144,9 @@ def addPropertyHelper(input: str | list[str] | None):
 
 def splitProperty(input: str | list[str] | None):
     if type(input) is str:
-        return input.split(";")
+        return [item.strip() for item in input.split(";") if item.strip()]
     if type(input) is list:
-        return input
+        return [item.strip() for item in input if item.strip()]
     return None
 
 
@@ -87,19 +154,23 @@ def getProperty(property: str) -> str:
     return property.replace("_", " ")
 
 
+def readProperty(element: ArchimateElement | ArchimateRelationship, property: str):
+    return element.resolved_properties.get(getProperty(property))
+
+
 def getRelatedDistributionElements(parsed_xml: ParsedXml, dataset_element: ArchimateElement) -> list[ArchimateElement]:
     model = parsed_xml.model
     if not model or not dataset_element.identifier:
         return []
 
-    if not containsCompare(dataset_element.resolved_properties.get(TYP), "datová sada"):
+    if not containsCompare(readProperty(dataset_element, TYP), "datová sada"):
         return []
 
     distribution_by_id = {
         element.identifier: element
         for element in model.elements
         if element.identifier
-        and containsCompare(element.resolved_properties.get(TYP), "distribuce")
+        and containsCompare(readProperty(element, TYP), "distribuce")
     }
     related_distribution_ids = set()
 
@@ -121,15 +192,15 @@ def getRelatedElementsByAssociation(parsed_xml: ParsedXml, dataset_element: Arch
     if not model or not dataset_element.identifier:
         return []
 
-    if not containsCompare(dataset_element.resolved_properties.get(TYP), "datová sada"):
+    if not containsCompare(readProperty(dataset_element, TYP), "datová sada"):
         return []
 
-    requested_types = ["subjekt práva", "objekt práva"]
+    requested_types = ["typ subjektu", "typ objektu"]
     related_element_by_id = {
         element.identifier: element
         for element in model.elements
         if element.identifier
-        and any(containsCompare(element.resolved_properties.get(TYP), requested_type) for requested_type in requested_types)
+        and any(containsCompare(readProperty(element, TYP), requested_type) for requested_type in requested_types)
     }
     related_element_ids = set()
 
@@ -151,7 +222,7 @@ def getRelatedElementsByAssociation(parsed_xml: ParsedXml, dataset_element: Arch
 def getIRIofTerm(element: ArchimateElement) -> str:
     ret = ""
     if ret:
-        ret = element.resolved_properties.get(IDENTIFIKATOR)
+        ret = readProperty(element, IDENTIFIKATOR)
         if isinstance(ret, list):
             ret = ret[0]
         if isinstance(ret, str):
@@ -189,77 +260,125 @@ def create_jsonld_files(parsed_xml: ParsedXml) -> list[JsonLdFile]:
             elif len(nameCs) > 1:
                 warnings.warn(
                     "Warning: element ID {} has multiple Czech names, there should be only one Czech name. The first one found will be used.".format(dataset.identifier))
-            if containsCompare(dataset.resolved_properties[TYP], "datová sada"):
+            if containsCompare(readProperty(dataset, TYP), "datová sada"):
                 distributions = getRelatedDistributionElements(
                     parsed_xml, dataset)
                 distributionJsonLDcontents = []
                 relatedTerms = getRelatedElementsByAssociation(
                     parsed_xml, dataset)
                 for i, distribution in enumerate(distributions):
-                    distributionJsonLDcontents.append({
-                        IRI: createDatasetIRI(nameCs[0].value) + "/distribuce/{}".format(i),
-                        TYP: ["Datové rozhraní", "Distribuce"],
-                        NAZEV: {x.language: x.value for x in distribution.names},
-                        **addProperty(PRISTUPOVE_URL, addPropertyHelper(distribution.resolved_properties.get(PRISTUPOVE_URL)), distribution),
-                        **addProperty(PRAVNI_PREDPIS, splitProperty(distribution.resolved_properties.get(PRAVNI_PREDPIS)), distribution),
-                        **addProperty(PODMINKY_UZITI, {
-                            IRI: createDatasetIRI(nameCs[0].value) + "/distribuce/{}/specifikace-podmínek-užití".format(i),
-                            TYP: ["Specifikace podmínek užití"],
-                            **addProperty(AUTORSKE_DILO, addPropertyHelper(distribution.resolved_properties.get(AUTORSKE_DILO)), distribution),
-                            **addProperty(AUTOR, {CS: addPropertyHelper(distribution.resolved_properties.get(AUTOR))}, distribution),
-                            **addProperty(DATABAZE_JAKO_AUTORSKE_DILO, addPropertyHelper(distribution.resolved_properties.get(DATABAZE_JAKO_AUTORSKE_DILO)), distribution),
-                            **addProperty(AUTOR_DATABAZE, {CS: addPropertyHelper(distribution.resolved_properties.get(AUTOR_DATABAZE))}, distribution),
-                            **addProperty(DATABAZE_CHRANENA_ZVLASTNIMI_PRAVY, addPropertyHelper(distribution.resolved_properties.get(DATABAZE_CHRANENA_ZVLASTNIMI_PRAVY)), distribution),
-                            **addProperty(OSOBNI_UDAJE, addPropertyHelper(distribution.resolved_properties.get(OSOBNI_UDAJE)), distribution),
-                        }, distribution),
-                        # **addProperty(SDILI_UDAJ, {CS: addPropertyHelper(distribution.resolved_properties.get(SDILI_UDAJ))}, distribution),
-                        **addProperty(PRISTUPOVA_SLUZBA, {
-                            IRI: createDatasetIRI(nameCs[0].value) + "/distribuce/{}/přístupová-služba".format(i),
-                            TYP: ["Datová služba"],
+                    usageTerms = {
+                        IRI: createDatasetIRI(nameCs[0].value) + "/distribuce/{}/specifikace-podmínek-užití".format(i),
+                        TYP: ["Specifikace podmínek užití"],
+                        # IRI. Satisfies regex ^https://.*$
+                        **addRegexProperty(AUTORSKE_DILO, addPropertyHelper(readProperty(distribution, AUTORSKE_DILO)), HTTPS_REGEX, distribution),
+                        # Czech string.
+                        **addProperty(AUTOR, {CS: addPropertyHelper(readProperty(distribution, AUTOR))}, distribution),
+                        # IRI. Satisfies regex ^https://.*$
+                        **addRegexProperty(DATABAZE_JAKO_AUTORSKE_DILO, addPropertyHelper(readProperty(distribution, DATABAZE_JAKO_AUTORSKE_DILO)), HTTPS_REGEX, distribution),
+                        # Czech string.
+                        **addProperty(AUTOR_DATABAZE, {CS: addPropertyHelper(readProperty(distribution, AUTOR_DATABAZE))}, distribution),
+                        # IRI. Satisfies regex ^https://.*$
+                        **addRegexProperty(DATABAZE_CHRANENA_ZVLASTNIMI_PRAVY, addPropertyHelper(readProperty(distribution, DATABAZE_CHRANENA_ZVLASTNIMI_PRAVY)), HTTPS_REGEX, distribution),
+                        # IRI. Satisfies regex ^https://.*$
+                        **addRegexProperty(OSOBNI_UDAJE, addPropertyHelper(readProperty(distribution, OSOBNI_UDAJE)), HTTPS_REGEX, distribution),
+                    }
+                    if containsCompare(readProperty(distribution, TYP), "distribuce - soubor ke stažení"):
+                        distributionJsonLDcontents.append({
+                            IRI: createDatasetIRI(nameCs[0].value) + "/distribuce/{}".format(i),
+                            TYP: ["Datové rozhraní", "Distribuce"],
                             NAZEV: {x.language: x.value for x in distribution.names},
-                        }, distribution),
-                        # **addProperty(ODPOVIDAJICI_POJEM, {CS: addPropertyHelper(distribution.resolved_properties.get(ODPOVIDAJICI_POJEM))}, distribution),
-                        # **addProperty(ZPUSOB_ZISKANI_SDILENYCH_UDAJU, splitProperty(distribution.resolved_properties.get(ZPUSOB_ZISKANI_SDILENYCH_UDAJU)), distribution),
-                        # **addProperty(ZPUSOB_SDILENI_UDAJU, addPropertyHelper(distribution.resolved_properties.get(ZPUSOB_SDILENI_UDAJU)), distribution),
-                        # **addProperty(TYP_OBSAHU_SDILENYCH_UDAJU, splitProperty(distribution.resolved_properties.get(TYP_OBSAHU_SDILENYCH_UDAJU)), distribution),
-                        **addProperty(SOUBOR_KE_STAZENI, {CS: addPropertyHelper(distribution.resolved_properties.get(SOUBOR_KE_STAZENI))}, distribution),
-                        **addProperty(FORMAT, {CS: addPropertyHelper(distribution.resolved_properties.get(FORMAT))}, distribution),
-                        **addProperty(TYP_MEDIA, {CS: addPropertyHelper(distribution.resolved_properties.get(TYP_MEDIA))}, distribution),
-                        **addProperty(SCHEMA, {CS: addPropertyHelper(distribution.resolved_properties.get(SCHEMA))}, distribution),
-                        **addProperty(TYP_MEDIA_KOMPRESE, {CS: addPropertyHelper(distribution.resolved_properties.get(TYP_MEDIA_KOMPRESE))}, distribution),
-                        **addProperty(TYP_MEDIA_BALICKU, {CS: addPropertyHelper(distribution.resolved_properties.get(TYP_MEDIA_BALICKU))}, distribution),
-                        **addProperty(PRISTUPOVY_BOD, {CS: addPropertyHelper(distribution.resolved_properties.get(PRISTUPOVY_BOD))}, distribution),
-                        **addProperty(POPIS_PRISTUPOVEHO_BODU, {CS: addPropertyHelper(distribution.resolved_properties.get(POPIS_PRISTUPOVEHO_BODU))}, distribution),
-                    })
+                            # URL. Satisfies regex ^https://.*$
+                            **addRegexProperty(PRISTUPOVE_URL, addPropertyHelper(readProperty(distribution, PRISTUPOVE_URL)), HTTPS_REGEX, distribution),
+                            # Strings separated by ; that satisfy regex ^https://.*$
+                            **addRegexProperty(PRAVNI_PREDPIS, splitProperty(readProperty(distribution, PRAVNI_PREDPIS)), HTTPS_REGEX, distribution),
+                            **addProperty(PODMINKY_UZITI, usageTerms, distribution),
+                            # URL. Satisfies regex ^https://.*$
+                            **addRegexProperty(SOUBOR_KE_STAZENI, {CS: addPropertyHelper(readProperty(distribution, SOUBOR_KE_STAZENI))}, HTTPS_REGEX, distribution),
+                            # String. Satisfies regex ^formáty:.*$
+                            **addRegexProperty(FORMAT, {CS: addPropertyHelper(readProperty(distribution, FORMAT))}, FORMAT_REGEX, distribution),
+                            # String. Satisfies regex ^mediaTypes:.*$
+                            **addRegexProperty(TYP_MEDIA, {CS: addPropertyHelper(readProperty(distribution, TYP_MEDIA))}, MEDIA_TYPE_REGEX, distribution),
+                            # URL. Satisfies regex ^https://.*$
+                            **addRegexProperty(SCHEMA, {CS: addPropertyHelper(readProperty(distribution, SCHEMA))}, HTTPS_REGEX, distribution),
+                            # String. Satisfies regex ^mediaTypes:.*$
+                            **addRegexProperty(TYP_MEDIA_KOMPRESE, {CS: addPropertyHelper(readProperty(distribution, TYP_MEDIA_KOMPRESE))}, MEDIA_TYPE_REGEX, distribution),
+                            # String. Satisfies regex ^mediaTypes:.*$
+                            **addRegexProperty(TYP_MEDIA_BALICKU, {CS: addPropertyHelper(readProperty(distribution, TYP_MEDIA_BALICKU))}, MEDIA_TYPE_REGEX, distribution),
+                        })
+                    elif containsCompare(readProperty(distribution, TYP), "distribuce - datová služba"):
+                        distributionJsonLDcontents.append({
+                            IRI: createDatasetIRI(nameCs[0].value) + "/distribuce/{}".format(i),
+                            TYP: ["Datové rozhraní", "Distribuce"],
+                            NAZEV: {x.language: x.value for x in distribution.names},
+                            # URL. Satisfies regex ^https://.*$
+                            **addRegexProperty(PRISTUPOVE_URL, addPropertyHelper(readProperty(distribution, PRISTUPOVE_URL)), HTTPS_REGEX, distribution),
+                            # Strings separated by ; that satisfy regex ^https://.*$
+                            **addRegexProperty(PRAVNI_PREDPIS, splitProperty(readProperty(distribution, PRAVNI_PREDPIS)), HTTPS_REGEX, distribution),
+                            **addProperty(PODMINKY_UZITI, usageTerms, distribution),
+                            **addProperty(PRISTUPOVA_SLUZBA, {
+                                IRI: createDatasetIRI(nameCs[0].value) + "/distribuce/{}/přístupová-služba".format(i),
+                                TYP: ["Datová služba"],
+                                NAZEV: {x.language: x.value for x in distribution.names},
+                                **addProperty(PRISTUPOVY_BOD, {CS: addPropertyHelper(readProperty(distribution, PRISTUPOVY_BOD))}, distribution),
+                                **addProperty(POPIS_PRISTUPOVEHO_BODU, {CS: addPropertyHelper(readProperty(distribution, POPIS_PRISTUPOVEHO_BODU))}, distribution),
+                                # Strings separated by ; that satisfy regex ^https://.*$
+                                **addRegexProperty(PRAVNI_PREDPIS, splitProperty(readProperty(distribution, PRAVNI_PREDPIS)), HTTPS_REGEX, distribution),
+                                # URL. Satisfies regex ^https://.*$
+                                **addRegexProperty(SPECIFIKACE, addPropertyHelper(readProperty(distribution, SPECIFIKACE)), HTTPS_REGEX, distribution),
+                                # URL. Satisfies regex ^https://.*$
+                                **addRegexProperty(DOKUMENTACE, addPropertyHelper(readProperty(distribution, DOKUMENTACE)), HTTPS_REGEX, distribution),
+                            }, distribution),
+                        })
+                    else:
+                        warnings.warn(
+                            "Skipping distribution of element ID {} because it doesn't specify the exact distribution type".format(distribution.identifier))
 
                 jsonLdContent = {
                     CONTEXT: "https://ofn.gov.cz/dcat-ap-cz-otevřená-data/draft/datová-sada/kontext.jsonld",
+                    # IRI identifier of the dataset created from the element name.
                     IRI: createDatasetIRI(nameCs[0].value),
                     TYP: ["Datová sada", "Datová sada SSP"],
+                    # String in Czech. Required.
                     NAZEV: {x.language: x.value for x in dataset.names},
-                    **addProperty(POPIS, {CS: addPropertyHelper(dataset.resolved_properties.get(POPIS))}, dataset),
-                    **addProperty(POSKYTOVATEL, addPropertyHelper(dataset.resolved_properties.get(POSKYTOVATEL)), dataset),
-                    **addProperty(TEMA, splitProperty(dataset.resolved_properties.get(TEMA)), dataset),
-                    **addProperty(PERIODICITA_AKTUALIZACE, addPropertyHelper(dataset.resolved_properties.get(PERIODICITA_AKTUALIZACE)), dataset),
-                    **addProperty(KLICOVE_SLOVO, {CS: splitProperty(dataset.resolved_properties.get(KLICOVE_SLOVO))}, dataset),
+                    # Text in Czech. Required
+                    **addProperty(POPIS, {CS: addPropertyHelper(readProperty(dataset, POPIS))}, dataset),
+                    # String that satisfies regex ^ovm:[^/]+$
+                    **addRegexProperty(POSKYTOVATEL, addPropertyHelper(readProperty(dataset, POSKYTOVATEL)), PROVIDER_REGEX, dataset),
+                    # Strings separated by ; that satisfy regex ^témata:.*$
+                    **addRegexProperty(TEMA, splitProperty(readProperty(dataset, TEMA)), THEME_REGEX, dataset),
+                    # String that satisfies regex ^frekvence:.*$
+                    **addRegexProperty(PERIODICITA_AKTUALIZACE, addPropertyHelper(readProperty(dataset, PERIODICITA_AKTUALIZACE)), FREQUENCY_REGEX, dataset),
+                    # Strings in Czech separated by ;
+                    **addProperty(KLICOVE_SLOVO, {CS: splitProperty(readProperty(dataset, KLICOVE_SLOVO))}, dataset),
                     **addProperty(CASOVE_POKRYTI, {
                         TYP: ["Časový interval"],
-                        ZACATEK: addPropertyHelper(dataset.resolved_properties.get(CASOVE_POKRYTI_ZACATEK)),
-                        KONEC: addPropertyHelper(dataset.resolved_properties.get(CASOVE_POKRYTI_KONEC)),
+                        # Date in format yyyy-MM-dd.
+                        **addRegexProperty(ZACATEK, addPropertyHelper(readProperty(dataset, CASOVE_POKRYTI_ZACATEK)), DATE_REGEX, dataset, CASOVE_POKRYTI_ZACATEK),
+                        # Date in format yyyy-MM-dd.
+                        **addRegexProperty(KONEC, addPropertyHelper(readProperty(dataset, CASOVE_POKRYTI_KONEC)), DATE_REGEX, dataset, CASOVE_POKRYTI_KONEC),
                     }, dataset),
                     **addProperty(KONTAKTNI_BOD, {
                         TYP: ["Organizace"],
-                        JMENO: addPropertyHelper(dataset.resolved_properties.get(KONTAKTNI_BOD_JMENO)),
-                        E_MAIL: addPropertyHelper(dataset.resolved_properties.get(KONTAKTNI_BOD_EMAIL)),
+                        # Name.
+                        JMENO: addPropertyHelper(readProperty(dataset, KONTAKTNI_BOD_JMENO)),
+                        # Email address
+                        **addRegexProperty(E_MAIL, addPropertyHelper(readProperty(dataset, KONTAKTNI_BOD_EMAIL)), EMAIL_REGEX, dataset, KONTAKTNI_BOD_EMAIL),
                     }, dataset),
-                    **addProperty(DOKUMENTACE, addPropertyHelper(dataset.resolved_properties.get(DOKUMENTACE)), dataset),
-                    **addProperty(SPECIFIKACE, addPropertyHelper(dataset.resolved_properties.get(SPECIFIKACE)), dataset),
-                    **addProperty(KONCEPT_EUROVOC, splitProperty(dataset.resolved_properties.get(KONCEPT_EUROVOC)), dataset),
+                    # URL. Satisfies regex ^https://.*$
+                    **addRegexProperty(DOKUMENTACE, addPropertyHelper(readProperty(dataset, DOKUMENTACE)), HTTPS_REGEX, dataset),
+                    # URL. Satisfies regex ^https://.*$
+                    **addRegexProperty(SPECIFIKACE, addPropertyHelper(readProperty(dataset, SPECIFIKACE)), HTTPS_REGEX, dataset),
+                    # Strings separated by ; that satisfy regex ^euroVoc:.*$
+                    **addRegexProperty(KONCEPT_EUROVOC, splitProperty(readProperty(dataset, KONCEPT_EUROVOC)), EUROVOC_REGEX, dataset),
                     # jak agresivní by mělo hledání pojmů být?
                     **addProperty(TYKA_SE_POJMU, [getIRIofTerm(x) for x in relatedTerms], dataset),
-                    **addProperty(JE_ZAHRNUTA_V_ISVS, addPropertyHelper(dataset.resolved_properties.get(JE_ZAHRNUTA_V_ISVS)), dataset),
-                    **addProperty(JE_SOUCASTI, addPropertyHelper(dataset.resolved_properties.get(JE_SOUCASTI)), dataset),
-                    **addProperty(PRAVNI_PREDPIS, splitProperty(dataset.resolved_properties.get(PRAVNI_PREDPIS)), dataset),
+                    # String that satisfies regex ^isvs:[^/]+$
+                    **addRegexProperty(JE_ZAHRNUTA_V_ISVS, addPropertyHelper(readProperty(dataset, JE_ZAHRNUTA_V_ISVS)), ISVS_REGEX, dataset),
+                    # Strings separated by ; that satisfy regex ^https://.*$
+                    **addRegexProperty(JE_SOUCASTI, splitProperty(readProperty(dataset, JE_SOUCASTI)), HTTPS_REGEX, dataset),
+                    # Strings separated by ; that satisfy regex ^https://.*$
+                    **addRegexProperty(PRAVNI_PREDPIS, splitProperty(readProperty(dataset, PRAVNI_PREDPIS)), HTTPS_REGEX, dataset),
                     **addProperty(DISTRIBUCE, distributionJsonLDcontents, dataset),
                 }
                 jsonLdFile = JsonLdFile(

@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Preparing an ArchiMate model for JSON-LD export</title>
+    <style>
+      :root {
+        --ink: #17212b;
+        --muted: #52606d;
+        --paper: #ffffff;
+        --canvas: #f3f6f8;
+        --line: #d8e0e7;
+        --brand: #075985;
+        --brand-soft: #e0f2fe;
+        --good: #166534;
+        --good-soft: #dcfce7;
+        --warn: #92400e;
+        --warn-soft: #fef3c7;
+        --danger: #991b1b;
+        --danger-soft: #fee2e2;
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--canvas);
+        font: 16px/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      header {
+        color: white;
+        background: linear-gradient(125deg, #0c4a6e, #0369a1 58%, #0e7490);
+        padding: 54px 24px 48px;
+      }
+
+      .header-inner, .layout { max-width: 1180px; margin: 0 auto; }
+      .eyebrow { margin: 0 0 6px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .82; }
+      h1 { margin: 0; max-width: 850px; font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.08; }
+      header p:last-child { max-width: 780px; margin: 18px 0 0; font-size: 1.08rem; }
+
+      .layout { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 28px; padding: 32px 20px 64px; }
+      nav { position: sticky; top: 20px; align-self: start; padding: 18px; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; }
+      nav strong { display: block; margin-bottom: 10px; }
+      nav a { display: block; color: var(--brand); padding: 4px 0; text-decoration: none; }
+      nav a:hover { text-decoration: underline; }
+
+      main { min-width: 0; }
+      section { margin-bottom: 24px; padding: 28px; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 8px 24px rgb(15 23 42 / 5%); }
+      h2 { margin: 0 0 16px; color: #0c4a6e; font-size: 1.65rem; }
+      h3 { margin: 24px 0 8px; font-size: 1.15rem; }
+      p, ul, ol { margin-top: 0; }
+      code { padding: .08em .32em; color: #0c4a6e; background: #eef6fa; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+      pre { overflow-x: auto; margin: 16px 0; padding: 18px; color: #dbeafe; background: #0f172a; border-radius: 10px; }
+      pre code { padding: 0; color: inherit; background: transparent; }
+
+      .callout { margin: 18px 0; padding: 14px 16px; border-left: 5px solid; border-radius: 8px; }
+      .callout.good { color: var(--good); background: var(--good-soft); border-color: var(--good); }
+      .callout.warning { color: var(--warn); background: var(--warn-soft); border-color: var(--warn); }
+      .callout.danger { color: var(--danger); background: var(--danger-soft); border-color: var(--danger); }
+
+      .table-wrap { overflow-x: auto; }
+      table { width: 100%; border-collapse: collapse; font-size: .94rem; }
+      th, td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+      th { color: #0c4a6e; background: #f0f9ff; }
+      tbody tr:last-child td { border-bottom: 0; }
+      .badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: .78rem; font-weight: 700; white-space: nowrap; }
+      .required { color: var(--danger); background: var(--danger-soft); }
+      .switch { color: var(--warn); background: var(--warn-soft); }
+      .optional { color: var(--good); background: var(--good-soft); }
+      footer { margin-top: 42px; padding-top: 18px; color: var(--muted); border-top: 1px solid var(--line); font-size: .9rem; }
+
+      @media (max-width: 850px) {
+        .layout { grid-template-columns: 1fr; }
+        nav { position: static; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-inner">
+        <p class="eyebrow">ArchiMate XML → JSON-LD</p>
+        <h1>How to prepare the source ArchiMate model</h1>
+        <p>
+          A practical guide to the elements, relationships, property names, and value formats expected by
+          <code>create_jsonld_files</code> in <code>jsonld_creation.py</code>.
+        </p>
+      </div>
+    </header>
+
+    <div class="layout">
+      <nav aria-label="Contents">
+        <strong>Contents</strong>
+        <a href="archimate-jsonld-guide.html" lang="cs">Czech version</a>
+        <a href="#quick-start">Quick start</a>
+        <a href="#property-reading">How properties are read</a>
+        <a href="#dataset">Dataset</a>
+        <a href="#distribution">Distribution</a>
+        <a href="#usage-terms">Usage terms</a>
+        <a href="#download">Downloadable file</a>
+        <a href="#service">Data service</a>
+        <a href="#relationships">Model relationships</a>
+        <a href="#example">XML example</a>
+        <a href="#checklist">Checklist</a>
+        <a href="#limitations">Known limitations</a>
+      </nav>
+
+      <main>
+        <section id="quick-start">
+          <h2>Quick start</h2>
+          <ol>
+            <li>Create property definitions using the exact source names shown in the tables below.</li>
+            <li>Create a dataset element, give it a Czech name, and add a <code>typ</code> property whose value contains <code>datová sada</code>.</li>
+            <li>Fill in the dataset properties, respecting the documented prefixes, formats, and capitalization.</li>
+            <li>Create a separate element for every distribution, set its exact subtype in <code>typ</code>, and connect it to the dataset with a relationship.</li>
+            <li>Add the <code>distribuce</code> switch property to the dataset to include related distributions in the output.</li>
+          </ol>
+
+          <div class="callout good">
+            <strong>Input versus output:</strong> ArchiMate source property names use spaces, for example
+            <code>kontaktní bod - email</code>. JSON-LD keys keep their underscored form, for example
+            <code>kontaktní_bod</code>.
+          </div>
+        </section>
+
+        <section id="property-reading">
+          <h2>How the converter reads ArchiMate XML</h2>
+
+          <h3>Property names must match exactly</h3>
+          <p>
+            An element refers to an entry in <code>propertyDefinitions</code> through
+            <code>propertyDefinitionRef</code>. The converter uses the text of the definition's first
+            <code>&lt;name&gt;</code> as the resolved property key. If the definition has no name, its
+            <code>identifier</code> is used. Source names are case-sensitive and diacritic-sensitive, and
+            they must use spaces instead of underscores. The expected source name is
+            <code>soubor ke stažení</code>, not <code>soubor_ke_stažení</code>. This transformation applies
+            only to input lookup; generated JSON-LD keys retain underscores.
+          </p>
+
+          <pre><code>&lt;propertyDefinitions&gt;
+  &lt;propertyDefinition identifier="prop-popis" type="string"&gt;
+    &lt;name xml:lang="cs"&gt;popis&lt;/name&gt;
+  &lt;/propertyDefinition&gt;
+&lt;/propertyDefinitions&gt;
+
+&lt;element identifier="dataset-1" xsi:type="BusinessObject"&gt;
+  &lt;properties&gt;
+    &lt;property propertyDefinitionRef="prop-popis"&gt;
+      &lt;value xml:lang="cs"&gt;Dataset description&lt;/value&gt;
+    &lt;/property&gt;
+  &lt;/properties&gt;
+&lt;/element&gt;</code></pre>
+
+          <h3>Single values, repeated values, and semicolons</h3>
+          <ul>
+            <li>For single-valued fields, the converter uses the first value.</li>
+            <li>For fields described as lists, a single value is split on semicolons, for example <code>témata:doprava;témata:regiony</code>.</li>
+            <li>If the same property occurs multiple times in XML, the parser creates a list; those already separate values are not split again on semicolons.</li>
+            <li>Empty list items are discarded and surrounding whitespace is removed.</li>
+          </ul>
+
+          <h3>Languages and switch properties</h3>
+          <p>
+            A dataset needs a Czech name using <code>&lt;name xml:lang="cs"&gt;…&lt;/name&gt;</code>. Without one,
+            the element is skipped. If several Czech names exist, the first is used for the IRI and file
+            name. All names are written under their <code>xml:lang</code> keys in <code>název</code>.
+          </p>
+          <p>
+            Some nested objects are emitted only when the source element contains the corresponding switch
+            property. Its value is not copied and may simply be <code>ano</code>. Such entries are marked
+            <span class="badge switch">switch</span> below.
+          </p>
+        </section>
+
+        <section id="dataset">
+          <h2>Dataset element</h2>
+          <p>
+            A JSON-LD file is created for every element whose <code>typ</code> property contains
+            <code>datová sada</code>. This comparison is case-insensitive and allows a partial match. The
+            element's concrete ArchiMate <code>xsi:type</code> is not checked.
+          </p>
+          <p>
+            The IRI is generated as <code>https://slovník.gov.cz/{sanitized-Czech-name}</code>. The Czech
+            name is trimmed, lowercased, and characters disallowed in the local IRI part are replaced with
+            hyphens. It also becomes the basis of the <code>.jsonld</code> file name. JSON-LD <code>typ</code>
+            is always <code>["Datová sada", "Datová sada SSP"]</code>.
+          </p>
+
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>ArchiMate source</th><th>JSON-LD output</th><th>Expected value</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><code>name xml:lang="cs"</code></td><td><code>název.cs</code>, IRI, and file name</td><td>Czech name; other language variants are copied too.</td><td><span class="badge required">required</span></td></tr>
+                <tr><td><code>typ</code></td><td>fixed <code>typ</code></td><td>Text containing <code>datová sada</code>.</td><td><span class="badge required">required</span></td></tr>
+                <tr><td><code>popis</code></td><td><code>popis.cs</code></td><td>Czech text; first value is used.</td><td><span class="badge optional">optional*</span></td></tr>
+                <tr><td><code>poskytovatel</code></td><td><code>poskytovatel</code></td><td><code>ovm:</code> followed by at least one non-slash character, e.g. <code>ovm:00007064</code>.</td><td><span class="badge optional">optional*</span></td></tr>
+                <tr><td><code>téma</code></td><td><code>téma</code></td><td>Semicolon-separated list; every item starts with <code>témata:</code>.</td><td><span class="badge optional">optional</span></td></tr>
+                <tr><td><code>periodicita aktualizace</code></td><td><code>periodicita_aktualizace</code></td><td>Value starting with <code>frekvence:</code>, e.g. <code>frekvence:měsíčně</code>.</td><td><span class="badge optional">optional</span></td></tr>
+                <tr><td><code>klíčové slovo</code></td><td><code>klíčové_slovo.cs</code></td><td>Semicolon-separated Czech keywords.</td><td><span class="badge optional">optional</span></td></tr>
+                <tr><td><code>časové pokrytí</code></td><td><code>časové_pokrytí</code></td><td>Any value; enables the time-interval object.</td><td><span class="badge switch">switch</span></td></tr>
+                <tr><td><code>časové pokrytí - začátek</code></td><td><code>časové_pokrytí.začátek</code></td><td>Date in <code>YYYY-MM-DD</code> format.</td><td><span class="badge optional">optional</span></td></tr>
+                <tr><td><code>časové pokrytí - konec</code></td><td><code>časové_pokrytí.konec</code></td><td>Date in <code>YYYY-MM-DD</code> format.</td><td><span class="badge optional">optional</span></td></tr>
+                <tr><td><code>kontaktní bod</code></td><td><code>kontaktní_bod</code></td><td>Any value; enables the organization object.</td><td><span class="badge switch">switch</span></td></tr>
+                <tr><td><code>kontaktní bod - jméno</code></td><td><code>kontaktní_bod.jméno</code></td><td>Person or organization name; first value is used.</td><td><span class="badge optional">optional*</span></td></tr>
+                <tr><td><code>kontaktní bod - email</code></td><td><code>kontaktní_bod.e-mail</code></td><td>Email address without whitespace.</td><td><span class="badge optional">optional*</span></td></tr>
+                <tr><td><code>dokumentace</code></td><td><code>dokumentace</code></td><td>Absolute URL beginning with <code>https://</code>.</td><td><span class="badge optional">optional</span></td></tr>
+                <tr><td><code>specifikace</code></td><td><code>specifikace</code></td><td>Absolute URL beginning with <code>https://</code>.</td><td><span class="badge optional">optional</span></td></tr>
+                <tr><td><code>koncept euroVoc</code></td><td><code>koncept_euroVoc</code></td><td>Semicolon-separated list; every item starts with <code>euroVoc:</code>.</td><td><span class="badge optional">optional</span></td></tr>
+                <tr><td><code>týká se pojmu</code></td><td><code>týká_se_pojmu</code></td><td>Any value enables export of terms found through associations; see limitations.</td><td><span class="badge switch">switch</span></td></tr>
+                <tr><td><code>je zahrnuta v isvs</code></td><td><code>je_zahrnuta_v_isvs</code></td><td><code>isvs:</code> followed by at least one non-slash character.</td><td><span class="badge optional">optional</span></td></tr>
+                <tr><td><code>je součástí</code></td><td><code>je_součástí</code></td><td>One or more semicolon-separated <code>https://</code> URLs.</td><td><span class="badge optional">optional</span></td></tr>
+                <tr><td><code>právní předpis</code></td><td><code>právní_předpis</code></td><td>One or more semicolon-separated <code>https://</code> URLs.</td><td><span class="badge optional">optional</span></td></tr>
+                <tr><td><code>distribuce</code></td><td><code>distribuce</code></td><td>Any value; includes distributions found through relationships.</td><td><span class="badge switch">switch</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><small>* Requirements of the target JSON Schema may differ from what the converter function itself enforces.</small></p>
+        </section>
+
+        <section id="distribution">
+          <h2>Distribution element</h2>
+          <p>
+            An element is a distribution candidate when its <code>typ</code> contains <code>distribuce</code>.
+            To be emitted, it must be connected to a dataset and its <code>typ</code> must contain one of the
+            exact subtypes below. Matching is case-insensitive; the element's <code>xsi:type</code> is ignored.
+          </p>
+          <div class="callout good">
+            <strong>Allowed subtypes:</strong> <code>distribuce - soubor ke stažení</code> or
+            <code>distribuce - datová služba</code>. A generic <code>distribuce</code> value is insufficient
+            and causes the element to be skipped with a warning.
+          </div>
+          <p>
+            The distribution IRI is <code>{dataset IRI}/distribuce/{index}</code>, with a zero-based index
+            determined by model element order. Its output type is always
+            <code>["Datové rozhraní", "Distribuce"]</code>, and its names are copied from the distribution.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>ArchiMate source</th><th>JSON-LD output</th><th>Expected value</th><th>Applies to</th></tr></thead>
+              <tbody>
+                <tr><td><code>name</code></td><td><code>název</code></td><td>At least a Czech name is recommended; all language variants are copied.</td><td>both subtypes</td></tr>
+                <tr><td><code>typ</code></td><td>fixed <code>typ</code></td><td>One of the two exact subtypes above.</td><td>both subtypes</td></tr>
+                <tr><td><code>přístupové url</code></td><td><code>přístupové_url</code></td><td><code>https://</code> URL; first value is used.</td><td>both subtypes</td></tr>
+                <tr><td><code>právní předpis</code></td><td><code>právní_předpis</code></td><td>One or more semicolon-separated <code>https://</code> URLs.</td><td>both subtypes and service</td></tr>
+                <tr><td><code>podmínky užití</code></td><td><code>podmínky_užití</code></td><td>Any value; enables the nested usage-terms object.</td><td><span class="badge switch">switch</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="usage-terms">
+          <h2>Distribution usage terms</h2>
+          <p>
+            These properties belong directly to the distribution element. They appear only when that
+            element also has the <code>podmínky užití</code> switch. The generated object gets an automatic
+            IRI ending in <code>/specifikace-podmínek-užití</code> and the fixed type
+            <code>Specifikace podmínek užití</code>.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Source property</th><th>JSON-LD output</th><th>Allowed value</th></tr></thead>
+              <tbody>
+                <tr><td><code>autorské dílo</code></td><td><code>podmínky_užití.autorské_dílo</code></td><td>One <code>https://</code> URL.</td></tr>
+                <tr><td><code>autor</code></td><td><code>podmínky_užití.autor.cs</code></td><td>Czech text; first value is used.</td></tr>
+                <tr><td><code>databáze jako autorské dílo</code></td><td><code>podmínky_užití.databáze_jako_autorské_dílo</code></td><td>One <code>https://</code> URL.</td></tr>
+                <tr><td><code>autor databáze</code></td><td><code>podmínky_užití.autor_databáze.cs</code></td><td>Czech text; first value is used.</td></tr>
+                <tr><td><code>databáze chráněná zvláštními právy</code></td><td><code>podmínky_užití.databáze_chráněná_zvláštními_právy</code></td><td>One <code>https://</code> URL.</td></tr>
+                <tr><td><code>osobní údaje</code></td><td><code>podmínky_užití.osobní_údaje</code></td><td>One <code>https://</code> URL.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="download">
+          <h2>Distribution – downloadable file</h2>
+          <p>These properties apply only when <code>typ = distribuce - soubor ke stažení</code>.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Source property</th><th>JSON-LD output</th><th>Allowed value</th></tr></thead>
+              <tbody>
+                <tr><td><code>soubor ke stažení</code></td><td><code>soubor_ke_stažení.cs</code></td><td>URL beginning with <code>https://</code>.</td></tr>
+                <tr><td><code>formát</code></td><td><code>formát.cs</code></td><td>Value beginning with <code>formáty:</code>, e.g. <code>formáty:CSV</code>.</td></tr>
+                <tr><td><code>typ média</code></td><td><code>typ_média.cs</code></td><td>Value beginning with <code>mediaTypes:</code>, e.g. <code>mediaTypes:text/csv</code>.</td></tr>
+                <tr><td><code>schéma</code></td><td><code>schéma.cs</code></td><td>URL beginning with <code>https://</code>.</td></tr>
+                <tr><td><code>typ média komprese</code></td><td><code>typ_média_komprese.cs</code></td><td>Value beginning with <code>mediaTypes:</code>.</td></tr>
+                <tr><td><code>typ média balíčku</code></td><td><code>typ_média_balíčku.cs</code></td><td>Value beginning with <code>mediaTypes:</code>.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="service">
+          <h2>Distribution – data service</h2>
+          <p>
+            With <code>typ = distribuce - datová služba</code>, a data-service object can be included when
+            the distribution has the <code>přístupová služba</code> switch. The switch value is ignored.
+            The service gets an automatic IRI ending in <code>/přístupová-služba</code>, the fixed type
+            <code>Datová služba</code>, and the same names as the distribution.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Source property</th><th>JSON-LD output</th><th>Allowed value</th></tr></thead>
+              <tbody>
+                <tr><td><code>přístupová služba</code></td><td><code>přístupová_služba</code></td><td>Any value; <span class="badge switch">switch</span>.</td></tr>
+                <tr><td><code>přístupový bod</code></td><td><code>přístupová_služba.přístupový_bod.cs</code></td><td>Text; the converter does not validate it as a URL.</td></tr>
+                <tr><td><code>popis přístupového bodu</code></td><td><code>přístupová_služba.popis_přístupového_bodu.cs</code></td><td>Czech text.</td></tr>
+                <tr><td><code>právní předpis</code></td><td><code>přístupová_služba.právní_předpis</code></td><td>One or more semicolon-separated <code>https://</code> URLs.</td></tr>
+                <tr><td><code>specifikace</code></td><td><code>přístupová_služba.specifikace</code></td><td>One <code>https://</code> URL.</td></tr>
+                <tr><td><code>dokumentace</code></td><td><code>přístupová_služba.dokumentace</code></td><td>One <code>https://</code> URL.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="relationships">
+          <h2>How to create model relationships</h2>
+          <h3>Dataset → distribution</h3>
+          <p>
+            A dataset and distribution must be connected by an entry in <code>relationships</code>. Direction
+            and relationship type are not checked for distributions: the dataset may be either
+            <code>source</code> or <code>target</code>. Found distributions are included only when the dataset
+            has the <code>distribuce</code> switch.
+          </p>
+          <pre><code>&lt;relationships&gt;
+  &lt;relationship identifier="rel-1" xsi:type="Association"
+                source="dataset-1" target="distribution-1" /&gt;
+&lt;/relationships&gt;</code></pre>
+
+          <h3>Dataset → related term</h3>
+          <p>
+            Related-term lookup accepts only a relationship whose normalized <code>xsi:type</code> is exactly
+            <code>Association</code>. Direction is irrelevant. The connected element's <code>typ</code> must
+            contain <code>typ subjektu</code> or <code>typ objektu</code>, and the dataset must also have the
+            <code>týká se pojmu</code> switch.
+          </p>
+        </section>
+
+        <section id="example">
+          <h2>Minimal example of relevant XML</h2>
+          <p>
+            This example deliberately shortens the property-definition list. A real file needs one
+            <code>propertyDefinition</code> for every source property name used.
+          </p>
+          <pre><code>&lt;model xmlns="http://www.opengroup.org/xsd/archimate/3.0/"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       identifier="model-1"&gt;
+  &lt;propertyDefinitions&gt;
+    &lt;propertyDefinition identifier="pd-typ" type="string"&gt;
+      &lt;name xml:lang="cs"&gt;typ&lt;/name&gt;
+    &lt;/propertyDefinition&gt;
+    &lt;propertyDefinition identifier="pd-popis" type="string"&gt;
+      &lt;name xml:lang="cs"&gt;popis&lt;/name&gt;
+    &lt;/propertyDefinition&gt;
+    &lt;propertyDefinition identifier="pd-distribuce" type="string"&gt;
+      &lt;name xml:lang="cs"&gt;distribuce&lt;/name&gt;
+    &lt;/propertyDefinition&gt;
+    &lt;propertyDefinition identifier="pd-url" type="string"&gt;
+      &lt;name xml:lang="cs"&gt;přístupové url&lt;/name&gt;
+    &lt;/propertyDefinition&gt;
+  &lt;/propertyDefinitions&gt;
+
+  &lt;elements&gt;
+    &lt;element identifier="dataset-1" xsi:type="BusinessObject"&gt;
+      &lt;name xml:lang="cs"&gt;Dopravní data&lt;/name&gt;
+      &lt;name xml:lang="en"&gt;Transport data&lt;/name&gt;
+      &lt;properties&gt;
+        &lt;property propertyDefinitionRef="pd-typ"&gt;
+          &lt;value&gt;datová sada&lt;/value&gt;
+        &lt;/property&gt;
+        &lt;property propertyDefinitionRef="pd-popis"&gt;
+          &lt;value&gt;Přehled dopravních dat.&lt;/value&gt;
+        &lt;/property&gt;
+        &lt;property propertyDefinitionRef="pd-distribuce"&gt;
+          &lt;value&gt;ano&lt;/value&gt;
+        &lt;/property&gt;
+      &lt;/properties&gt;
+    &lt;/element&gt;
+
+    &lt;element identifier="distribution-1" xsi:type="Artifact"&gt;
+      &lt;name xml:lang="cs"&gt;CSV distribuce&lt;/name&gt;
+      &lt;properties&gt;
+        &lt;property propertyDefinitionRef="pd-typ"&gt;
+          &lt;value&gt;distribuce - soubor ke stažení&lt;/value&gt;
+        &lt;/property&gt;
+        &lt;property propertyDefinitionRef="pd-url"&gt;
+          &lt;value&gt;https://data.example.cz/doprava.csv&lt;/value&gt;
+        &lt;/property&gt;
+      &lt;/properties&gt;
+    &lt;/element&gt;
+  &lt;/elements&gt;
+
+  &lt;relationships&gt;
+    &lt;relationship identifier="rel-1" xsi:type="Association"
+                  source="dataset-1" target="distribution-1" /&gt;
+  &lt;/relationships&gt;
+&lt;/model&gt;</code></pre>
+        </section>
+
+        <section id="checklist">
+          <h2>Pre-export checklist</h2>
+          <ul>
+            <li>The XML root is <code>model</code> and uses a valid ArchiMate structure.</li>
+            <li>Every used property definition has the exact source key from these tables as its first <code>name</code>.</li>
+            <li>Every dataset and distribution candidate has a <code>typ</code> property.</li>
+            <li>Each dataset has a Czech name and a <code>typ</code> containing <code>datová sada</code>.</li>
+            <li>The prefixes <code>ovm:</code>, <code>témata:</code>, <code>frekvence:</code>, <code>euroVoc:</code>, <code>isvs:</code>, <code>formáty:</code>, and <code>mediaTypes:</code> use the exact capitalization.</li>
+            <li>URLs begin with <code>https://</code>; <code>http://</code> values are discarded.</li>
+            <li>Dates use <code>YYYY-MM-DD</code>, and email addresses contain no whitespace.</li>
+            <li>Lists within one value use semicolons, not commas.</li>
+            <li>Every desired nested object has its switch property.</li>
+            <li>Distributions have an exact subtype and a relationship to their dataset.</li>
+          </ul>
+          <div class="callout warning">
+            A value that fails its regular expression is omitted and produces a warning. For lists, only
+            invalid items are discarded; valid items remain.
+          </div>
+        </section>
+
+        <section id="limitations">
+          <h2>Known limitations of the current implementation</h2>
+          <ul>
+            <li>
+              The related-term IRI helper (<code>getIRIofTerm</code>) currently always returns an empty
+              string, so neither <code>identifikátor</code> nor a term's Czech name produces a usable
+              <code>týká_se_pojmu</code> value.
+            </li>
+            <li>
+              Constants exist for <code>sdílí_údaj</code>, <code>odpovídající_pojem</code>,
+              <code>způsob_získání_sdílených_údajů</code>, <code>způsob_sdílení_údajů</code>, and
+              <code>typ_obsahu_sdílených_údajů</code>, but <code>create_jsonld_files</code> does not export them.
+            </li>
+            <li>
+              The converter does not enforce every target JSON Schema requirement. If external validation
+              is enabled, a generated document may still be rejected for a missing required value.
+            </li>
+            <li>
+              The JSON-LD context is hard-coded. This guide describes the current implementation, not the
+              behavior of every DCAT-AP-CZ version.
+            </li>
+          </ul>
+        </section>
+
+        <footer>
+          Sources of truth for this guide: <code>jsonld_creation.py</code>, <code>xml_processing.py</code>,
+          and <code>ofnDistributionBindings.py</code> in <code>xml-jsonld-webapp</code>.
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>

@@ -35,6 +35,14 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
+On Windows, you can also run the installation script:
+
+```bat
+install_and_run.bat
+```
+
+The script pulls the latest `main` branch, creates `.venv` when needed, installs or updates dependencies, starts the app, and opens the default browser.
+
 ## Run
 
 ```bash
