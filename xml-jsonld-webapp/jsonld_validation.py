@@ -4,7 +4,11 @@ import requests
 from jsonschema import validate
 
 
-SCHEMA_URL = os.environ.get("JSON_SCHEMA_URL", "").strip()
+DEFAULT_SCHEMA_URL = (
+    "https://ofn.gov.cz/dcat-ap-cz-datov%c3%a1-rozhran%c3%ad/"
+    "draft/datov%C3%A1-sada/sch%C3%A9ma.json"
+)
+SCHEMA_URL = os.environ.get("JSON_SCHEMA_URL", DEFAULT_SCHEMA_URL).strip()
 
 
 def load_schema():

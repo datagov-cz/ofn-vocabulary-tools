@@ -39,9 +39,13 @@
         background: linear-gradient(125deg, #12385f, #17618a);
       }
 
-      .header-inner,
-      .layout {
+      .header-inner {
         width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      .layout {
+        width: min(1480px, calc(100% - 32px));
         margin: 0 auto;
       }
 
@@ -128,7 +132,22 @@
       th { background: #edf3f8; color: #193956; }
       tr:last-child td { border-bottom: 0; }
       tbody tr:nth-child(even) { background: #fafbfd; }
+      th:nth-child(4), td:nth-child(4), td:nth-child(4) code {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+      td:nth-child(4) code { white-space: normal; }
       .nowrap { white-space: nowrap; }
+
+      .ofn-definition {
+        display: block;
+        margin-top: .35em;
+        color: var(--muted);
+        font-size: .86em;
+        line-height: 1.4;
+      }
+
+      .ofn-definition::before { content: "OFN: "; font-weight: 700; }
 
       .badge {
         display: inline-block;
@@ -140,7 +159,6 @@
       }
 
       .required { color: var(--danger); background: var(--danger-soft); }
-      .switch { color: var(--warn); background: var(--warn-soft); }
       .optional { color: var(--good); background: var(--good-soft); }
 
       footer { margin-top: 42px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: .9rem; }
@@ -189,7 +207,7 @@
             <li>Vytvořte element datové sady, přidejte mu český název a vlastnost <code>typ</code> s hodnotou obsahující <code>datová sada</code>.</li>
             <li>Vyplňte vlastnosti datové sady. Hodnoty musejí dodržet uvedené prefixy, formáty a velikost písmen.</li>
             <li>Pro každou distribuci vytvořte další element, nastavte jeho přesný druh v <code>typ</code> a spojte jej s datovou sadou vztahem.</li>
-            <li>Chcete-li distribuce skutečně vložit do výstupu, přidejte na datovou sadu také „spínací“ vlastnost <code>distribuce</code>.</li>
+            <li>Propojené distribuce se do výstupu vloží automaticky.</li>
           </ol>
 
           <div class="callout danger">
@@ -242,11 +260,11 @@
             jazyk vždy uveďte a každý jazyk použijte nejvýše jednou.
           </p>
 
-          <h3>Spínací vlastnosti</h3>
+          <h3>Vnořené vlastnosti</h3>
           <p>
-            Některé vnořené objekty vzniknou jen tehdy, když na zdrojovém elementu existuje příslušná
-            vlastnost. Její hodnota se nepřenáší a může být například <code>ano</code>. V tabulkách jsou
-            takové položky označeny jako <span class="badge switch">spínač</span>.
+            Zdrojové vlastnosti vnořených objektů používají jako prefix název výstupního objektu,
+            oddělený od názvu podvlastnosti pomocí <code> - </code>. Použijte například
+            <code>podmínky užití - autorské dílo</code>, nikoli <code>autorské dílo</code>.
           </p>
         </section>
 
@@ -263,34 +281,36 @@
             Český název je zároveň základem názvu souboru <code>.jsonld</code>. JSON-LD <code>typ</code> je
             vždy <code>["Datová sada", "Datová sada SSP"]</code>.
           </p>
+          <p>
+            U každého pole je uveden také jeho význam podle
+            <a href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/">DCAT-AP-CZ: Datová rozhraní</a>.
+            Odkaz vede přímo na odpovídající definici v OFN; pokyny ve sloupci <strong>Jak vyplnit</strong>
+            nadále popisují konkrétní vstup, který přijímá tento převodník.
+          </p>
 
           <div class="table-wrap">
             <table>
               <thead>
-                <tr><th>Zdroj v ArchiMate</th><th>Výstup JSON-LD</th><th>Jak vyplnit</th><th>Stav</th></tr>
+                <tr><th>Zdroj v ArchiMate</th><th>Výstup JSON-LD</th><th>Jak vyplnit</th><th>Příklad</th><th>Stav</th></tr>
               </thead>
               <tbody>
-                <tr><td><code>name xml:lang="cs"</code></td><td><code>název.cs</code>, IRI a název souboru</td><td>Český název; pro export je nutný. Další jazykové názvy se také přenesou.</td><td><span class="badge required">nutné</span></td></tr>
-                <tr><td><code>typ</code></td><td>pevný <code>typ</code></td><td>Text musí obsahovat <code>datová sada</code>.</td><td><span class="badge required">nutné</span></td></tr>
-                <tr><td><code>popis</code></td><td><code>popis.cs</code></td><td>Český text; použije se první hodnota.</td><td><span class="badge optional">volitelné*</span></td></tr>
-                <tr><td><code>poskytovatel</code></td><td><code>poskytovatel</code></td><td>Přesně <code>ovm:</code> a alespoň jeden znak bez lomítka, např. <code>ovm:00007064</code>.</td><td><span class="badge optional">volitelné*</span></td></tr>
-                <tr><td><code>téma</code></td><td><code>téma</code></td><td>Seznam oddělený <code>;</code>; každá položka začíná <code>témata:</code>, např. <code>témata:doprava;témata:regiony</code>.</td><td><span class="badge optional">volitelné</span></td></tr>
-                <tr><td><code>periodicita aktualizace</code></td><td><code>periodicita_aktualizace</code></td><td>Hodnota začínající přesně <code>frekvence:</code>, např. <code>frekvence:měsíčně</code>.</td><td><span class="badge optional">volitelné</span></td></tr>
-                <tr><td><code>klíčové slovo</code></td><td><code>klíčové_slovo.cs</code></td><td>Česká klíčová slova oddělená <code>;</code>.</td><td><span class="badge optional">volitelné</span></td></tr>
-                <tr><td><code>časové pokrytí</code></td><td><code>časové_pokrytí</code></td><td>Libovolná hodnota; zapne objekt časového intervalu.</td><td><span class="badge switch">spínač</span></td></tr>
-                <tr><td><code>časové pokrytí - začátek</code></td><td><code>časové_pokrytí.začátek</code></td><td>Datum přesně ve formátu <code>RRRR-MM-DD</code>, např. <code>2026-08-04</code>.</td><td><span class="badge optional">volitelné</span></td></tr>
-                <tr><td><code>časové pokrytí - konec</code></td><td><code>časové_pokrytí.konec</code></td><td>Datum přesně ve formátu <code>RRRR-MM-DD</code>.</td><td><span class="badge optional">volitelné</span></td></tr>
-                <tr><td><code>kontaktní bod</code></td><td><code>kontaktní_bod</code></td><td>Libovolná hodnota; zapne objekt organizace.</td><td><span class="badge switch">spínač</span></td></tr>
-                <tr><td><code>kontaktní bod - jméno</code></td><td><code>kontaktní_bod.jméno</code></td><td>Jméno osoby nebo název organizace; použije se první hodnota.</td><td><span class="badge optional">volitelné*</span></td></tr>
-                <tr><td><code>kontaktní bod - email</code></td><td><code>kontaktní_bod.e-mail</code></td><td>E-mail ve tvaru <code>uzivatel@domena.cz</code>; mezery nejsou povoleny.</td><td><span class="badge optional">volitelné*</span></td></tr>
-                <tr><td><code>dokumentace</code></td><td><code>dokumentace</code></td><td>Absolutní URL začínající přesně <code>https://</code>.</td><td><span class="badge optional">volitelné</span></td></tr>
-                <tr><td><code>specifikace</code></td><td><code>specifikace</code></td><td>Absolutní URL začínající přesně <code>https://</code>.</td><td><span class="badge optional">volitelné</span></td></tr>
-                <tr><td><code>koncept euroVoc</code></td><td><code>koncept_euroVoc</code></td><td>Seznam oddělený <code>;</code>; každá položka začíná přesně <code>euroVoc:</code>.</td><td><span class="badge optional">volitelné</span></td></tr>
-                <tr><td><code>týká se pojmu</code></td><td><code>týká_se_pojmu</code></td><td>Libovolná hodnota zapne export pojmů nalezených přes asociace; viz omezení níže.</td><td><span class="badge switch">spínač</span></td></tr>
-                <tr><td><code>je zahrnuta v isvs</code></td><td><code>je_zahrnuta_v_isvs</code></td><td>Přesně <code>isvs:</code> a alespoň jeden znak bez lomítka, např. <code>isvs:1234</code>.</td><td><span class="badge optional">volitelné</span></td></tr>
-                <tr><td><code>je součástí</code></td><td><code>je_součástí</code></td><td>Jedna či více <code>https://</code> URL oddělených <code>;</code>.</td><td><span class="badge optional">volitelné</span></td></tr>
-                <tr><td><code>právní předpis</code></td><td><code>právní_předpis</code></td><td>Jedna či více <code>https://</code> URL oddělených <code>;</code>.</td><td><span class="badge optional">volitelné</span></td></tr>
-                <tr><td><code>distribuce</code></td><td><code>distribuce</code></td><td>Libovolná hodnota; zapne vložení distribucí nalezených přes vztahy.</td><td><span class="badge switch">spínač</span></td></tr>
+                <tr><td><code>name xml:lang="cs"</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.n%C3%A1zev">Název datové sady.</a></td><td><code>název.cs</code>, IRI a název souboru</td><td>Český název; pro export je nutný. Další jazykové názvy se také přenesou.</td><td><code>Jízdní řády MHD</code></td><td><span class="badge required">nutné</span></td></tr>
+                <tr><td><code>typ</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada">Určuje, že element představuje datovou sadu.</a></td><td>pevný <code>typ</code></td><td>Text musí obsahovat <code>datová sada</code>.</td><td><code>datová sada</code></td><td><span class="badge required">nutné</span></td></tr>
+                <tr><td><code>popis</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.popis">Volný text popisující datovou sadu.</a></td><td><code>popis.cs</code></td><td>Český text; použije se první hodnota.</td><td><code>Aktuální jízdní řády MHD.</code></td><td><span class="badge optional">volitelné*</span></td></tr>
+                <tr><td><code>poskytovatel</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.poskytovatel">Subjekt, který datovou sadu poskytuje.</a></td><td><code>poskytovatel</code></td><td>Přesně <code>ovm:</code> a alespoň jeden znak bez lomítka, např. <code>ovm:00007064</code>.</td><td><code>ovm:00007064</code></td><td><span class="badge optional">volitelné*</span></td></tr>
+                <tr><td><code>téma</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.t%C3%A9ma">Jedno nebo více témat popisujících datovou sadu.</a></td><td><code>téma</code></td><td>Seznam oddělený <code>;</code>; každá položka začíná <code>témata:</code>, např. <code>témata:doprava;témata:regiony</code>.</td><td><code>témata:doprava;témata:regiony</code></td><td><span class="badge optional">volitelné</span></td></tr>
+                <tr><td><code>periodicita aktualizace</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.periodicitaAktualizace">Frekvence aktualizace datové sady.</a></td><td><code>periodicita_aktualizace</code></td><td>Hodnota začínající přesně <code>frekvence:</code>, např. <code>frekvence:měsíčně</code>.</td><td><code>frekvence:měsíčně</code></td><td><span class="badge optional">volitelné</span></td></tr>
+                <tr><td><code>klíčové slovo</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.kl%C3%AD%C4%8Dov%C3%A9Slovo">Klíčové slovo nebo značka charakterizující zdroj.</a></td><td><code>klíčové_slovo.cs</code></td><td>Česká klíčová slova oddělená <code>;</code>.</td><td><code>doprava;jízdní řády</code></td><td><span class="badge optional">volitelné</span></td></tr>
+                <tr><td><code>časové pokrytí - začátek</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#%C4%8Casov%C3%BDInterval.datumZa%C4%8D%C3%A1tku">Začátek období pokrytého datovou sadou.</a></td><td><code>časové_pokrytí.začátek</code></td><td>Datum přesně ve formátu <code>RRRR-MM-DD</code>, např. <code>2026-08-04</code>.</td><td><code>2026-01-01</code></td><td><span class="badge optional">volitelné</span></td></tr>
+                <tr><td><code>časové pokrytí - konec</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#%C4%8Casov%C3%BDInterval.datumKonce">Konec období pokrytého datovou sadou.</a></td><td><code>časové_pokrytí.konec</code></td><td>Datum přesně ve formátu <code>RRRR-MM-DD</code>.</td><td><code>2026-12-31</code></td><td><span class="badge optional">volitelné</span></td></tr>
+                <tr><td><code>kontaktní bod - jméno</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Kontaktn%C3%ADBod.jm%C3%A9no">Formátované jméno kontaktního bodu.</a></td><td><code>kontaktní_bod.jméno</code></td><td>Jméno osoby nebo název organizace; použije se první hodnota.</td><td><code>Odbor dopravy</code></td><td><span class="badge optional">volitelné*</span></td></tr>
+                <tr><td><code>kontaktní bod - email</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Kontaktn%C3%ADBod.email">E-mailová adresa určená ke komunikaci.</a></td><td><code>kontaktní_bod.e-mail</code></td><td>E-mail ve tvaru <code>uzivatel@domena.cz</code>; exportuje se jako IRI s prefixem <code>mailto:</code>.</td><td><code>data@example.cz</code></td><td><span class="badge optional">volitelné*</span></td></tr>
+                <tr><td><code>dokumentace</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.dokumentace">Stránka nebo dokument s informacemi o datové sadě.</a></td><td><code>dokumentace</code></td><td>Absolutní URL začínající přesně <code>https://</code>.</td><td><code>https://data.example.cz/dokumentace</code></td><td><span class="badge optional">volitelné</span></td></tr>
+                <tr><td><code>specifikace</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.specifikace">Standard nebo specifikace, podle které se datová sada řídí.</a></td><td><code>specifikace</code></td><td>Jedna či více <code>https://</code> URL oddělených středníkem.</td><td><code>https://data.example.cz/specifikace</code></td><td><span class="badge optional">volitelné</span></td></tr>
+                <tr><td><code>koncept euroVoc</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.klasifikaceDleEurovoc">Kategorie nebo téma datové sady podle EuroVoc.</a></td><td><code>koncept_euroVoc</code></td><td>Seznam oddělený <code>;</code>; každá položka začíná přesně <code>euroVoc:</code>.</td><td><code>euroVoc:4512;euroVoc:2816</code></td><td><span class="badge optional">volitelné</span></td></tr>
+                <tr><td><code>je zahrnuta v isvs</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Informa%C4%8Dn%C3%ADSyst%C3%A9mVe%C5%99ejn%C3%A9Spr%C3%A1vy.zahrnuje">Informační systém veřejné správy, který datovou sadu zahrnuje.</a></td><td><code>je_zahrnuta_v_isvs</code></td><td>Přesně <code>isvs:</code> a alespoň jeden znak bez lomítka, např. <code>isvs:1234</code>.</td><td><code>isvs:1234</code></td><td><span class="badge optional">volitelné</span></td></tr>
+                <tr><td><code>je součástí</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.jeSou%C4%8D%C3%A1st%C3%AD">Datová série, do které datová sada patří.</a></td><td><code>je_součástí</code></td><td>Jedna URL začínající <code>https://</code>.</td><td><code>https://data.example.cz/datove-sady/doprava</code></td><td><span class="badge optional">volitelné</span></td></tr>
+                <tr><td><code>právní předpis</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.p%C5%99%C3%ADslu%C5%A1n%C3%BDPr%C3%A1vn%C3%ADP%C5%99edpis">Předpis, který ukládá vznik nebo správu datové sady.</a></td><td><code>právní_předpis</code></td><td>Jedna či více <code>https://</code> URL oddělených <code>;</code>.</td><td><code>https://www.e-sbirka.cz/sb/1999/106;https://www.e-sbirka.cz/sb/2000/365</code></td><td><span class="badge optional">volitelné</span></td></tr>
               </tbody>
             </table>
           </div>
@@ -321,13 +341,12 @@
 
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Zdroj v ArchiMate</th><th>Výstup JSON-LD</th><th>Jak vyplnit</th><th>Platí pro</th></tr></thead>
+              <thead><tr><th>Zdroj v ArchiMate</th><th>Výstup JSON-LD</th><th>Jak vyplnit</th><th>Příklad</th><th>Platí pro</th></tr></thead>
               <tbody>
-                <tr><td><code>name</code></td><td><code>název</code></td><td>Doporučen je alespoň český název s <code>xml:lang="cs"</code>; všechny jazykové názvy se přenesou.</td><td>oba podtypy</td></tr>
-                <tr><td><code>typ</code></td><td>pevný <code>typ</code></td><td>Jeden ze dvou přesných podtypů výše.</td><td>oba podtypy</td></tr>
-                <tr><td><code>přístupové url</code></td><td><code>přístupové_url</code></td><td>URL začínající přesně <code>https://</code>; použije se první hodnota.</td><td>oba podtypy</td></tr>
-                <tr><td><code>právní předpis</code></td><td><code>právní_předpis</code></td><td>Jedna či více <code>https://</code> URL oddělených <code>;</code>.</td><td>oba podtypy i služba</td></tr>
-                <tr><td><code>podmínky užití</code></td><td><code>podmínky_užití</code></td><td>Libovolná hodnota; zapne vnořený objekt podmínek užití.</td><td><span class="badge switch">spínač</span></td></tr>
+                <tr><td><code>name</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce.n%C3%A1zev">Název distribuce datové sady.</a></td><td><code>název</code></td><td>Doporučen je alespoň český název s <code>xml:lang="cs"</code>; všechny jazykové názvy se přenesou.</td><td><code>Jízdní řády ve formátu CSV</code></td><td>oba podtypy</td></tr>
+                <tr><td><code>typ</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce">Určuje konkrétní reprezentaci a způsob zpřístupnění datové sady.</a></td><td>pevný <code>typ</code></td><td>Jeden ze dvou přesných podtypů výše.</td><td><code>distribuce - soubor ke stažení</code></td><td>oba podtypy</td></tr>
+                <tr><td><code>přístupové url</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce.p%C5%99%C3%ADstupov%C3%A9Url">Adresa zdroje, přes který lze k distribuci přistoupit.</a></td><td><code>přístupové_url</code></td><td>URL začínající přesně <code>https://</code>; použije se první hodnota.</td><td><code>https://data.example.cz/jizdni-rady</code></td><td>oba podtypy</td></tr>
+                <tr><td><code>právní předpis</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce.p%C5%99%C3%ADslu%C5%A1n%C3%BDPr%C3%A1vn%C3%ADP%C5%99edpis">Předpis, který ukládá vznik distribuce.</a></td><td><code>právní_předpis</code></td><td>Jedna či více <code>https://</code> URL oddělených <code>;</code>.</td><td><code>https://www.e-sbirka.cz/sb/1999/106;https://www.e-sbirka.cz/sb/2000/365</code></td><td>oba podtypy i služba</td></tr>
               </tbody>
             </table>
           </div>
@@ -336,21 +355,21 @@
         <section id="podminky">
           <h2>Podmínky užití distribuce</h2>
           <p>
-            Následující vlastnosti patří přímo na element distribuce. Do výstupu se dostanou jen tehdy,
-            když na stejném elementu existuje i spínač <code>podmínky užití</code>. Vytvořený objekt má
+            Následující vlastnosti s prefixem patří přímo na element distribuce. Alespoň jedna z nich
+            vytvoří objekt podmínek užití. Vytvořený objekt má
             automatické IRI končící <code>/specifikace-podmínek-užití</code> a pevný typ
             <code>Specifikace podmínek užití</code>.
           </p>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Zdrojová vlastnost</th><th>Výstup JSON-LD</th><th>Povolená hodnota</th></tr></thead>
+              <thead><tr><th>Zdrojová vlastnost</th><th>Výstup JSON-LD</th><th>Povolená hodnota</th><th>Příklad</th></tr></thead>
               <tbody>
-                <tr><td><code>autorské dílo</code></td><td><code>podmínky_užití.autorské_dílo</code></td><td>Jedna URL začínající <code>https://</code>.</td></tr>
-                <tr><td><code>autor</code></td><td><code>podmínky_užití.autor.cs</code></td><td>Český text; použije se první hodnota.</td></tr>
-                <tr><td><code>databáze jako autorské dílo</code></td><td><code>podmínky_užití.databáze_jako_autorské_dílo</code></td><td>Jedna URL začínající <code>https://</code>.</td></tr>
-                <tr><td><code>autor databáze</code></td><td><code>podmínky_užití.autor_databáze.cs</code></td><td>Český text; použije se první hodnota.</td></tr>
-                <tr><td><code>databáze chráněná zvláštními právy</code></td><td><code>podmínky_užití.databáze_chráněná_zvláštními_právy</code></td><td>Jedna URL začínající <code>https://</code>.</td></tr>
-                <tr><td><code>osobní údaje</code></td><td><code>podmínky_užití.osobní_údaje</code></td><td>Jedna URL začínající <code>https://</code>.</td></tr>
+                <tr><td><code>podmínky užití - autorské dílo</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.autorsk%C3%A9D%C3%ADlo">Určuje, zda data obsahují autorskoprávně chráněná díla a jaká licence se uplatní.</a></td><td><code>podmínky_užití.autorské_dílo</code></td><td>Jedna URL začínající <code>https://</code>.</td><td><code>https://creativecommons.org/licenses/by/4.0/</code></td></tr>
+                <tr><td><code>podmínky užití - autor</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.jm%C3%A9naAutor%C5%AFD%C3%ADla">Jména autorů díla uváděná při použití licence CC BY 4.0.</a></td><td><code>podmínky_užití.autor.cs</code></td><td>Český text; použije se první hodnota.</td><td><code>Ministerstvo dopravy</code></td></tr>
+                <tr><td><code>podmínky užití - databáze jako autorské dílo</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.origin%C3%A1ln%C3%ADDatab%C3%A1ze">Určuje ochranu originální struktury nebo uspořádání databáze autorským právem.</a></td><td><code>podmínky_užití.databáze_jako_autorské_dílo</code></td><td>Jedna URL začínající <code>https://</code>.</td><td><code>https://creativecommons.org/licenses/by/4.0/</code></td></tr>
+                <tr><td><code>podmínky užití - autor databáze</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.jm%C3%A9naAutor%C5%AFOrigin%C3%A1ln%C3%ADDatab%C3%A1ze">Jména autorů originální databáze uváděná pro licenci CC BY 4.0.</a></td><td><code>podmínky_užití.autor_databáze.cs</code></td><td>Český text; použije se první hodnota.</td><td><code>Ministerstvo dopravy</code></td></tr>
+                <tr><td><code>podmínky užití - databáze chráněná zvláštními právy</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.zvl%C3%A1%C5%A1tn%C3%ADPr%C3%A1voPo%C5%99izovateleDatab%C3%A1ze">Určuje zvláštní práva chránící investici do pořízení, ověření nebo zveřejnění databáze.</a></td><td><code>podmínky_užití.databáze_chráněná_zvláštními_právy</code></td><td>Jedna URL začínající <code>https://</code>.</td><td><code>https://creativecommons.org/publicdomain/zero/1.0/</code></td></tr>
+                <tr><td><code>podmínky užití - osobní údaje</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.osobn%C3%AD%C3%9Adaje">Informuje příjemce, zda data obsahují osobní údaje.</a></td><td><code>podmínky_užití.osobní_údaje</code></td><td>Jedna URL začínající <code>https://</code>.</td><td><code>https://data.example.cz/podminky-osobnich-udaju</code></td></tr>
               </tbody>
             </table>
           </div>
@@ -361,14 +380,14 @@
           <p>Tyto vlastnosti se použijí pouze při <code>typ = distribuce - soubor ke stažení</code>.</p>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Zdrojová vlastnost</th><th>Výstup JSON-LD</th><th>Povolená hodnota</th></tr></thead>
+              <thead><tr><th>Zdrojová vlastnost</th><th>Výstup JSON-LD</th><th>Povolená hodnota</th><th>Příklad</th></tr></thead>
               <tbody>
-                <tr><td><code>soubor ke stažení</code></td><td><code>soubor_ke_stažení.cs</code></td><td>URL začínající přesně <code>https://</code>.</td></tr>
-                <tr><td><code>formát</code></td><td><code>formát.cs</code></td><td>Hodnota začínající přesně <code>formáty:</code>, např. <code>formáty:CSV</code>.</td></tr>
-                <tr><td><code>typ média</code></td><td><code>typ_média.cs</code></td><td>Hodnota začínající přesně <code>mediaTypes:</code>, např. <code>mediaTypes:text/csv</code>.</td></tr>
-                <tr><td><code>schéma</code></td><td><code>schéma.cs</code></td><td>URL začínající přesně <code>https://</code>.</td></tr>
-                <tr><td><code>typ média komprese</code></td><td><code>typ_média_komprese.cs</code></td><td>Hodnota začínající přesně <code>mediaTypes:</code>.</td></tr>
-                <tr><td><code>typ média balíčku</code></td><td><code>typ_média_balíčku.cs</code></td><td>Hodnota začínající přesně <code>mediaTypes:</code>.</td></tr>
+                <tr><td><code>soubor ke stažení</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.odkazNaSta%C5%BEen%C3%ADSouboru">Přímý odkaz na soubor ke stažení v daném formátu.</a></td><td><code>soubor_ke_stažení.cs</code></td><td>URL začínající přesně <code>https://</code>.</td><td><code>https://data.example.cz/jizdni-rady.csv</code></td></tr>
+                <tr><td><code>formát</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.form%C3%A1tSouboruKeSta%C5%BEen%C3%AD">Typ souboru, ve kterém je distribuce poskytována.</a></td><td><code>formát.cs</code></td><td>Hodnota začínající přesně <code>formáty:</code>, např. <code>formáty:CSV</code>.</td><td><code>formáty:CSV</code></td></tr>
+                <tr><td><code>typ média</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.typM%C3%A9dia">Typ média distribuce podle registru IANA.</a></td><td><code>typ_média.cs</code></td><td>Hodnota začínající přesně <code>mediaTypes:</code>, např. <code>mediaTypes:text/csv</code>.</td><td><code>mediaTypes:text/csv</code></td></tr>
+                <tr><td><code>schéma</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.strojov%C4%9B%C4%8Citeln%C3%A9Sch%C3%A9maSouboruKeSta%C5%BEen%C3%AD">Strojově čitelné schéma, kterým se distribuce řídí.</a></td><td><code>schéma.cs</code></td><td>URL začínající přesně <code>https://</code>.</td><td><code>https://data.example.cz/schema.json</code></td></tr>
+                <tr><td><code>typ média komprese</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.form%C3%A1tKomprese">Formát komprese použitý například ke zmenšení stahovaného souboru.</a></td><td><code>typ_média_komprese.cs</code></td><td>Hodnota začínající přesně <code>mediaTypes:</code>.</td><td><code>mediaTypes:application/gzip</code></td></tr>
+                <tr><td><code>typ média balíčku</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.form%C3%A1tBal%C3%AD%C4%8Dku">Formát balíčku sdružujícího jeden nebo více souvisejících souborů.</a></td><td><code>typ_média_balíčku.cs</code></td><td>Hodnota začínající přesně <code>mediaTypes:</code>.</td><td><code>mediaTypes:application/zip</code></td></tr>
               </tbody>
             </table>
           </div>
@@ -377,21 +396,20 @@
         <section id="sluzba">
           <h2>Distribuce – datová služba</h2>
           <p>
-            Při <code>typ = distribuce - datová služba</code> lze vložit objekt datové služby. Ten vznikne
-            pouze tehdy, když distribuce obsahuje spínač <code>přístupová služba</code>. Hodnota spínače se
-            nepoužije. Služba získá automatické IRI končící <code>/přístupová-služba</code>, pevný typ
+            Při <code>typ = distribuce - datová služba</code> vznikne objekt datové služby, pokud distribuce
+            obsahuje alespoň jednu vlastnost <code>přístupová služba - ...</code>. Služba získá automatické
+            IRI končící <code>/přístupová-služba</code>, pevný typ
             <code>Datová služba</code> a názvy shodné s názvy distribuce.
           </p>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Zdrojová vlastnost</th><th>Výstup JSON-LD</th><th>Povolená hodnota</th></tr></thead>
+              <thead><tr><th>Zdrojová vlastnost</th><th>Výstup JSON-LD</th><th>Povolená hodnota</th><th>Příklad</th></tr></thead>
               <tbody>
-                <tr><td><code>přístupová služba</code></td><td><code>přístupová_služba</code></td><td>Libovolná hodnota; <span class="badge switch">spínač</span>.</td></tr>
-                <tr><td><code>přístupový bod</code></td><td><code>přístupová_služba.přístupový_bod.cs</code></td><td>Text; kód jej neověřuje jako URL.</td></tr>
-                <tr><td><code>popis přístupového bodu</code></td><td><code>přístupová_služba.popis_přístupového_bodu.cs</code></td><td>Český text.</td></tr>
-                <tr><td><code>právní předpis</code></td><td><code>přístupová_služba.právní_předpis</code></td><td>Jedna či více <code>https://</code> URL oddělených <code>;</code>.</td></tr>
-                <tr><td><code>specifikace</code></td><td><code>přístupová_služba.specifikace</code></td><td>Jedna URL začínající přesně <code>https://</code>.</td></tr>
-                <tr><td><code>dokumentace</code></td><td><code>přístupová_služba.dokumentace</code></td><td>Jedna URL začínající přesně <code>https://</code>.</td></tr>
+                <tr><td><code>přístupová služba - přístupový bod</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Slu%C5%BEba.p%C5%99%C3%ADstupov%C3%BDBodSlu%C5%BEby">Kořenové umístění nebo hlavní webový přístupový bod služby.</a></td><td><code>přístupová_služba.přístupový_bod.cs</code></td><td>Text; kód jej neověřuje jako URL.</td><td><code>https://api.example.cz/jizdni-rady</code></td></tr>
+                <tr><td><code>přístupová služba - popis přístupového bodu</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Slu%C5%BEba.popisP%C5%99%C3%ADstupov%C3%A9hoBoduSlu%C5%BEby">Popis přístupového bodu včetně operací a parametrů.</a></td><td><code>přístupová_služba.popis_přístupového_bodu.cs</code></td><td>Český text.</td><td><code>REST API pro vyhledání spojů</code></td></tr>
+                <tr><td><code>přístupová služba - právní předpis</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Slu%C5%BEba.p%C5%99%C3%ADslu%C5%A1n%C3%BDPr%C3%A1vn%C3%ADP%C5%99edpis">Předpis, který ukládá vznik datové služby.</a></td><td><code>přístupová_služba.právní_předpis</code></td><td>Jedna či více <code>https://</code> URL oddělených <code>;</code>.</td><td><code>https://www.e-sbirka.cz/sb/1999/106;https://www.e-sbirka.cz/sb/2000/365</code></td></tr>
+                <tr><td><code>přístupová služba - specifikace</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Slu%C5%BEba.specifikace">Standard nebo specifikace, podle které se datová služba řídí.</a></td><td><code>přístupová_služba.specifikace</code></td><td>Jedna či více <code>https://</code> URL oddělených středníkem.</td><td><code>https://api.example.cz/openapi.json</code></td></tr>
+                <tr><td><code>přístupová služba - dokumentace</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Slu%C5%BEba.dokumentace">Dokumentace, která datovou službu podrobněji popisuje.</a></td><td><code>přístupová_služba.dokumentace</code></td><td>Jedna URL začínající přesně <code>https://</code>.</td><td><code>https://api.example.cz/dokumentace</code></td></tr>
               </tbody>
             </table>
           </div>
@@ -403,7 +421,7 @@
           <p>
             Datová sada a distribuce musejí být spojeny záznamem v <code>relationships</code>. Směr ani typ
             vztahu se pro distribuce nekontroluje: datová sada může být <code>source</code> i <code>target</code>.
-            Každá nalezená distribuce se vloží jen tehdy, když má datová sada spínač <code>distribuce</code>.
+            Nalezené distribuce se vloží automaticky.
           </p>
           <pre><code>&lt;relationships&gt;
   &lt;relationship identifier="rel-1" xsi:type="Association"
@@ -415,7 +433,7 @@
             Pro hledání souvisejících pojmů se naopak přijímá pouze vztah, jehož
             <code>xsi:type</code> se po odstranění prefixu rovná přesně <code>Association</code>. Směr vztahu je
             libovolný. Propojený element musí mít <code>typ</code> obsahující <code>typ subjektu</code> nebo
-            <code>typ objektu</code>. Na datové sadě musí být zároveň spínač <code>týká se pojmu</code>.
+            <code>typ objektu</code>. Nalezené pojmy se vloží automaticky.
           </p>
         </section>
 
@@ -491,7 +509,7 @@
             <li>URL začínají <code>https://</code>; <code>http://</code> se zahodí.</li>
             <li>Datum používá tvar <code>RRRR-MM-DD</code> a e-mail neobsahuje mezery.</li>
             <li>Seznamy v jedné hodnotě používají středník, ne čárku.</li>
-            <li>Vnořené části mají vyplněnou svou spínací vlastnost.</li>
+            <li>Vlastnosti vnořených částí používají název objektu a <code> - </code> jako prefix.</li>
             <li>Distribuce mají přesný podtyp a jsou vztahem propojené s datovou sadou.</li>
           </ul>
           <div class="callout warning">
@@ -504,19 +522,14 @@
           <h2>Známá omezení současné implementace</h2>
           <ul>
             <li>
-              Funkce pro získání IRI souvisejícího pojmu (<code>getIRIofTerm</code>) aktuálně vždy vrací
-              prázdný řetězec. Ani vlastnost <code>identifikátor</code>, ani český název pojmu proto nyní
-              nevytvoří správnou hodnotu <code>týká_se_pojmu</code>.
-            </li>
-            <li>
               Vlastnosti <code>sdílí_údaj</code>, <code>odpovídající_pojem</code>,
               <code>způsob_získání_sdílených_údajů</code>, <code>způsob_sdílení_údajů</code> a
               <code>typ_obsahu_sdílených_údajů</code> mají definované konstanty, ale
               <code>create_jsonld_files</code> je neexportuje.
             </li>
             <li>
-              Převodník nevynucuje všechny povinnosti cílového JSON schématu. Pokud je zapnutá externí
-              validace, výsledný dokument může být následně odmítnut kvůli chybějící povinné hodnotě.
+              Chybějící povinné hodnoty se zapisují do logu s úplnou cestou k poli. Pokud je zapnutá
+              externí validace, výsledný dokument je navíc odmítnut validací JSON schématu.
             </li>
             <li>
               Kontext JSON-LD je v implementaci nastaven napevno; hodnoty a struktura v tomto návodu

@@ -10,8 +10,12 @@ The XML conversion is currently only a skeleton. It parses the XML, reads the ro
 - `routes.py` connects the upload form to the conversion flow.
 - `file_upload.py` loads and checks the uploaded XML file.
 - `xml_processing.py` parses XML and contains the marked setup area for custom XML parsing.
-- `jsonld_creation.py` creates one or more JSON-LD files and contains the marked setup area for custom JSON-LD mapping.
-- `jsonld_validation.py` validates generated JSON-LD against `JSON_SCHEMA_URL` when configured.
+- `jsonld_creation.py` orchestrates creation of one or more JSON-LD files and preserves the public creation API.
+- `jsonld_builders.py` maps datasets and distributions to JSON-LD documents.
+- `jsonld_properties.py` reads, normalizes, and validates ArchiMate properties.
+- `jsonld_relationships.py` finds distributions and terms related to a dataset.
+- `jsonld_required_fields.py` reports required fields missing from generated documents.
+- `jsonld_validation.py` validates generated JSON-LD against the default OFN schema or a schema configured with `JSON_SCHEMA_URL`.
 - `jsonld_download.py` returns one generated JSON-LD file directly, or multiple JSON-LD files as a ZIP download.
 - `texts.json` contains the user-facing front-end text and displayed error messages.
 - `texts.py` loads text from `texts.json`.
@@ -57,9 +61,13 @@ http://127.0.0.1:5000
 
 ## JSON Schema Validation
 
-The app is ready to validate the generated JSON-LD against an online JSON schema.
+By default, the app validates generated JSON-LD against:
 
-Set the schema URL before running the app:
+```text
+https://ofn.gov.cz/dcat-ap-cz-datov%c3%a1-rozhran%c3%ad/draft/datov%C3%A1-sada/sch%C3%A9ma.json
+```
+
+Set `JSON_SCHEMA_URL` to override the schema URL before running the app:
 
 ```bash
 export JSON_SCHEMA_URL="https://example.com/schema.json"
@@ -73,7 +81,7 @@ $env:JSON_SCHEMA_URL = "https://example.com/schema.json"
 python app.py
 ```
 
-If `JSON_SCHEMA_URL` is not set, schema validation is skipped for now.
+Set `JSON_SCHEMA_URL` to an empty string to disable schema validation.
 
 ## Docker Development
 
@@ -90,7 +98,7 @@ Then open:
 http://127.0.0.1:5000
 ```
 
-To include schema validation:
+To override the default validation schema:
 
 ```bash
 JSON_SCHEMA_URL="https://example.com/schema.json" docker compose up --build
@@ -113,7 +121,7 @@ Then open:
 http://127.0.0.1:5000
 ```
 
-To include schema validation:
+To override the default validation schema:
 
 ```bash
 JSON_SCHEMA_URL="https://example.com/schema.json" docker compose -f docker-compose.prod.yml up --build -d
