@@ -11,6 +11,7 @@ from jsonld_properties import (
     MEDIA_TYPE_REGEX,
     PROVIDER_REGEX,
     THEME_REGEX,
+    addCodeProperty,
     addEmailProperty,
     addNonEmptyProperty,
     addPrefixedProperty,
@@ -194,16 +195,18 @@ def _build_download_distribution(
             distribution,
         ),
         # File type according to the code list at https://op.europa.eu/en/web/eu-vocabularies/concept-scheme/-/resource?uri=http://publications.europa.eu/resource/authority/file-type (code is the field inputted here, for example 7Z  - should be transformed into formáty:75 for the jsonld)
-        **addRegexProperty(
+        **addCodeProperty(
             FORMAT,
             _single_property(distribution, FORMAT),
+            "formáty:",
             FORMAT_REGEX,
             distribution,
         ),
         # Media type according to IANA file types, for example application/zip - should be transformed into mediaTypes:application/zip for the jsonld
-        **addRegexProperty(
+        **addCodeProperty(
             TYP_MEDIA,
             _single_property(distribution, TYP_MEDIA),
+            "mediaTypes:",
             MEDIA_TYPE_REGEX,
             distribution,
         ),
@@ -214,16 +217,18 @@ def _build_download_distribution(
             distribution,
         ),
         # Media type according to IANA file types, for example application/zip - should be transformed into mediaTypes:application/zip for the jsonld
-        **addRegexProperty(
+        **addCodeProperty(
             TYP_MEDIA_KOMPRESE,
             _single_property(distribution, TYP_MEDIA_KOMPRESE),
+            "mediaTypes:",
             MEDIA_TYPE_REGEX,
             distribution,
         ),
         # Media type according to IANA file types, for example application/zip - should be transformed into mediaTypes:application/zip for the jsonld
-        **addRegexProperty(
+        **addCodeProperty(
             TYP_MEDIA_BALICKU,
             _single_property(distribution, TYP_MEDIA_BALICKU),
+            "mediaTypes:",
             MEDIA_TYPE_REGEX,
             distribution,
         ),
@@ -410,16 +415,18 @@ def build_dataset_document(
             dataset,
         ),
         # Themes according to the code list at https://op.europa.eu/en/web/eu-vocabularies/concept-scheme/-/resource?uri=http://publications.europa.eu/resource/authority/data-theme (code is the field inputted here, for example GOVE  - should be transformed into témata:GOVE for the jsonld)
-        **addRegexProperty(
+        **addCodeProperty(
             TEMA,
             _list_property(dataset, TEMA),
+            "témata:",
             THEME_REGEX,
             dataset,
         ),
         # Themes according to the code list at https://op.europa.eu/en/web/eu-vocabularies/concept-scheme/-/resource?uri=http://publications.europa.eu/resource/authority/frequency (code is the field inputted here, for example CONT - should be transformed into frekvence:CONT for the jsonld)
-        **addRegexProperty(
+        **addCodeProperty(
             PERIODICITA_AKTUALIZACE,
             _single_property(dataset, PERIODICITA_AKTUALIZACE),
+            "frekvence:",
             FREQUENCY_REGEX,
             dataset,
         ),
@@ -451,17 +458,19 @@ def build_dataset_document(
             dataset,
         ),
         # one or more numbers, for example 1234;5678 - should be transformed into [euroVoc:1234, euroVoc:5678] for the jsonld
-        **addRegexProperty(
+        **addCodeProperty(
             KONCEPT_EUROVOC,
             _list_property(dataset, KONCEPT_EUROVOC),
+            "euroVoc:",
             EUROVOC_REGEX,
             dataset,
         ),
         **addNonEmptyProperty(TYKA_SE_POJMU, related_term_iris),
         # A number, for example 1234 - should be transformed into isvs:1234 for the jsonld
-        **addRegexProperty(
+        **addCodeProperty(
             JE_ZAHRNUTA_V_ISVS,
             _single_property(dataset, JE_ZAHRNUTA_V_ISVS),
+            "isvs:",
             ISVS_REGEX,
             dataset,
         ),

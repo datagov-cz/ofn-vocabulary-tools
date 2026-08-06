@@ -171,6 +171,43 @@ def addRegexProperty(
     return {key: filtered_value}
 
 
+def prefixValue(value, prefix: str):
+    """Add a JSON-LD compact-IRI prefix to scalar or list input values.
+
+    Values that already carry the requested prefix are left unchanged.  This
+    keeps older ArchiMate models working while allowing users to enter just
+    the code (or media type) in newly created models.
+    """
+    if isinstance(value, str):
+        stripped_value = value.strip()
+        if not stripped_value or stripped_value.startswith(prefix):
+            return stripped_value
+        return "{}{}".format(prefix, stripped_value)
+
+    if isinstance(value, list):
+        return [prefixValue(item, prefix) for item in value]
+
+    return value
+
+
+def addCodeProperty(
+    key: str,
+    value,
+    prefix: str,
+    regex: str,
+    element: ArchimateElement | ArchimateRelationship,
+    property=None,
+) -> dict:
+    """Prefix an input code and validate the resulting compact IRI."""
+    return addRegexProperty(
+        key,
+        prefixValue(value, prefix),
+        regex,
+        element,
+        property,
+    )
+
+
 def addEmailProperty(
     key: str,
     value,

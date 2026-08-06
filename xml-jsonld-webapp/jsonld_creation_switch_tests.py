@@ -32,6 +32,58 @@ def parsed_model(elements, relationships):
 
 
 class CreateJsonLdFilesSwitchTest(unittest.TestCase):
+    def test_codes_are_expanded_to_jsonld_compact_iris(self):
+        dataset = element("dataset", "Test", {
+            "typ": "datová sada",
+            "téma": "GOVE;ECON",
+            "periodicita aktualizace": "CONT",
+            "koncept euroVoc": "1234; 5678",
+            "je zahrnuta v isvs": "42",
+        })
+        distribution = element("distribution", "Archive", {
+            "typ": "distribuce - soubor ke stažení",
+            "formát": "7Z",
+            "typ média": "application/json",
+            "typ média komprese": "application/gzip",
+            "typ média balíčku": "application/zip",
+        })
+        relationship = ArchimateRelationship(
+            identifier="distribution-relation",
+            type="Association",
+            source="dataset",
+            target="distribution",
+        )
+
+        document = create_jsonld_files(
+            parsed_model([dataset, distribution], [relationship])
+        )[0].document
+
+        self.assertEqual(document["téma"], ["témata:GOVE", "témata:ECON"])
+        self.assertEqual(
+            document["periodicita_aktualizace"],
+            "frekvence:CONT",
+        )
+        self.assertEqual(
+            document["koncept_euroVoc"],
+            ["euroVoc:1234", "euroVoc:5678"],
+        )
+        self.assertEqual(document["je_zahrnuta_v_isvs"], "isvs:42")
+
+        output_distribution = document["distribuce"][0]
+        self.assertEqual(output_distribution["formát"], "formáty:7Z")
+        self.assertEqual(
+            output_distribution["typ_média"],
+            "mediaTypes:application/json",
+        )
+        self.assertEqual(
+            output_distribution["typ_média_komprese"],
+            "mediaTypes:application/gzip",
+        )
+        self.assertEqual(
+            output_distribution["typ_média_balíčku"],
+            "mediaTypes:application/zip",
+        )
+
     def test_prefixed_subproperties_replace_switches(self):
         dataset = element("dataset", "Test", {
             "typ": "datová sada",
