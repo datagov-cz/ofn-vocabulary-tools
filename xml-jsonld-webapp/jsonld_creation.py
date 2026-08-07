@@ -48,7 +48,7 @@ from jsonld_properties import (
 from jsonld_relationships import (
     getIRIofTerm,
     getRelatedDistributionElements,
-    getRelatedElementsByAssociation,
+    getRelatedTerms,
 )
 from jsonld_required_fields import (
     ACCESS_SERVICE_REQUIRED_FIELDS,
@@ -114,7 +114,7 @@ def create_jsonld_files(parsed_xml: ParsedXml) -> list[JsonLdFile]:
 
         dataset_name = czech_names[0].value
         dataset_iri = createDatasetIRI(dataset_name)
-        related_terms = getRelatedElementsByAssociation(parsed_xml, dataset)
+        related_terms = getRelatedTerms(parsed_xml, dataset)
         related_term_iris = [
             iri
             for iri in (getIRIofTerm(term) for term in related_terms)

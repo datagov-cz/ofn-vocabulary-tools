@@ -21,13 +21,22 @@
         --danger-soft: #fee2e2;
       }
 
-      * { box-sizing: border-box; }
-      html { scroll-behavior: smooth; }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
       body {
         margin: 0;
         color: var(--ink);
         background: var(--canvas);
-        font: 16px/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font:
+          16px/1.65 system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
       }
 
       header {
@@ -36,52 +45,203 @@
         padding: 54px 24px 48px;
       }
 
-      .header-inner { max-width: 1180px; margin: 0 auto; }
-      .layout { max-width: 1480px; margin: 0 auto; }
-      .eyebrow { margin: 0 0 6px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .82; }
-      h1 { margin: 0; max-width: 850px; font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.08; }
-      header p:last-child { max-width: 780px; margin: 18px 0 0; font-size: 1.08rem; }
+      .header-inner {
+        max-width: 1180px;
+        margin: 0 auto;
+      }
+      .layout {
+        max-width: 1480px;
+        margin: 0 auto;
+      }
+      .eyebrow {
+        margin: 0 0 6px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        opacity: 0.82;
+      }
+      h1 {
+        margin: 0;
+        max-width: 850px;
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        line-height: 1.08;
+      }
+      header p:last-child {
+        max-width: 780px;
+        margin: 18px 0 0;
+        font-size: 1.08rem;
+      }
 
-      .layout { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 28px; padding: 32px 20px 64px; }
-      nav { position: sticky; top: 20px; align-self: start; padding: 18px; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; }
-      nav strong { display: block; margin-bottom: 10px; }
-      nav a { display: block; color: var(--brand); padding: 4px 0; text-decoration: none; }
-      nav a:hover { text-decoration: underline; }
+      .layout {
+        display: grid;
+        grid-template-columns: 230px minmax(0, 1fr);
+        gap: 28px;
+        padding: 32px 20px 64px;
+      }
+      nav {
+        position: sticky;
+        top: 20px;
+        align-self: start;
+        padding: 18px;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+      }
+      nav strong {
+        display: block;
+        margin-bottom: 10px;
+      }
+      nav a {
+        display: block;
+        color: var(--brand);
+        padding: 4px 0;
+        text-decoration: none;
+      }
+      nav a:hover {
+        text-decoration: underline;
+      }
 
-      main { min-width: 0; }
-      section { margin-bottom: 24px; padding: 28px; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 8px 24px rgb(15 23 42 / 5%); }
-      h2 { margin: 0 0 16px; color: #0c4a6e; font-size: 1.65rem; }
-      h3 { margin: 24px 0 8px; font-size: 1.15rem; }
-      p, ul, ol { margin-top: 0; }
-      code { padding: .08em .32em; color: #0c4a6e; background: #eef6fa; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
-      pre { overflow-x: auto; margin: 16px 0; padding: 18px; color: #dbeafe; background: #0f172a; border-radius: 10px; }
-      pre code { padding: 0; color: inherit; background: transparent; }
+      main {
+        min-width: 0;
+      }
+      section {
+        margin-bottom: 24px;
+        padding: 28px;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgb(15 23 42 / 5%);
+      }
+      h2 {
+        margin: 0 0 16px;
+        color: #0c4a6e;
+        font-size: 1.65rem;
+      }
+      h3 {
+        margin: 24px 0 8px;
+        font-size: 1.15rem;
+      }
+      p,
+      ul,
+      ol {
+        margin-top: 0;
+      }
+      code {
+        padding: 0.08em 0.32em;
+        color: #0c4a6e;
+        background: #eef6fa;
+        border-radius: 4px;
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      }
+      pre {
+        overflow-x: auto;
+        margin: 16px 0;
+        padding: 18px;
+        color: #dbeafe;
+        background: #0f172a;
+        border-radius: 10px;
+      }
+      pre code {
+        padding: 0;
+        color: inherit;
+        background: transparent;
+      }
 
-      .callout { margin: 18px 0; padding: 14px 16px; border-left: 5px solid; border-radius: 8px; }
-      .callout.good { color: var(--good); background: var(--good-soft); border-color: var(--good); }
-      .callout.warning { color: var(--warn); background: var(--warn-soft); border-color: var(--warn); }
-      .callout.danger { color: var(--danger); background: var(--danger-soft); border-color: var(--danger); }
+      .callout {
+        margin: 18px 0;
+        padding: 14px 16px;
+        border-left: 5px solid;
+        border-radius: 8px;
+      }
+      .callout.good {
+        color: var(--good);
+        background: var(--good-soft);
+        border-color: var(--good);
+      }
+      .callout.warning {
+        color: var(--warn);
+        background: var(--warn-soft);
+        border-color: var(--warn);
+      }
+      .callout.danger {
+        color: var(--danger);
+        background: var(--danger-soft);
+        border-color: var(--danger);
+      }
 
-      .table-wrap { overflow-x: auto; }
-      table { width: 100%; border-collapse: collapse; font-size: .94rem; }
-      th, td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
-      th { color: #0c4a6e; background: #f0f9ff; }
-      tbody tr:last-child td { border-bottom: 0; }
-      th:nth-child(4), td:nth-child(4), td:nth-child(4) code {
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.94rem;
+      }
+      th,
+      td {
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: top;
+        border-bottom: 1px solid var(--line);
+      }
+      th {
+        color: #0c4a6e;
+        background: #f0f9ff;
+      }
+      tbody tr:last-child td {
+        border-bottom: 0;
+      }
+      th:nth-child(4),
+      td:nth-child(4),
+      td:nth-child(4) code {
         overflow-wrap: anywhere;
         word-break: break-word;
       }
-      td:nth-child(4) code { white-space: normal; }
-      .ofn-definition { display: block; margin-top: .35em; color: var(--muted); font-size: .86em; line-height: 1.4; }
-      .ofn-definition::before { content: "OFN: "; font-weight: 700; }
-      .badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: .78rem; font-weight: 700; white-space: nowrap; }
-      .required { color: var(--danger); background: var(--danger-soft); }
-      .optional { color: var(--good); background: var(--good-soft); }
-      footer { margin-top: 42px; padding-top: 18px; color: var(--muted); border-top: 1px solid var(--line); font-size: .9rem; }
+      td:nth-child(4) code {
+        white-space: normal;
+      }
+      .ofn-definition {
+        display: block;
+        margin-top: 0.35em;
+        color: var(--muted);
+        font-size: 0.86em;
+        line-height: 1.4;
+      }
+      .ofn-definition::before {
+        content: "OFN: ";
+        font-weight: 700;
+      }
+      .badge {
+        display: inline-block;
+        padding: 1px 8px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .required {
+        color: var(--danger);
+        background: var(--danger-soft);
+      }
+      .optional {
+        color: var(--good);
+        background: var(--good-soft);
+      }
+      footer {
+        margin-top: 42px;
+        padding-top: 18px;
+        color: var(--muted);
+        border-top: 1px solid var(--line);
+        font-size: 0.9rem;
+      }
 
       @media (max-width: 850px) {
-        .layout { grid-template-columns: 1fr; }
-        nav { position: static; }
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        nav {
+          position: static;
+        }
       }
     </style>
   </head>
@@ -91,7 +251,8 @@
         <p class="eyebrow">ArchiMate XML → JSON-LD</p>
         <h1>How to prepare the source ArchiMate model</h1>
         <p>
-          A practical guide to the elements, relationships, property names, and value formats expected by
+          A practical guide to the elements, relationships, property names, and
+          value formats expected by
           <code>create_jsonld_files</code> in <code>jsonld_creation.py</code>.
         </p>
       </div>
@@ -118,16 +279,34 @@
         <section id="quick-start">
           <h2>Quick start</h2>
           <ol>
-            <li>Create property definitions using the exact source names shown in the tables below.</li>
-            <li>Create a dataset element, give it a Czech name, and add a <code>typ</code> property whose value contains <code>datová sada</code>.</li>
-            <li>Fill in the dataset properties, respecting the documented prefixes, formats, and capitalization.</li>
-            <li>Create a separate element for every distribution, set its exact subtype in <code>typ</code>, and connect it to the dataset with a relationship.</li>
-            <li>Related distributions are included automatically when they are connected to the dataset.</li>
+            <li>
+              Create property definitions using the exact source names shown in
+              the tables below.
+            </li>
+            <li>
+              Create a dataset element, give it a Czech name, and add a
+              <code>typ</code> property whose value contains
+              <code>datová sada</code>.
+            </li>
+            <li>
+              Fill in the dataset properties, respecting the documented
+              prefixes, formats, and capitalization.
+            </li>
+            <li>
+              Create a separate element for every distribution, set its exact
+              subtype in <code>typ</code>, and connect it to the dataset with a
+              relationship.
+            </li>
+            <li>
+              Related distributions are included automatically when they are
+              connected to the dataset.
+            </li>
           </ol>
 
           <div class="callout good">
-            <strong>Input versus output:</strong> ArchiMate source property names use spaces, for example
-            <code>kontaktní bod - email</code>. JSON-LD keys keep their underscored form, for example
+            <strong>Input versus output:</strong> ArchiMate source property
+            names use spaces, for example <code>kontaktní bod - email</code>.
+            JSON-LD keys keep their underscored form, for example
             <code>kontaktní_bod</code>.
           </div>
         </section>
@@ -137,13 +316,17 @@
 
           <h3>Property names must match exactly</h3>
           <p>
-            An element refers to an entry in <code>propertyDefinitions</code> through
-            <code>propertyDefinitionRef</code>. The converter uses the text of the definition's first
-            <code>&lt;name&gt;</code> as the resolved property key. If the definition has no name, its
-            <code>identifier</code> is used. Source names are case-sensitive and diacritic-sensitive, and
-            they must use spaces instead of underscores. The expected source name is
-            <code>soubor ke stažení</code>, not <code>soubor_ke_stažení</code>. This transformation applies
-            only to input lookup; generated JSON-LD keys retain underscores.
+            An element refers to an entry in
+            <code>propertyDefinitions</code> through
+            <code>propertyDefinitionRef</code>. The converter uses the text of
+            the definition's first <code>&lt;name&gt;</code> as the resolved
+            property key. If the definition has no name, its
+            <code>identifier</code> is used. Source names are case-sensitive and
+            diacritic-sensitive, and they must use spaces instead of
+            underscores. The expected source name is
+            <code>soubor ke stažení</code>, not <code>soubor_ke_stažení</code>.
+            This transformation applies only to input lookup; generated JSON-LD
+            keys retain underscores.
           </p>
 
           <pre><code>&lt;propertyDefinitions&gt;
@@ -162,97 +345,473 @@
 
           <h3>Single values, repeated values, and semicolons</h3>
           <ul>
-            <li>For single-valued fields, the converter uses the first value.</li>
-            <li>For fields described as lists, a single value is split on semicolons, for example <code>témata:doprava;témata:regiony</code>.</li>
-            <li>If the same property occurs multiple times in XML, the parser creates a list; those already separate values are not split again on semicolons.</li>
-            <li>Empty list items are discarded and surrounding whitespace is removed.</li>
+            <li>
+              For single-valued fields, the converter uses the first value.
+            </li>
+            <li>
+              For fields described as lists, a single value is split on
+              semicolons, for example
+              <code>témata:doprava;témata:regiony</code>.
+            </li>
+            <li>
+              If the same property occurs multiple times in XML, the parser
+              creates a list; those already separate values are not split again
+              on semicolons.
+            </li>
+            <li>
+              Empty list items are discarded and surrounding whitespace is
+              removed.
+            </li>
           </ul>
 
           <h3>Languages and nested properties</h3>
           <p>
-            A dataset needs a Czech name using <code>&lt;name xml:lang="cs"&gt;…&lt;/name&gt;</code>. Without one,
-            the element is skipped. If several Czech names exist, the first is used for the IRI and file
-            name. All names are written under their <code>xml:lang</code> keys in <code>název</code>.
+            A dataset needs a Czech name using
+            <code>&lt;name xml:lang="cs"&gt;…&lt;/name&gt;</code>. Without one,
+            the element is skipped. If several Czech names exist, the first is
+            used for the IRI and file name. All names are written under their
+            <code>xml:lang</code> keys in <code>název</code>.
           </p>
           <p>
-            Nested source properties use the name of their output object as a prefix, separated from the
-            child name by <code> - </code>. For example, use
-            <code>podmínky užití - autorské dílo</code>, not <code>autorské dílo</code>.
+            Nested source properties use the name of their output object as a
+            prefix, separated from the child name by <code> - </code>. For
+            example, use <code>podmínky užití - autorské dílo</code>, not
+            <code>autorské dílo</code>.
           </p>
         </section>
 
         <section id="dataset">
           <h2>Dataset element</h2>
           <p>
-            A JSON-LD file is created for every element whose <code>typ</code> property contains
-            <code>datová sada</code>. This comparison is case-insensitive and allows a partial match. The
+            A JSON-LD file is created for every element whose
+            <code>typ</code> property contains <code>datová sada</code>. This
+            comparison is case-insensitive and allows a partial match. The
             element's concrete ArchiMate <code>xsi:type</code> is not checked.
           </p>
           <p>
-            The IRI is generated as <code>https://slovník.gov.cz/{sanitized-Czech-name}</code>. The Czech
-            name is trimmed, lowercased, and characters disallowed in the local IRI part are replaced with
-            hyphens. It also becomes the basis of the <code>.jsonld</code> file name. JSON-LD <code>typ</code>
-            is always <code>["Datová sada", "Datová sada SSP"]</code>.
+            The IRI is generated as
+            <code>https://slovník.gov.cz/{sanitized-Czech-name}</code>. The
+            Czech name is trimmed, lowercased, and characters disallowed in the
+            local IRI part are replaced with hyphens. It also becomes the basis
+            of the <code>.jsonld</code> file name. JSON-LD <code>typ</code> is
+            always <code>["Datová sada", "Datová sada SSP"]</code>.
           </p>
           <p>
             Each field also includes its meaning according to
-            <a href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/">DCAT-AP-CZ: Data Interfaces</a>.
-            The link opens the corresponding definition in the authoritative Czech OFN; the
-            <strong>Expected value</strong> column continues to describe the input accepted by this converter.
+            <a
+              href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/"
+              >DCAT-AP-CZ: Data Interfaces</a
+            >. The link opens the corresponding definition in the authoritative
+            Czech OFN; the <strong>Expected value</strong> column continues to
+            describe the input accepted by this converter.
           </p>
 
           <div class="table-wrap">
             <table>
-              <thead><tr><th>ArchiMate source</th><th>JSON-LD output</th><th>Expected value</th><th>Example</th><th>Status</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>ArchiMate source</th>
+                  <th>JSON-LD output</th>
+                  <th>Expected value</th>
+                  <th>Example</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
               <tbody>
-                <tr><td><code>name xml:lang="cs"</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.n%C3%A1zev">The dataset's name.</a></td><td><code>název.cs</code>, IRI, and file name</td><td>Czech name; other language variants are copied too.</td><td><code>Jízdní řády MHD</code></td><td><span class="badge required">required</span></td></tr>
-                <tr><td><code>typ</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada">Identifies the element as a dataset.</a></td><td>fixed <code>typ</code></td><td>Text containing <code>datová sada</code>.</td><td><code>datová sada</code></td><td><span class="badge required">required</span></td></tr>
-                <tr><td><code>popis</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.popis">Free text describing the dataset.</a></td><td><code>popis.cs</code></td><td>Czech text; first value is used.</td><td><code>Aktuální jízdní řády MHD.</code></td><td><span class="badge optional">optional*</span></td></tr>
-                <tr><td><code>poskytovatel</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.poskytovatel">The entity that provides the dataset.</a></td><td><code>poskytovatel</code></td><td><code>ovm:</code> followed by at least one non-slash character, e.g. <code>ovm:00007064</code>.</td><td><code>ovm:00007064</code></td><td><span class="badge optional">optional*</span></td></tr>
-                <tr><td><code>téma</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.t%C3%A9ma">One or more themes describing the dataset.</a></td><td><code>téma</code></td><td>Semicolon-separated list; every item starts with <code>témata:</code>.</td><td><code>témata:doprava;témata:regiony</code></td><td><span class="badge optional">optional</span></td></tr>
-                <tr><td><code>periodicita aktualizace</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.periodicitaAktualizace">How frequently the dataset is updated.</a></td><td><code>periodicita_aktualizace</code></td><td>Value starting with <code>frekvence:</code>, e.g. <code>frekvence:měsíčně</code>.</td><td><code>frekvence:měsíčně</code></td><td><span class="badge optional">optional</span></td></tr>
-                <tr><td><code>klíčové slovo</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.kl%C3%AD%C4%8Dov%C3%A9Slovo">A keyword or tag characterizing the resource.</a></td><td><code>klíčové_slovo.cs</code></td><td>Semicolon-separated Czech keywords.</td><td><code>doprava;jízdní řády</code></td><td><span class="badge optional">optional</span></td></tr>
-                <tr><td><code>časové pokrytí - začátek</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#%C4%8Casov%C3%BDInterval.datumZa%C4%8D%C3%A1tku">The start of the period covered by the dataset.</a></td><td><code>časové_pokrytí.začátek</code></td><td>Date in <code>YYYY-MM-DD</code> format.</td><td><code>2026-01-01</code></td><td><span class="badge optional">optional</span></td></tr>
-                <tr><td><code>časové pokrytí - konec</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#%C4%8Casov%C3%BDInterval.datumKonce">The end of the period covered by the dataset.</a></td><td><code>časové_pokrytí.konec</code></td><td>Date in <code>YYYY-MM-DD</code> format.</td><td><code>2026-12-31</code></td><td><span class="badge optional">optional</span></td></tr>
-                <tr><td><code>kontaktní bod - jméno</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Kontaktn%C3%ADBod.jm%C3%A9no">The contact point's formatted name.</a></td><td><code>kontaktní_bod.jméno</code></td><td>Person or organization name; first value is used.</td><td><code>Odbor dopravy</code></td><td><span class="badge optional">optional*</span></td></tr>
-                <tr><td><code>kontaktní bod - email</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Kontaktn%C3%ADBod.email">An email address for communication.</a></td><td><code>kontaktní_bod.e-mail</code></td><td>Email address without whitespace; exported as a <code>mailto:</code> IRI.</td><td><code>data@example.cz</code></td><td><span class="badge optional">optional*</span></td></tr>
-                <tr><td><code>dokumentace</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.dokumentace">A page or document with information about the dataset.</a></td><td><code>dokumentace</code></td><td>Absolute URL beginning with <code>https://</code>.</td><td><code>https://data.example.cz/documentation</code></td><td><span class="badge optional">optional</span></td></tr>
-                <tr><td><code>specifikace</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.specifikace">A standard or specification that the dataset conforms to.</a></td><td><code>specifikace</code></td><td>One or more semicolon-separated URLs beginning with <code>https://</code>.</td><td><code>https://data.example.cz/specification</code></td><td><span class="badge optional">optional</span></td></tr>
-                <tr><td><code>koncept euroVoc</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.klasifikaceDleEurovoc">A dataset category or theme from EuroVoc.</a></td><td><code>koncept_euroVoc</code></td><td>Semicolon-separated list; every item starts with <code>euroVoc:</code>.</td><td><code>euroVoc:4512;euroVoc:2816</code></td><td><span class="badge optional">optional</span></td></tr>
-                <tr><td><code>je zahrnuta v isvs</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Informa%C4%8Dn%C3%ADSyst%C3%A9mVe%C5%99ejn%C3%A9Spr%C3%A1vy.zahrnuje">The public-administration information system that contains the dataset.</a></td><td><code>je_zahrnuta_v_isvs</code></td><td><code>isvs:</code> followed by at least one non-slash character.</td><td><code>isvs:1234</code></td><td><span class="badge optional">optional</span></td></tr>
-                <tr><td><code>je součástí</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.jeSou%C4%8D%C3%A1st%C3%AD">The dataset series to which the dataset belongs.</a></td><td><code>je_součástí</code></td><td>One URL beginning with <code>https://</code>.</td><td><code>https://data.example.cz/datasets/transport</code></td><td><span class="badge optional">optional</span></td></tr>
-                <tr><td><code>právní předpis</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.p%C5%99%C3%ADslu%C5%A1n%C3%BDPr%C3%A1vn%C3%ADP%C5%99edpis">Legislation mandating the dataset's creation or management.</a></td><td><code>právní_předpis</code></td><td>One or more semicolon-separated <code>https://</code> URLs.</td><td><code>https://www.e-sbirka.cz/sb/1999/106;https://www.e-sbirka.cz/sb/2000/365</code></td><td><span class="badge optional">optional</span></td></tr>
+                <tr>
+                  <td>
+                    <code>name xml:lang="cs"</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.n%C3%A1zev"
+                      >The dataset's name.</a
+                    >
+                  </td>
+                  <td><code>název.cs</code>, IRI, and file name</td>
+                  <td>Czech name; other language variants are copied too.</td>
+                  <td><code>Jízdní řády MHD</code></td>
+                  <td><span class="badge required">required</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>typ</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada"
+                      >Identifies the element as a dataset.</a
+                    >
+                  </td>
+                  <td>fixed <code>typ</code></td>
+                  <td>Text containing <code>datová sada</code>.</td>
+                  <td><code>datová sada</code></td>
+                  <td><span class="badge required">required</span></td>
+                </tr>
+                <tr>
+                  <td><code>metoda sbírání pojmů</code></td>
+                  <td>not emitted; controls <code>týká_se_pojmu</code></td>
+                  <td>
+                    One of <code>podrobně</code>, <code>standard</code>, or
+                    <code>agresivně</code>. If omitted, <code>podrobně</code> is
+                    used.
+                  </td>
+                  <td><code>standard</code></td>
+                  <td><span class="badge optional">optional</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>popis</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.popis"
+                      >Free text describing the dataset.</a
+                    >
+                  </td>
+                  <td><code>popis.cs</code></td>
+                  <td>Czech text; first value is used.</td>
+                  <td><code>Aktuální jízdní řády MHD.</code></td>
+                  <td><span class="badge optional">optional*</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>poskytovatel</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.poskytovatel"
+                      >The entity that provides the dataset.</a
+                    >
+                  </td>
+                  <td><code>poskytovatel</code></td>
+                  <td>
+                    <code>ovm:</code> followed by at least one non-slash
+                    character, e.g. <code>ovm:00007064</code>.
+                  </td>
+                  <td><code>ovm:00007064</code></td>
+                  <td><span class="badge optional">optional*</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>téma</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.t%C3%A9ma"
+                      >One or more themes describing the dataset.</a
+                    >
+                  </td>
+                  <td><code>téma</code></td>
+                  <td>
+                    Semicolon-separated list; every item starts with
+                    <code>témata:</code>.
+                  </td>
+                  <td><code>témata:doprava;témata:regiony</code></td>
+                  <td><span class="badge optional">optional</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>periodicita aktualizace</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.periodicitaAktualizace"
+                      >How frequently the dataset is updated.</a
+                    >
+                  </td>
+                  <td><code>periodicita_aktualizace</code></td>
+                  <td>
+                    Value starting with <code>frekvence:</code>, e.g.
+                    <code>frekvence:měsíčně</code>.
+                  </td>
+                  <td><code>frekvence:měsíčně</code></td>
+                  <td><span class="badge optional">optional</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>klíčové slovo</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.kl%C3%AD%C4%8Dov%C3%A9Slovo"
+                      >A keyword or tag characterizing the resource.</a
+                    >
+                  </td>
+                  <td><code>klíčové_slovo.cs</code></td>
+                  <td>Semicolon-separated Czech keywords.</td>
+                  <td><code>doprava;jízdní řády</code></td>
+                  <td><span class="badge optional">optional</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>časové pokrytí - začátek</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#%C4%8Casov%C3%BDInterval.datumZa%C4%8D%C3%A1tku"
+                      >The start of the period covered by the dataset.</a
+                    >
+                  </td>
+                  <td><code>časové_pokrytí.začátek</code></td>
+                  <td>Date in <code>YYYY-MM-DD</code> format.</td>
+                  <td><code>2026-01-01</code></td>
+                  <td><span class="badge optional">optional</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>časové pokrytí - konec</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#%C4%8Casov%C3%BDInterval.datumKonce"
+                      >The end of the period covered by the dataset.</a
+                    >
+                  </td>
+                  <td><code>časové_pokrytí.konec</code></td>
+                  <td>Date in <code>YYYY-MM-DD</code> format.</td>
+                  <td><code>2026-12-31</code></td>
+                  <td><span class="badge optional">optional</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>kontaktní bod - jméno</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Kontaktn%C3%ADBod.jm%C3%A9no"
+                      >The contact point's formatted name.</a
+                    >
+                  </td>
+                  <td><code>kontaktní_bod.jméno</code></td>
+                  <td>Person or organization name; first value is used.</td>
+                  <td><code>Odbor dopravy</code></td>
+                  <td><span class="badge optional">optional*</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>kontaktní bod - email</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Kontaktn%C3%ADBod.email"
+                      >An email address for communication.</a
+                    >
+                  </td>
+                  <td><code>kontaktní_bod.e-mail</code></td>
+                  <td>
+                    Email address without whitespace; exported as a
+                    <code>mailto:</code> IRI.
+                  </td>
+                  <td><code>data@example.cz</code></td>
+                  <td><span class="badge optional">optional*</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>dokumentace</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.dokumentace"
+                      >A page or document with information about the dataset.</a
+                    >
+                  </td>
+                  <td><code>dokumentace</code></td>
+                  <td>Absolute URL beginning with <code>https://</code>.</td>
+                  <td><code>https://data.example.cz/documentation</code></td>
+                  <td><span class="badge optional">optional</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>specifikace</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.specifikace"
+                      >A standard or specification that the dataset conforms
+                      to.</a
+                    >
+                  </td>
+                  <td><code>specifikace</code></td>
+                  <td>
+                    One or more semicolon-separated URLs beginning with
+                    <code>https://</code>.
+                  </td>
+                  <td><code>https://data.example.cz/specification</code></td>
+                  <td><span class="badge optional">optional</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>koncept euroVoc</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.klasifikaceDleEurovoc"
+                      >A dataset category or theme from EuroVoc.</a
+                    >
+                  </td>
+                  <td><code>koncept_euroVoc</code></td>
+                  <td>
+                    Semicolon-separated list; every item starts with
+                    <code>euroVoc:</code>.
+                  </td>
+                  <td><code>euroVoc:4512;euroVoc:2816</code></td>
+                  <td><span class="badge optional">optional</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>je zahrnuta v isvs</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Informa%C4%8Dn%C3%ADSyst%C3%A9mVe%C5%99ejn%C3%A9Spr%C3%A1vy.zahrnuje"
+                      >The public-administration information system that
+                      contains the dataset.</a
+                    >
+                  </td>
+                  <td><code>je_zahrnuta_v_isvs</code></td>
+                  <td>
+                    <code>isvs:</code> followed by at least one non-slash
+                    character.
+                  </td>
+                  <td><code>isvs:1234</code></td>
+                  <td><span class="badge optional">optional</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>je součástí</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.jeSou%C4%8D%C3%A1st%C3%AD"
+                      >The dataset series to which the dataset belongs.</a
+                    >
+                  </td>
+                  <td><code>je_součástí</code></td>
+                  <td>One URL beginning with <code>https://</code>.</td>
+                  <td>
+                    <code>https://data.example.cz/datasets/transport</code>
+                  </td>
+                  <td><span class="badge optional">optional</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>právní předpis</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.p%C5%99%C3%ADslu%C5%A1n%C3%BDPr%C3%A1vn%C3%ADP%C5%99edpis"
+                      >Legislation mandating the dataset's creation or
+                      management.</a
+                    >
+                  </td>
+                  <td><code>právní_předpis</code></td>
+                  <td>
+                    One or more semicolon-separated <code>https://</code> URLs.
+                  </td>
+                  <td>
+                    <code
+                      >https://www.e-sbirka.cz/sb/1999/106;https://www.e-sbirka.cz/sb/2000/365</code
+                    >
+                  </td>
+                  <td><span class="badge optional">optional</span></td>
+                </tr>
               </tbody>
             </table>
           </div>
-          <p><small>* Requirements of the target JSON Schema may differ from what the converter function itself enforces.</small></p>
+          <p>
+            <small
+              >* Requirements of the target JSON Schema may differ from what the
+              converter function itself enforces.</small
+            >
+          </p>
         </section>
 
         <section id="distribution">
           <h2>Distribution element</h2>
           <p>
-            An element is a distribution candidate when its <code>typ</code> contains <code>distribuce</code>.
-            To be emitted, it must be connected to a dataset and its <code>typ</code> must contain one of the
-            exact subtypes below. Matching is case-insensitive; the element's <code>xsi:type</code> is ignored.
+            An element is a distribution candidate when its
+            <code>typ</code> contains <code>distribuce</code>. To be emitted, it
+            must be connected to a dataset and its <code>typ</code> must contain
+            one of the exact subtypes below. Matching is case-insensitive; the
+            element's <code>xsi:type</code> is ignored.
           </p>
           <div class="callout good">
-            <strong>Allowed subtypes:</strong> <code>distribuce - soubor ke stažení</code> or
-            <code>distribuce - datová služba</code>. A generic <code>distribuce</code> value is insufficient
-            and causes the element to be skipped with a warning.
+            <strong>Allowed subtypes:</strong>
+            <code>distribuce - soubor ke stažení</code> or
+            <code>distribuce - datová služba</code>. A generic
+            <code>distribuce</code> value is insufficient and causes the element
+            to be skipped with a warning.
           </div>
           <p>
-            The distribution IRI is <code>{dataset IRI}/distribuce/{index}</code>, with a zero-based index
-            determined by model element order. Its output type is always
-            <code>["Datové rozhraní", "Distribuce"]</code>, and its names are copied from the distribution.
+            The distribution IRI is
+            <code>{dataset IRI}/distribuce/{index}</code>, with a zero-based
+            index determined by model element order. Its output type is always
+            <code>["Datové rozhraní", "Distribuce"]</code>, and its names are
+            copied from the distribution.
           </p>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>ArchiMate source</th><th>JSON-LD output</th><th>Expected value</th><th>Example</th><th>Applies to</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>ArchiMate source</th>
+                  <th>JSON-LD output</th>
+                  <th>Expected value</th>
+                  <th>Example</th>
+                  <th>Applies to</th>
+                </tr>
+              </thead>
               <tbody>
-                <tr><td><code>name</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce.n%C3%A1zev">The dataset distribution's name.</a></td><td><code>název</code></td><td>At least a Czech name is recommended; all language variants are copied.</td><td><code>Jízdní řády ve formátu CSV</code></td><td>both subtypes</td></tr>
-                <tr><td><code>typ</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce">Identifies a concrete representation and access method for the dataset.</a></td><td>fixed <code>typ</code></td><td>One of the two exact subtypes above.</td><td><code>distribuce - soubor ke stažení</code></td><td>both subtypes</td></tr>
-                <tr><td><code>přístupové url</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce.p%C5%99%C3%ADstupov%C3%A9Url">The address of a resource through which the distribution can be accessed.</a></td><td><code>přístupové_url</code></td><td><code>https://</code> URL; first value is used.</td><td><code>https://data.example.cz/timetables</code></td><td>both subtypes</td></tr>
-                <tr><td><code>právní předpis</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce.p%C5%99%C3%ADslu%C5%A1n%C3%BDPr%C3%A1vn%C3%ADP%C5%99edpis">Legislation mandating the distribution's creation.</a></td><td><code>právní_předpis</code></td><td>One or more semicolon-separated <code>https://</code> URLs.</td><td><code>https://www.e-sbirka.cz/sb/1999/106;https://www.e-sbirka.cz/sb/2000/365</code></td><td>both subtypes and service</td></tr>
+                <tr>
+                  <td>
+                    <code>name</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce.n%C3%A1zev"
+                      >The dataset distribution's name.</a
+                    >
+                  </td>
+                  <td><code>název</code></td>
+                  <td>
+                    At least a Czech name is recommended; all language variants
+                    are copied.
+                  </td>
+                  <td><code>Jízdní řády ve formátu CSV</code></td>
+                  <td>both subtypes</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>typ</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce"
+                      >Identifies a concrete representation and access method
+                      for the dataset.</a
+                    >
+                  </td>
+                  <td>fixed <code>typ</code></td>
+                  <td>One of the two exact subtypes above.</td>
+                  <td><code>distribuce - soubor ke stažení</code></td>
+                  <td>both subtypes</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>přístupové url</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce.p%C5%99%C3%ADstupov%C3%A9Url"
+                      >The address of a resource through which the distribution
+                      can be accessed.</a
+                    >
+                  </td>
+                  <td><code>přístupové_url</code></td>
+                  <td><code>https://</code> URL; first value is used.</td>
+                  <td><code>https://data.example.cz/timetables</code></td>
+                  <td>both subtypes</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>právní předpis</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce.p%C5%99%C3%ADslu%C5%A1n%C3%BDPr%C3%A1vn%C3%ADP%C5%99edpis"
+                      >Legislation mandating the distribution's creation.</a
+                    >
+                  </td>
+                  <td><code>právní_předpis</code></td>
+                  <td>
+                    One or more semicolon-separated <code>https://</code> URLs.
+                  </td>
+                  <td>
+                    <code
+                      >https://www.e-sbirka.cz/sb/1999/106;https://www.e-sbirka.cz/sb/2000/365</code
+                    >
+                  </td>
+                  <td>both subtypes and service</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -261,21 +820,123 @@
         <section id="usage-terms">
           <h2>Distribution usage terms</h2>
           <p>
-            These prefixed properties belong directly to the distribution element. At least one of them
-            creates the usage-terms object. The generated object gets an automatic
-            IRI ending in <code>/specifikace-podmínek-užití</code> and the fixed type
+            These prefixed properties belong directly to the distribution
+            element. At least one of them creates the usage-terms object. The
+            generated object gets an automatic IRI ending in
+            <code>/specifikace-podmínek-užití</code> and the fixed type
             <code>Specifikace podmínek užití</code>.
           </p>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Source property</th><th>JSON-LD output</th><th>Allowed value</th><th>Example</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Source property</th>
+                  <th>JSON-LD output</th>
+                  <th>Allowed value</th>
+                  <th>Example</th>
+                </tr>
+              </thead>
               <tbody>
-                <tr><td><code>podmínky užití - autorské dílo</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.autorsk%C3%A9D%C3%ADlo">Whether the data contains copyrighted works and which license applies.</a></td><td><code>podmínky_užití.autorské_dílo</code></td><td>One <code>https://</code> URL.</td><td><code>https://creativecommons.org/licenses/by/4.0/</code></td></tr>
-                <tr><td><code>podmínky užití - autor</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.jm%C3%A9naAutor%C5%AFD%C3%ADla">Names of work authors to attribute under CC BY 4.0.</a></td><td><code>podmínky_užití.autor.cs</code></td><td>Czech text; first value is used.</td><td><code>Ministerstvo dopravy</code></td></tr>
-                <tr><td><code>podmínky užití - databáze jako autorské dílo</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.origin%C3%A1ln%C3%ADDatab%C3%A1ze">Copyright protection for the database's original structure or arrangement.</a></td><td><code>podmínky_užití.databáze_jako_autorské_dílo</code></td><td>One <code>https://</code> URL.</td><td><code>https://creativecommons.org/licenses/by/4.0/</code></td></tr>
-                <tr><td><code>podmínky užití - autor databáze</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.jm%C3%A9naAutor%C5%AFOrigin%C3%A1ln%C3%ADDatab%C3%A1ze">Names of original-database authors to attribute under CC BY 4.0.</a></td><td><code>podmínky_užití.autor_databáze.cs</code></td><td>Czech text; first value is used.</td><td><code>Ministerstvo dopravy</code></td></tr>
-                <tr><td><code>podmínky užití - databáze chráněná zvláštními právy</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.zvl%C3%A1%C5%A1tn%C3%ADPr%C3%A1voPo%C5%99izovateleDatab%C3%A1ze">Sui generis rights protecting investment in obtaining, verifying, or publishing the database.</a></td><td><code>podmínky_užití.databáze_chráněná_zvláštními_právy</code></td><td>One <code>https://</code> URL.</td><td><code>https://creativecommons.org/publicdomain/zero/1.0/</code></td></tr>
-                <tr><td><code>podmínky užití - osobní údaje</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.osobn%C3%AD%C3%9Adaje">Tells recipients whether the data contains personal data.</a></td><td><code>podmínky_užití.osobní_údaje</code></td><td>One <code>https://</code> URL.</td><td><code>https://data.example.cz/personal-data-terms</code></td></tr>
+                <tr>
+                  <td>
+                    <code>podmínky užití - autorské dílo</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.autorsk%C3%A9D%C3%ADlo"
+                      >Whether the data contains copyrighted works and which
+                      license applies.</a
+                    >
+                  </td>
+                  <td><code>podmínky_užití.autorské_dílo</code></td>
+                  <td>One <code>https://</code> URL.</td>
+                  <td>
+                    <code>https://creativecommons.org/licenses/by/4.0/</code>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>podmínky užití - autor</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.jm%C3%A9naAutor%C5%AFD%C3%ADla"
+                      >Names of work authors to attribute under CC BY 4.0.</a
+                    >
+                  </td>
+                  <td><code>podmínky_užití.autor.cs</code></td>
+                  <td>Czech text; first value is used.</td>
+                  <td><code>Ministerstvo dopravy</code></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>podmínky užití - databáze jako autorské dílo</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.origin%C3%A1ln%C3%ADDatab%C3%A1ze"
+                      >Copyright protection for the database's original
+                      structure or arrangement.</a
+                    >
+                  </td>
+                  <td>
+                    <code>podmínky_užití.databáze_jako_autorské_dílo</code>
+                  </td>
+                  <td>One <code>https://</code> URL.</td>
+                  <td>
+                    <code>https://creativecommons.org/licenses/by/4.0/</code>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>podmínky užití - autor databáze</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.jm%C3%A9naAutor%C5%AFOrigin%C3%A1ln%C3%ADDatab%C3%A1ze"
+                      >Names of original-database authors to attribute under CC
+                      BY 4.0.</a
+                    >
+                  </td>
+                  <td><code>podmínky_užití.autor_databáze.cs</code></td>
+                  <td>Czech text; first value is used.</td>
+                  <td><code>Ministerstvo dopravy</code></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code
+                      >podmínky užití - databáze chráněná zvláštními právy</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.zvl%C3%A1%C5%A1tn%C3%ADPr%C3%A1voPo%C5%99izovateleDatab%C3%A1ze"
+                      >Sui generis rights protecting investment in obtaining,
+                      verifying, or publishing the database.</a
+                    >
+                  </td>
+                  <td>
+                    <code
+                      >podmínky_užití.databáze_chráněná_zvláštními_právy</code
+                    >
+                  </td>
+                  <td>One <code>https://</code> URL.</td>
+                  <td>
+                    <code
+                      >https://creativecommons.org/publicdomain/zero/1.0/</code
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>podmínky užití - osobní údaje</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.osobn%C3%AD%C3%9Adaje"
+                      >Tells recipients whether the data contains personal
+                      data.</a
+                    >
+                  </td>
+                  <td><code>podmínky_užití.osobní_údaje</code></td>
+                  <td>One <code>https://</code> URL.</td>
+                  <td>
+                    <code>https://data.example.cz/personal-data-terms</code>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -283,17 +944,108 @@
 
         <section id="download">
           <h2>Distribution – downloadable file</h2>
-          <p>These properties apply only when <code>typ = distribuce - soubor ke stažení</code>.</p>
+          <p>
+            These properties apply only when
+            <code>typ = distribuce - soubor ke stažení</code>.
+          </p>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Source property</th><th>JSON-LD output</th><th>Allowed value</th><th>Example</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Source property</th>
+                  <th>JSON-LD output</th>
+                  <th>Allowed value</th>
+                  <th>Example</th>
+                </tr>
+              </thead>
               <tbody>
-                <tr><td><code>soubor ke stažení</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.odkazNaSta%C5%BEen%C3%ADSouboru">A direct URL for downloading the file in the specified format.</a></td><td><code>soubor_ke_stažení.cs</code></td><td>URL beginning with <code>https://</code>.</td><td><code>https://data.example.cz/timetables.csv</code></td></tr>
-                <tr><td><code>formát</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.form%C3%A1tSouboruKeSta%C5%BEen%C3%AD">The file type in which the distribution is provided.</a></td><td><code>formát.cs</code></td><td>Value beginning with <code>formáty:</code>, e.g. <code>formáty:CSV</code>.</td><td><code>formáty:CSV</code></td></tr>
-                <tr><td><code>typ média</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.typM%C3%A9dia">The distribution's media type as defined by IANA.</a></td><td><code>typ_média.cs</code></td><td>Value beginning with <code>mediaTypes:</code>, e.g. <code>mediaTypes:text/csv</code>.</td><td><code>mediaTypes:text/csv</code></td></tr>
-                <tr><td><code>schéma</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.strojov%C4%9B%C4%8Citeln%C3%A9Sch%C3%A9maSouboruKeSta%C5%BEen%C3%AD">A machine-readable schema to which the distribution conforms.</a></td><td><code>schéma.cs</code></td><td>URL beginning with <code>https://</code>.</td><td><code>https://data.example.cz/schema.json</code></td></tr>
-                <tr><td><code>typ média komprese</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.form%C3%A1tKomprese">The compression format used, for example, to reduce download size.</a></td><td><code>typ_média_komprese.cs</code></td><td>Value beginning with <code>mediaTypes:</code>.</td><td><code>mediaTypes:application/gzip</code></td></tr>
-                <tr><td><code>typ média balíčku</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.form%C3%A1tBal%C3%AD%C4%8Dku">The package format grouping one or more related files.</a></td><td><code>typ_média_balíčku.cs</code></td><td>Value beginning with <code>mediaTypes:</code>.</td><td><code>mediaTypes:application/zip</code></td></tr>
+                <tr>
+                  <td>
+                    <code>soubor ke stažení</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.odkazNaSta%C5%BEen%C3%ADSouboru"
+                      >A direct URL for downloading the file in the specified
+                      format.</a
+                    >
+                  </td>
+                  <td><code>soubor_ke_stažení.cs</code></td>
+                  <td>URL beginning with <code>https://</code>.</td>
+                  <td><code>https://data.example.cz/timetables.csv</code></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>formát</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.form%C3%A1tSouboruKeSta%C5%BEen%C3%AD"
+                      >The file type in which the distribution is provided.</a
+                    >
+                  </td>
+                  <td><code>formát.cs</code></td>
+                  <td>
+                    Value beginning with <code>formáty:</code>, e.g.
+                    <code>formáty:CSV</code>.
+                  </td>
+                  <td><code>formáty:CSV</code></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>typ média</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.typM%C3%A9dia"
+                      >The distribution's media type as defined by IANA.</a
+                    >
+                  </td>
+                  <td><code>typ_média.cs</code></td>
+                  <td>
+                    Value beginning with <code>mediaTypes:</code>, e.g.
+                    <code>mediaTypes:text/csv</code>.
+                  </td>
+                  <td><code>mediaTypes:text/csv</code></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>schéma</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.strojov%C4%9B%C4%8Citeln%C3%A9Sch%C3%A9maSouboruKeSta%C5%BEen%C3%AD"
+                      >A machine-readable schema to which the distribution
+                      conforms.</a
+                    >
+                  </td>
+                  <td><code>schéma.cs</code></td>
+                  <td>URL beginning with <code>https://</code>.</td>
+                  <td><code>https://data.example.cz/schema.json</code></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>typ média komprese</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.form%C3%A1tKomprese"
+                      >The compression format used, for example, to reduce
+                      download size.</a
+                    >
+                  </td>
+                  <td><code>typ_média_komprese.cs</code></td>
+                  <td>Value beginning with <code>mediaTypes:</code>.</td>
+                  <td><code>mediaTypes:application/gzip</code></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>typ média balíčku</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.form%C3%A1tBal%C3%AD%C4%8Dku"
+                      >The package format grouping one or more related files.</a
+                    >
+                  </td>
+                  <td><code>typ_média_balíčku.cs</code></td>
+                  <td>Value beginning with <code>mediaTypes:</code>.</td>
+                  <td><code>mediaTypes:application/zip</code></td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -302,20 +1054,103 @@
         <section id="service">
           <h2>Distribution – data service</h2>
           <p>
-            With <code>typ = distribuce - datová služba</code>, a data-service object is included when
-            the distribution has at least one <code>přístupová služba - ...</code> property.
-            The service gets an automatic IRI ending in <code>/přístupová-služba</code>, the fixed type
-            <code>Datová služba</code>, and the same names as the distribution.
+            With <code>typ = distribuce - datová služba</code>, a data-service
+            object is included when the distribution has at least one
+            <code>přístupová služba - ...</code> property. The service gets an
+            automatic IRI ending in <code>/přístupová-služba</code>, the fixed
+            type <code>Datová služba</code>, and the same names as the
+            distribution.
           </p>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Source property</th><th>JSON-LD output</th><th>Allowed value</th><th>Example</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Source property</th>
+                  <th>JSON-LD output</th>
+                  <th>Allowed value</th>
+                  <th>Example</th>
+                </tr>
+              </thead>
               <tbody>
-                <tr><td><code>přístupová služba - přístupový bod</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Slu%C5%BEba.p%C5%99%C3%ADstupov%C3%BDBodSlu%C5%BEby">The service's root location or main web-accessible endpoint.</a></td><td><code>přístupová_služba.přístupový_bod.cs</code></td><td>Text; the converter does not validate it as a URL.</td><td><code>https://api.example.cz/timetables</code></td></tr>
-                <tr><td><code>přístupová služba - popis přístupového bodu</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Slu%C5%BEba.popisP%C5%99%C3%ADstupov%C3%A9hoBoduSlu%C5%BEby">A description of the endpoint, including operations and parameters.</a></td><td><code>přístupová_služba.popis_přístupového_bodu.cs</code></td><td>Czech text.</td><td><code>REST API pro vyhledání spojů</code></td></tr>
-                <tr><td><code>přístupová služba - právní předpis</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Slu%C5%BEba.p%C5%99%C3%ADslu%C5%A1n%C3%BDPr%C3%A1vn%C3%ADP%C5%99edpis">Legislation mandating the data service's creation.</a></td><td><code>přístupová_služba.právní_předpis</code></td><td>One or more semicolon-separated <code>https://</code> URLs.</td><td><code>https://www.e-sbirka.cz/sb/1999/106;https://www.e-sbirka.cz/sb/2000/365</code></td></tr>
-                <tr><td><code>přístupová služba - specifikace</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Slu%C5%BEba.specifikace">A standard or specification that the data service conforms to.</a></td><td><code>přístupová_služba.specifikace</code></td><td>One or more semicolon-separated <code>https://</code> URLs.</td><td><code>https://api.example.cz/openapi.json</code></td></tr>
-                <tr><td><code>přístupová služba - dokumentace</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Slu%C5%BEba.dokumentace">Documentation that describes the data service in more detail.</a></td><td><code>přístupová_služba.dokumentace</code></td><td>One <code>https://</code> URL.</td><td><code>https://api.example.cz/documentation</code></td></tr>
+                <tr>
+                  <td>
+                    <code>přístupová služba - přístupový bod</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Slu%C5%BEba.p%C5%99%C3%ADstupov%C3%BDBodSlu%C5%BEby"
+                      >The service's root location or main web-accessible
+                      endpoint.</a
+                    >
+                  </td>
+                  <td><code>přístupová_služba.přístupový_bod.cs</code></td>
+                  <td>Text; the converter does not validate it as a URL.</td>
+                  <td><code>https://api.example.cz/timetables</code></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>přístupová služba - popis přístupového bodu</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Slu%C5%BEba.popisP%C5%99%C3%ADstupov%C3%A9hoBoduSlu%C5%BEby"
+                      >A description of the endpoint, including operations and
+                      parameters.</a
+                    >
+                  </td>
+                  <td>
+                    <code>přístupová_služba.popis_přístupového_bodu.cs</code>
+                  </td>
+                  <td>Czech text.</td>
+                  <td><code>REST API pro vyhledání spojů</code></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>přístupová služba - právní předpis</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Slu%C5%BEba.p%C5%99%C3%ADslu%C5%A1n%C3%BDPr%C3%A1vn%C3%ADP%C5%99edpis"
+                      >Legislation mandating the data service's creation.</a
+                    >
+                  </td>
+                  <td><code>přístupová_služba.právní_předpis</code></td>
+                  <td>
+                    One or more semicolon-separated <code>https://</code> URLs.
+                  </td>
+                  <td>
+                    <code
+                      >https://www.e-sbirka.cz/sb/1999/106;https://www.e-sbirka.cz/sb/2000/365</code
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>přístupová služba - specifikace</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Slu%C5%BEba.specifikace"
+                      >A standard or specification that the data service
+                      conforms to.</a
+                    >
+                  </td>
+                  <td><code>přístupová_služba.specifikace</code></td>
+                  <td>
+                    One or more semicolon-separated <code>https://</code> URLs.
+                  </td>
+                  <td><code>https://api.example.cz/openapi.json</code></td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>přístupová služba - dokumentace</code
+                    ><a
+                      class="ofn-definition"
+                      href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Slu%C5%BEba.dokumentace"
+                      >Documentation that describes the data service in more
+                      detail.</a
+                    >
+                  </td>
+                  <td><code>přístupová_služba.dokumentace</code></td>
+                  <td>One <code>https://</code> URL.</td>
+                  <td><code>https://api.example.cz/documentation</code></td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -325,9 +1160,11 @@
           <h2>How to create model relationships</h2>
           <h3>Dataset → distribution</h3>
           <p>
-            A dataset and distribution must be connected by an entry in <code>relationships</code>. Direction
-            and relationship type are not checked for distributions: the dataset may be either
-            <code>source</code> or <code>target</code>. Found distributions are included automatically.
+            A dataset and distribution must be connected by an entry in
+            <code>relationships</code>. Direction and relationship type are not
+            checked for distributions: the dataset may be either
+            <code>source</code> or <code>target</code>. Found distributions are
+            included automatically.
           </p>
           <pre><code>&lt;relationships&gt;
   &lt;relationship identifier="rel-1" xsi:type="Association"
@@ -336,16 +1173,25 @@
 
           <h3>Dataset → related term</h3>
           <p>
-            Related-term lookup accepts only a relationship whose normalized <code>xsi:type</code> is exactly
-            <code>Association</code>. Direction is irrelevant. The connected element's <code>typ</code> must
-            contain <code>typ subjektu</code> or <code>typ objektu</code>. Found terms are included automatically.
+            The <code>metoda sbírání pojmů</code> dataset property selects the
+            lookup strategy. <code>podrobně</code> includes only directly
+            selected terms. <code>standard</code> keeps classes directly
+            associated with the dataset, their properties connected by
+            Composition, and named directed associations between those classes.
+            <code>agresivně</code> recursively follows named directed class
+            associations in either direction, class-to-class or property-to-property
+            Generalization/Specialization, and class-to-property Composition.
+            Only named directed class-to-class associations are emitted as
+            relationship terms. The strategy property itself is never written
+            to JSON-LD.
           </p>
         </section>
 
         <section id="example">
           <h2>Minimal example of relevant XML</h2>
           <p>
-            This example deliberately shortens the property-definition list. A real file needs one
+            This example deliberately shortens the property-definition list. A
+            real file needs one
             <code>propertyDefinition</code> for every source property name used.
           </p>
           <pre><code>&lt;model xmlns="http://www.opengroup.org/xsd/archimate/3.0/"
@@ -406,20 +1252,50 @@
         <section id="checklist">
           <h2>Pre-export checklist</h2>
           <ul>
-            <li>The XML root is <code>model</code> and uses a valid ArchiMate structure.</li>
-            <li>Every used property definition has the exact source key from these tables as its first <code>name</code>.</li>
-            <li>Every dataset and distribution candidate has a <code>typ</code> property.</li>
-            <li>Each dataset has a Czech name and a <code>typ</code> containing <code>datová sada</code>.</li>
-            <li>The prefixes <code>ovm:</code>, <code>témata:</code>, <code>frekvence:</code>, <code>euroVoc:</code>, <code>isvs:</code>, <code>formáty:</code>, and <code>mediaTypes:</code> use the exact capitalization.</li>
-            <li>URLs begin with <code>https://</code>; <code>http://</code> values are discarded.</li>
-            <li>Dates use <code>YYYY-MM-DD</code>, and email addresses contain no whitespace.</li>
+            <li>
+              The XML root is <code>model</code> and uses a valid ArchiMate
+              structure.
+            </li>
+            <li>
+              Every used property definition has the exact source key from these
+              tables as its first <code>name</code>.
+            </li>
+            <li>
+              Every dataset and distribution candidate has a
+              <code>typ</code> property.
+            </li>
+            <li>
+              Each dataset has a Czech name and a <code>typ</code> containing
+              <code>datová sada</code>.
+            </li>
+            <li>
+              The prefixes <code>ovm:</code>, <code>témata:</code>,
+              <code>frekvence:</code>, <code>euroVoc:</code>,
+              <code>isvs:</code>, <code>formáty:</code>, and
+              <code>mediaTypes:</code> use the exact capitalization.
+            </li>
+            <li>
+              URLs begin with <code>https://</code>; <code>http://</code> values
+              are discarded.
+            </li>
+            <li>
+              Dates use <code>YYYY-MM-DD</code>, and email addresses contain no
+              whitespace.
+            </li>
             <li>Lists within one value use semicolons, not commas.</li>
-            <li>Every nested source property uses its object name followed by <code> - </code> as a prefix.</li>
-            <li>Distributions have an exact subtype and a relationship to their dataset.</li>
+            <li>
+              Every nested source property uses its object name followed by
+              <code> - </code> as a prefix.
+            </li>
+            <li>
+              Distributions have an exact subtype and a relationship to their
+              dataset.
+            </li>
           </ul>
           <div class="callout warning">
-            A value that fails its regular expression is omitted and produces a warning. For lists, only
-            invalid items are discarded; valid items remain.
+            A value that fails its regular expression is omitted and produces a
+            warning. For lists, only invalid items are discarded; valid items
+            remain.
           </div>
         </section>
 
@@ -427,24 +1303,30 @@
           <h2>Known limitations of the current implementation</h2>
           <ul>
             <li>
-              Constants exist for <code>sdílí_údaj</code>, <code>odpovídající_pojem</code>,
-              <code>způsob_získání_sdílených_údajů</code>, <code>způsob_sdílení_údajů</code>, and
-              <code>typ_obsahu_sdílených_údajů</code>, but <code>create_jsonld_files</code> does not export them.
+              Constants exist for <code>sdílí_údaj</code>,
+              <code>odpovídající_pojem</code>,
+              <code>způsob_získání_sdílených_údajů</code>,
+              <code>způsob_sdílení_údajů</code>, and
+              <code>typ_obsahu_sdílených_údajů</code>, but
+              <code>create_jsonld_files</code> does not export them.
             </li>
             <li>
-              Missing required values are logged with their full field paths. If external validation is
-              enabled, the generated document is also rejected by JSON Schema validation.
+              Missing required values are logged with their full field paths. If
+              external validation is enabled, the generated document is also
+              rejected by JSON Schema validation.
             </li>
             <li>
-              The JSON-LD context is hard-coded. This guide describes the current implementation, not the
-              behavior of every DCAT-AP-CZ version.
+              The JSON-LD context is hard-coded. This guide describes the
+              current implementation, not the behavior of every DCAT-AP-CZ
+              version.
             </li>
           </ul>
         </section>
 
         <footer>
-          Sources of truth for this guide: <code>jsonld_creation.py</code>, <code>xml_processing.py</code>,
-          and <code>ofnDistributionBindings.py</code> in <code>xml-jsonld-webapp</code>.
+          Sources of truth for this guide: <code>jsonld_creation.py</code>,
+          <code>xml_processing.py</code>, and
+          <code>ofnDistributionBindings.py</code> in <code>tools-dataset</code>.
         </footer>
       </main>
     </div>

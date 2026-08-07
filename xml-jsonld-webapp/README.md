@@ -24,7 +24,7 @@ The XML conversion is currently only a skeleton. It parses the XML, reads the ro
 ## Setup
 
 ```bash
-cd xml-jsonld-webapp
+cd tools-dataset
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -33,7 +33,7 @@ pip install -r requirements.txt
 On Windows PowerShell:
 
 ```powershell
-cd xml-jsonld-webapp
+cd tools-dataset
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
@@ -88,7 +88,7 @@ Set `JSON_SCHEMA_URL` to an empty string to disable schema validation.
 The development container bind-mounts the project folder and runs Flask with debug mode enabled.
 
 ```bash
-cd xml-jsonld-webapp
+cd tools-dataset
 docker compose up --build
 ```
 
@@ -111,7 +111,7 @@ The same development setup is also available explicitly as `docker-compose.dev.y
 The production container copies the app into the image and runs it with Gunicorn.
 
 ```bash
-cd xml-jsonld-webapp
+cd tools-dataset
 docker compose -f docker-compose.prod.yml up --build -d
 ```
 

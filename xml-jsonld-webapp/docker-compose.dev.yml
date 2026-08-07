@@ -1,5 +1,5 @@
 services:
-  xml-jsonld-webapp-dev:
+  tools-dataset-dev:
     build:
       context: .
       dockerfile: Dockerfile.dev
