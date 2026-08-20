@@ -117,7 +117,7 @@ def create_jsonld_files(parsed_xml: ParsedXml) -> list[JsonLdFile]:
         related_terms = getRelatedTerms(parsed_xml, dataset)
         related_term_iris = [
             iri
-            for iri in (getIRIofTerm(term) for term in related_terms)
+            for iri in (getIRIofTerm(term, model) for term in related_terms)
             if iri
         ]
         distributions = build_distributions(

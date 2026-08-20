@@ -9,7 +9,12 @@ from jsonld_properties import (
     sanitizeString,
 )
 from ofnDistributionBindings import CS, IDENTIFIKATOR, METODA_SBIRANI_POJMU, TYP
-from xml_processing import ArchimateElement, ArchimateRelationship, ParsedXml
+from xml_processing import (
+    ArchimateElement,
+    ArchimateModel,
+    ArchimateRelationship,
+    ParsedXml,
+)
 
 
 DETAILED = "podrobně"
@@ -323,6 +328,7 @@ def getRelatedTerms(
 
 def getIRIofTerm(
     element: ArchimateElement | ArchimateRelationship,
+    model: ArchimateModel,
 ) -> str:
     iri = readProperty(element, IDENTIFIKATOR)
     if isinstance(iri, list):
@@ -340,8 +346,17 @@ def getIRIofTerm(
         )
         return ""
 
+    model_czech_names = [
+        name
+        for name in model.names
+        if name.language == CS and name.value.strip()
+    ]
+    if not model_czech_names:
+        raise ValueError("The model doesn't have a name in Czech")
+
     namespace = "https://slovník.gov.cz"
-    return "{}/{}".format(
+    return "{}/{}/pojem/{}".format(
         namespace.rstrip("/"),
+        sanitizeString(model_czech_names[0].value.strip().lower()),
         sanitizeString(czech_names[0].value.strip().lower()),
     )

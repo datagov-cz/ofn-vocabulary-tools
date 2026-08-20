@@ -1,6 +1,7 @@
 import unittest
 
 from jsonld_creation import create_jsonld_files
+from jsonld_relationships import getIRIofTerm
 from xml_processing import (
     ArchimateElement,
     ArchimateModel,
@@ -25,6 +26,7 @@ def parsed_model(elements, relationships):
         model=ArchimateModel(
             identifier="model",
             version=None,
+            names=[LangText("Testovací slovník", "cs")],
             elements=elements,
             relationships=relationships,
         ),
@@ -32,6 +34,23 @@ def parsed_model(elements, relationships):
 
 
 class CreateJsonLdFilesSwitchTest(unittest.TestCase):
+    def test_generated_term_iri_requires_a_czech_model_name(self):
+        term = element("term", "Term", {"typ": "typ subjektu"})
+        model = ArchimateModel(
+            identifier="model",
+            version=None,
+            names=[
+                LangText("", "cs"),
+                LangText("Test vocabulary", "en"),
+            ],
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "model doesn't have a name in Czech",
+        ):
+            getIRIofTerm(term, model)
+
     def test_codes_are_expanded_to_jsonld_compact_iris(self):
         dataset = element("dataset", "Test", {
             "typ": "datová sada",
@@ -154,7 +173,7 @@ class CreateJsonLdFilesSwitchTest(unittest.TestCase):
         self.assertIn("týká_se_pojmu", document)
         self.assertEqual(
             document["týká_se_pojmu"],
-            ["https://slovník.gov.cz/term"],
+            ["https://slovník.gov.cz/testovací-slovník/pojem/term"],
         )
         self.assertEqual(len(document["distribuce"]), 1)
 
