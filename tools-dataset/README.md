@@ -39,13 +39,32 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-On Windows, you can also run the installation script:
+### Windows local production deployment
+
+Windows users can run the app in a separate desktop window by double-clicking:
 
 ```bat
 install_and_run.bat
 ```
 
-The script pulls the latest `main` branch, creates `.venv` when needed, installs or updates dependencies, starts the app, and opens the default browser.
+This variant requires only Python 3.12 or newer. It does not require Docker,
+Git, administrator privileges, or changes to the PowerShell execution policy.
+The script creates `.venv` inside `tools-dataset`, installs or updates the
+dependencies from `requirements-windows.txt`, and launches `desktop.py` with
+`pythonw.exe`. FlaskWebGUI displays the application in its own window and
+stops the local Waitress server when that window is closed. Microsoft Edge,
+included with supported Windows versions, is used as the window engine.
+
+The desktop entry point can also be started from an activated environment:
+
+```powershell
+pip install -r requirements-windows.txt
+python desktop.py
+```
+
+This deployment is bound to the local computer and runs with Flask debugging
+and automatic reloading disabled. The ordinary development and Docker entry
+points remain available separately below.
 
 ## Run
 
