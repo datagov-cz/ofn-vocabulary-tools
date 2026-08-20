@@ -17,7 +17,7 @@ def read_xml_upload(uploaded_file):
     if uploaded_file is None or uploaded_file.filename == "":
         raise UploadError("missing_file")
 
-    if not uploaded_file.filename.lower().endswith(".xml"):
+    if not uploaded_file.filename.lower().endswith((".xml", ".xmi")):
         raise UploadError("invalid_file_type")
 
     return UploadedXml(

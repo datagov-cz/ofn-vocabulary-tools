@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+
+<html lang="cs">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Příprava modelu Enterprise Architect XMI pro export JSON-LD</title>
+<style>
+      :root {
+        color-scheme: light;
+        --ink: #172133;
+        --muted: #566176;
+        --paper: #ffffff;
+        --canvas: #f3f6fa;
+        --line: #d8dee9;
+        --brand: #174a7e;
+        --brand-soft: #e9f2fb;
+        --good: #23663d;
+        --good-soft: #eaf7ef;
+        --warn: #7a4a00;
+        --warn-soft: #fff5da;
+        --danger: #8b2530;
+        --danger-soft: #fcecef;
+        --code: #f0f3f7;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--canvas);
+        font:
+          16px/1.6 system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+
+      header {
+        color: #fff;
+        background: linear-gradient(125deg, #12385f, #17618a);
+      }
+
+      .header-inner {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      .layout {
+        width: min(1480px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      .header-inner {
+        padding: 52px 0 44px;
+      }
+      .eyebrow {
+        margin: 0 0 8px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      h1 {
+        max-width: 850px;
+        margin: 0;
+        font-size: clamp(2rem, 5vw, 3.4rem);
+        line-height: 1.1;
+      }
+      header p {
+        max-width: 780px;
+        margin: 18px 0 0;
+        font-size: 1.12rem;
+        color: #e4f0fa;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 250px minmax(0, 1fr);
+        gap: 28px;
+        padding: 30px 0 64px;
+      }
+
+      nav {
+        position: sticky;
+        top: 18px;
+        align-self: start;
+        padding: 20px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--paper);
+      }
+
+      nav strong {
+        display: block;
+        margin-bottom: 8px;
+      }
+      nav a {
+        display: block;
+        padding: 4px 0;
+        color: var(--brand);
+        text-decoration: none;
+      }
+      nav a:hover,
+      nav a:focus {
+        text-decoration: underline;
+      }
+
+      main {
+        min-width: 0;
+        padding: 28px clamp(20px, 4vw, 48px) 52px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--paper);
+        box-shadow: 0 8px 28px rgb(27 48 76 / 8%);
+      }
+
+      section {
+        scroll-margin-top: 20px;
+      }
+      h2 {
+        margin: 2.2em 0 0.45em;
+        padding-bottom: 0.25em;
+        border-bottom: 2px solid var(--brand-soft);
+        font-size: 1.65rem;
+      }
+      h2:first-child {
+        margin-top: 0;
+      }
+      h3 {
+        margin: 1.7em 0 0.4em;
+        font-size: 1.2rem;
+      }
+      p,
+      ul,
+      ol {
+        max-width: 82ch;
+      }
+      li + li {
+        margin-top: 0.3em;
+      }
+      a {
+        color: var(--brand);
+      }
+
+      code,
+      kbd {
+        padding: 0.08em 0.3em;
+        border-radius: 4px;
+        background: var(--code);
+        font:
+          0.92em ui-monospace,
+          SFMono-Regular,
+          Consolas,
+          monospace;
+      }
+
+      pre {
+        overflow-x: auto;
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #182334;
+        color: #f2f6fb;
+        line-height: 1.45;
+      }
+
+      pre code {
+        padding: 0;
+        background: transparent;
+        color: inherit;
+      }
+
+      .callout {
+        max-width: 86ch;
+        margin: 18px 0;
+        padding: 14px 18px;
+        border-left: 5px solid var(--brand);
+        border-radius: 6px;
+        background: var(--brand-soft);
+      }
+
+      .callout.good {
+        border-color: var(--good);
+        background: var(--good-soft);
+      }
+      .callout.warning {
+        border-color: var(--warn);
+        background: var(--warn-soft);
+      }
+      .callout.danger {
+        border-color: var(--danger);
+        background: var(--danger-soft);
+      }
+      .callout > :first-child {
+        margin-top: 0;
+      }
+      .callout > :last-child {
+        margin-bottom: 0;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        margin: 16px 0 26px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.94rem;
+      }
+      th,
+      td {
+        padding: 11px 13px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: #edf3f8;
+        color: #193956;
+      }
+      tr:last-child td {
+        border-bottom: 0;
+      }
+      tbody tr:nth-child(even) {
+        background: #fafbfd;
+      }
+      th:nth-child(4),
+      td:nth-child(4),
+      td:nth-child(4) code {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+      td:nth-child(4) code {
+        white-space: normal;
+      }
+      .nowrap {
+        white-space: nowrap;
+      }
+
+      .ofn-definition {
+        display: block;
+        margin-top: 0.35em;
+        color: var(--muted);
+        font-size: 0.86em;
+        line-height: 1.4;
+      }
+
+      .ofn-definition::before {
+        content: "OFN: ";
+        font-weight: 700;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 1px 7px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .required {
+        color: var(--danger);
+        background: var(--danger-soft);
+      }
+      .optional {
+        color: var(--good);
+        background: var(--good-soft);
+      }
+
+      footer {
+        margin-top: 42px;
+        padding-top: 18px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 850px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        nav {
+          position: static;
+        }
+      }
+    </style>
+</head>
+<body>
+<header>
+<div class="header-inner">
+<p class="eyebrow">Enterprise Architect XMI 2.1 → JSON-LD</p>
+<h1>Jak připravit model v Enterprise Architect</h1>
+<p>Vyčerpávající přehled všech podporovaných stereotypů a tagged values, jejich výstupu JSON-LD, povolených hodnot a příkladů.</p>
+</div>
+</header>
+<div class="layout">
+<nav aria-label="Obsah dokumentu">
+<strong>Obsah</strong>
+<a href="ea-xmi-jsonld-guide-en.html" lang="en">English version</a>
+<a href="#rychly-postup">Rychlý postup</a>
+<a href="#ea-stereotypy">Podporované stereotypy</a>
+<a href="#jak-se-ctou-vlastnosti">Jak se čtou tagged values</a>
+<a href="#datova-sada">Datová sada</a>
+<a href="#tagy-pojmu">Pojmy slovníku</a>
+<a href="#distribuce">Distribuce</a>
+<a href="#podminky">Podmínky užití</a>
+<a href="#soubor">Soubor ke stažení</a>
+<a href="#sluzba">Datová služba</a>
+<a href="#vztahy">Vztahy v modelu</a>
+<a href="#priklad">Ukázka XMI</a>
+<a href="#kontrolni-seznam">Kontrolní seznam</a>
+<a href="#omezeni">Známá omezení</a>
+<a href="archimate-jsonld-guide.html">Průvodce Archi</a></nav>
+<main>
+<section id="rychly-postup"><h2>Rychlý postup</h2><ol><li>Vytvořte balíček se stereotypem <code>slovnikyPackage</code>.</li><li>Všechny zpracovávané prvky a vztahy umístěte pod něj, přímo nebo ve vnořených balíčcích.</li><li>Použijte některý z přesných podporovaných stereotypů uvedených níže.</li><li>Ostatní metadata vyplňte přesnými názvy tagged values z vyčerpávajících tabulek.</li><li>Exportujte UML XMI 2.1 včetně profilů, stereotypů, tagged values a vztahů a nahrajte soubor <code>.xml</code> nebo <code>.xmi</code>.</li></ol><div class="callout good"><strong>Stejný vstup:</strong> Archi XML a EA XMI se rozpoznají automaticky.</div></section><section id="ea-stereotypy"><h2>Podporované stereotypy</h2>
+<p><code>typ</code> se ze tagged value ve vstupu EA nikdy nečte. Odvozuje se z přesného ASCII camelCase názvu stereotypu. Převodník při porovnávání ignoruje velikost písmen, oddělovače a diakritiku, v modelu však používejte níže uvedené kanonické názvy.</p>
+<div class="table-wrap"><table><thead><tr><th>Stereotyp EA</th><th>Platí pro</th><th>Účinek/výstup JSON-LD</th><th>Povolená hodnota modelu</th><th>Příklad</th></tr></thead><tbody>
+<tr><td><code>slovnikyPackage</code></td><td>UML Package</td><td>Nemá přímý výstup; určuje povinnou hranici převodu.</td><td>Každý zpracovávaný prvek a vztah musí být potomkem tohoto balíčku.</td><td>Balíček <code>Doprava</code></td></tr>
+<tr><td><code>datovaSada</code></td><td>UML prvek</td><td>Vytvoří soubor s <code>typ = ["Datová sada", "Datová sada SSP"]</code>.</td><td>Přesný stereotyp; UML name musí obsahovat český název datové sady.</td><td><code>datovaSada</code></td></tr>
+<tr><td><code>distribuceSouborKeStazeni</code></td><td>UML prvek</td><td>Vytvoří distribuci s poli souboru ke stažení.</td><td>Přesný stereotyp a vztah k datové sadě.</td><td><code>distribuceSouborKeStazeni</code></td></tr>
+<tr><td><code>distribuceDatovaSluzba</code></td><td>UML prvek</td><td>Vytvoří distribuci s objektem <code>přístupová_služba</code>.</td><td>Přesný stereotyp a vztah k datové sadě.</td><td><code>distribuceDatovaSluzba</code></td></tr>
+<tr><td><code>typSubjektu</code></td><td>UML třída</td><td>Může přidat své IRI do <code>týká_se_pojmu</code> datové sady.</td><td>Výběr určuje strategie sbírání pojmů.</td><td><code>typSubjektu</code></td></tr>
+<tr><td><code>typObjektu</code></td><td>UML třída</td><td>Může přidat své IRI do <code>týká_se_pojmu</code> datové sady.</td><td>Výběr určuje strategie sbírání pojmů.</td><td><code>typObjektu</code></td></tr>
+<tr><td><code>typVlastnosti</code></td><td>UML prvek</td><td>Může přidat své IRI do <code>týká_se_pojmu</code> datové sady.</td><td>Výběr je přímý nebo přes kompozici třídy podle strategie.</td><td><code>typVlastnosti</code></td></tr>
+<tr><td><code>typVztahu</code></td><td>Pojmenovaná UML asociace</td><td>Může přidat své IRI do <code>týká_se_pojmu</code> datové sady.</td><td>Orientovaná pojmenovaná asociace mezi zahrnutými třídami subjektu/objektu.</td><td><code>typVztahu</code></td></tr>
+</tbody></table></div></section>
+<section id="jak-se-ctou-vlastnosti"><h2>Jak se čtou tagged values EA</h2>
+<h3>Kanonické názvy</h3><p>Každá vlastnost kromě typu se čte z tagged values aplikace stereotypu. Tabulky uvádějí kanonický název tagu EA, například <code>klíčové slovo</code> nebo <code>podmínky užití - autorské dílo</code>. Parser toleruje i rozdíly ve velikosti písmen, oddělovačích a diakritice zavedené exportérem profilu, doporučené jsou však kanonické názvy.</p>
+<h3>Jednotlivé hodnoty a seznamy</h3><ul><li>U polí s jedinou hodnotou se použije první hodnota.</li><li>Seznamová pole dělí jednu hodnotu podle středníků a odstraňují okolní mezery.</li><li>Neplatná URL, data, e-maily, číselníkové hodnoty a typy médií se vynechají s varováním podle pravidla povolených hodnot v tabulce.</li></ul>
+<h3>Názvy a hranice balíčku</h3><p>UML <code>name</code> se použije jako český název. Datová sada bez něj se přeskočí. Čtou se pouze základní UML prvky a vztahy pod balíčkem se stereotypem <code>slovnikyPackage</code>, včetně potomků ve vnořených balíčcích.</p>
+<div class="callout warning"><strong>Výjimka <code>typ</code>:</strong> tagged value <code>typ</code> se ignoruje. Typ vždy pochází ze stereotypu prvku nebo vztahu.</div></section>
+<section id="datova-sada"><h2>Element datové sady</h2><p>Jeden soubor JSON-LD se vytvoří pro každý zahrnutý UML prvek se stereotypem <code>datovaSada</code>. UML <code>name</code> poskytuje povinný český název, název výstupního souboru a generované IRI datové sady.</p><p>Následující tabulka je vyčerpávající. Každý řádek, jehož zdrojem není <code>UML name</code> ani <code>stereotype</code>, představuje tagged value EA.</p><div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Zdroj v EA XMI</th>
+<th>Výstup JSON-LD</th>
+<th>Jak vyplnit</th>
+<th>Příklad</th>
+<th>Stav</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>UML name</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.n%C3%A1zev">Název datové sady.</a>
+</td>
+<td><code>název.cs</code>, IRI a název souboru</td>
+<td>UML name interpretovaný jako český název; je povinný.</td>
+<td><code>Jízdní řády MHD</code></td>
+<td><span class="badge required">nutné</span></td>
+</tr>
+<tr>
+<td>
+<code>stereotype</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada">Určuje, že element představuje datovou sadu.</a>
+</td>
+<td>pevný <code>typ</code></td>
+<td>Přesný podporovaný stereotyp datové sady.</td>
+<td><code>datovaSada</code></td>
+<td><span class="badge required">nutné</span></td>
+</tr>
+<tr>
+<td><code>metoda sbírání pojmů</code></td>
+<td>nevypisuje se; řídí <code>týká_se_pojmu</code></td>
+<td>
+                    Jedna z hodnot <code>podrobně</code>,
+                    <code>standard</code> nebo <code>agresivně</code>. Při
+                    vynechání se použije <code>podrobně</code>.
+                  </td>
+<td><code>standard</code></td>
+<td><span class="badge optional">volitelné</span></td>
+</tr>
+<tr>
+<td>
+<code>popis</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.popis">Volný text popisující datovou sadu.</a>
+</td>
+<td><code>popis.cs</code></td>
+<td>Český text; použije se první hodnota.</td>
+<td><code>Aktuální jízdní řády MHD.</code></td>
+<td><span class="badge optional">volitelné*</span></td>
+</tr>
+<tr>
+<td>
+<code>poskytovatel</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.poskytovatel">Subjekt, který datovou sadu poskytuje.</a>
+</td>
+<td><code>poskytovatel</code></td>
+<td>
+                    Přesně <code>ovm:</code> a alespoň jeden znak bez lomítka,
+                    např. <code>ovm:00007064</code>.
+                  </td>
+<td><code>ovm:00007064</code></td>
+<td><span class="badge optional">volitelné*</span></td>
+</tr>
+<tr>
+<td>
+<code>téma</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.t%C3%A9ma">Jedno nebo více témat popisujících datovou sadu.</a>
+</td>
+<td><code>téma</code></td>
+<td>Číselníkové kódy oddělené <code>;</code>; prefix <code>témata:</code> je volitelný.</td>
+<td><code>GOVE;ECON</code></td>
+<td><span class="badge optional">volitelné</span></td>
+</tr>
+<tr>
+<td>
+<code>periodicita aktualizace</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.periodicitaAktualizace">Frekvence aktualizace datové sady.</a>
+</td>
+<td><code>periodicita_aktualizace</code></td>
+<td>Kód frekvence; prefix <code>frekvence:</code> je volitelný.</td>
+<td><code>CONT</code></td>
+<td><span class="badge optional">volitelné</span></td>
+</tr>
+<tr>
+<td>
+<code>klíčové slovo</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.kl%C3%AD%C4%8Dov%C3%A9Slovo">Klíčové slovo nebo značka charakterizující zdroj.</a>
+</td>
+<td><code>klíčové_slovo.cs</code></td>
+<td>Česká klíčová slova oddělená <code>;</code>.</td>
+<td><code>doprava;jízdní řády</code></td>
+<td><span class="badge optional">volitelné</span></td>
+</tr>
+<tr>
+<td>
+<code>časové pokrytí - začátek</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#%C4%8Casov%C3%BDInterval.datumZa%C4%8D%C3%A1tku">Začátek období pokrytého datovou sadou.</a>
+</td>
+<td><code>časové_pokrytí.začátek</code></td>
+<td>
+                    Datum přesně ve formátu <code>RRRR-MM-DD</code>, např.
+                    <code>2026-08-04</code>.
+                  </td>
+<td><code>2026-01-01</code></td>
+<td><span class="badge optional">volitelné</span></td>
+</tr>
+<tr>
+<td>
+<code>časové pokrytí - konec</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#%C4%8Casov%C3%BDInterval.datumKonce">Konec období pokrytého datovou sadou.</a>
+</td>
+<td><code>časové_pokrytí.konec</code></td>
+<td>Datum přesně ve formátu <code>RRRR-MM-DD</code>.</td>
+<td><code>2026-12-31</code></td>
+<td><span class="badge optional">volitelné</span></td>
+</tr>
+<tr>
+<td>
+<code>kontaktní bod - jméno</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Kontaktn%C3%ADBod.jm%C3%A9no">Formátované jméno kontaktního bodu.</a>
+</td>
+<td><code>kontaktní_bod.jméno</code></td>
+<td>
+                    Jméno osoby nebo název organizace; použije se první hodnota.
+                  </td>
+<td><code>Odbor dopravy</code></td>
+<td><span class="badge optional">volitelné*</span></td>
+</tr>
+<tr>
+<td>
+<code>kontaktní bod - email</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Kontaktn%C3%ADBod.email">E-mailová adresa určená ke komunikaci.</a>
+</td>
+<td><code>kontaktní_bod.e-mail</code></td>
+<td>
+                    E-mail ve tvaru <code>uzivatel@domena.cz</code>; exportuje
+                    se jako IRI s prefixem <code>mailto:</code>.
+                  </td>
+<td><code>data@example.cz</code></td>
+<td><span class="badge optional">volitelné*</span></td>
+</tr>
+<tr>
+<td>
+<code>dokumentace</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.dokumentace">Stránka nebo dokument s informacemi o datové sadě.</a>
+</td>
+<td><code>dokumentace</code></td>
+<td>
+                    Absolutní URL začínající přesně <code>https://</code>.
+                  </td>
+<td><code>https://data.example.cz/dokumentace</code></td>
+<td><span class="badge optional">volitelné</span></td>
+</tr>
+<tr>
+<td>
+<code>specifikace</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.specifikace">Standard nebo specifikace, podle které se datová sada
+                      řídí.</a>
+</td>
+<td><code>specifikace</code></td>
+<td>
+                    Jedna či více <code>https://</code> URL oddělených
+                    středníkem.
+                  </td>
+<td><code>https://data.example.cz/specifikace</code></td>
+<td><span class="badge optional">volitelné</span></td>
+</tr>
+<tr>
+<td>
+<code>koncept euroVoc</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.klasifikaceDleEurovoc">Kategorie nebo téma datové sady podle EuroVoc.</a>
+</td>
+<td><code>koncept_euroVoc</code></td>
+<td>Kódy EuroVoc oddělené <code>;</code>; prefix <code>euroVoc:</code> je volitelný.</td>
+<td><code>4512;2816</code></td>
+<td><span class="badge optional">volitelné</span></td>
+</tr>
+<tr>
+<td>
+<code>je zahrnuta v isvs</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Informa%C4%8Dn%C3%ADSyst%C3%A9mVe%C5%99ejn%C3%A9Spr%C3%A1vy.zahrnuje">Informační systém veřejné správy, který datovou sadu
+                      zahrnuje.</a>
+</td>
+<td><code>je_zahrnuta_v_isvs</code></td>
+<td>Kód ISVS; prefix <code>isvs:</code> je volitelný.</td>
+<td><code>1234</code></td>
+<td><span class="badge optional">volitelné</span></td>
+</tr>
+<tr>
+<td>
+<code>je součástí</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.jeSou%C4%8D%C3%A1st%C3%AD">Datová série, do které datová sada patří.</a>
+</td>
+<td><code>je_součástí</code></td>
+<td>Jedna URL začínající <code>https://</code>.</td>
+<td>
+<code>https://data.example.cz/datove-sady/doprava</code>
+</td>
+<td><span class="badge optional">volitelné</span></td>
+</tr>
+<tr>
+<td>
+<code>právní předpis</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Sada.p%C5%99%C3%ADslu%C5%A1n%C3%BDPr%C3%A1vn%C3%ADP%C5%99edpis">Předpis, který ukládá vznik nebo správu datové sady.</a>
+</td>
+<td><code>právní_předpis</code></td>
+<td>
+                    Jedna či více <code>https://</code> URL oddělených
+                    <code>;</code>.
+                  </td>
+<td>
+<code>https://www.e-sbirka.cz/sb/1999/106;https://www.e-sbirka.cz/sb/2000/365</code>
+</td>
+<td><span class="badge optional">volitelné</span></td>
+</tr>
+<tr><td><code>vstupní stránka</code></td><td><code>vstupní_stránka</code></td><td>Jedna <code>https://</code> URL.</td><td><code>https://data.example.cz/datova-sada</code></td><td><span class="badge optional">volitelné</span></td></tr></tbody>
+</table>
+</div>
+<p>
+<small>* Povinnost vůči cílovému JSON schématu se může lišit od
+              technického chování převodníku. Tato tabulka popisuje, co vynucuje
+              samotná funkce.</small>
+</p>
+</section><section id="tagy-pojmu"><h2>Tagged values pojmů slovníku</h2><div class="table-wrap"><table><thead><tr><th>Tagged value EA</th><th>Výstup JSON-LD</th><th>Jak vyplnit</th><th>Příklad</th><th>Stav</th></tr></thead><tbody>
+<tr><td><code>identifikátor</code></td><td>Položka v <code>týká_se_pojmu</code> datové sady</td><td>Jedno absolutní IRI <code>https://</code>. Chybí-li, převodník vytvoří IRI z názvu stereotypovaného balíčku a českého UML názvu pojmu.</td><td><code>https://slovník.gov.cz/doprava/pojem/vozidlo</code></td><td><span class="badge optional">volitelné</span></td></tr>
+</tbody></table></div><p>Tag platí pro <code>typSubjektu</code>, <code>typObjektu</code>, <code>typVlastnosti</code> a způsobilé asociace <code>typVztahu</code>.</p></section>
+<section id="distribuce"><h2>Element distribuce</h2><p>Zahrnutý UML prvek se vypíše jako distribuce pouze se stereotypem <code>distribuceSouborKeStazeni</code> nebo <code>distribuceDatovaSluzba</code> a se vztahem k datové sadě. Jeho IRI je <code>{IRI datové sady}/distribuce/{index}</code>.</p><div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Zdroj v EA XMI</th>
+<th>Výstup JSON-LD</th>
+<th>Jak vyplnit</th>
+<th>Příklad</th>
+<th>Platí pro</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>UML name</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce.n%C3%A1zev">Název distribuce datové sady.</a>
+</td>
+<td><code>název</code></td>
+<td>UML name interpretovaný jako český název.</td>
+<td><code>Jízdní řády ve formátu CSV</code></td>
+<td>oba podtypy</td>
+</tr>
+<tr>
+<td>
+<code>stereotype</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce">Určuje konkrétní reprezentaci a způsob zpřístupnění
+                      datové sady.</a>
+</td>
+<td>pevný <code>typ</code></td>
+<td>Jeden ze dvou přesných podporovaných stereotypů distribuce.</td>
+<td><code>distribuceSouborKeStazeni</code></td>
+<td>oba podtypy</td>
+</tr>
+<tr>
+<td>
+<code>přístupové url</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce.p%C5%99%C3%ADstupov%C3%A9Url">Adresa zdroje, přes který lze k distribuci přistoupit.</a>
+</td>
+<td><code>přístupové_url</code></td>
+<td>
+                    URL začínající přesně <code>https://</code>; použije se
+                    první hodnota.
+                  </td>
+<td><code>https://data.example.cz/jizdni-rady</code></td>
+<td>oba podtypy</td>
+</tr>
+<tr>
+<td>
+<code>právní předpis</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce.p%C5%99%C3%ADslu%C5%A1n%C3%BDPr%C3%A1vn%C3%ADP%C5%99edpis">Předpis, který ukládá vznik distribuce.</a>
+</td>
+<td><code>právní_předpis</code></td>
+<td>
+                    Jedna či více <code>https://</code> URL oddělených
+                    <code>;</code>.
+                  </td>
+<td>
+<code>https://www.e-sbirka.cz/sb/1999/106;https://www.e-sbirka.cz/sb/2000/365</code>
+</td>
+<td>oba podtypy i služba</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="podminky">
+<h2>Podmínky užití distribuce</h2>
+<p>
+            Následující vlastnosti s prefixem patří přímo na element distribuce.
+            Alespoň jedna z nich vytvoří objekt podmínek užití. Vytvořený objekt
+            má automatické IRI končící
+            <code>/specifikace-podmínek-užití</code> a pevný typ
+            <code>Specifikace podmínek užití</code>.
+          </p>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Zdroj v EA XMI</th>
+<th>Výstup JSON-LD</th>
+<th>Povolená hodnota</th>
+<th>Příklad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>podmínky užití - autorské dílo</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.autorsk%C3%A9D%C3%ADlo">Určuje, zda data obsahují autorskoprávně chráněná díla a
+                      jaká licence se uplatní.</a>
+</td>
+<td><code>podmínky_užití.autorské_dílo</code></td>
+<td>Jedna URL začínající <code>https://</code>.</td>
+<td>
+<code>https://creativecommons.org/licenses/by/4.0/</code>
+</td>
+</tr>
+<tr>
+<td>
+<code>podmínky užití - autor</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.jm%C3%A9naAutor%C5%AFD%C3%ADla">Jména autorů díla uváděná při použití licence CC BY
+                      4.0.</a>
+</td>
+<td><code>podmínky_užití.autor.cs</code></td>
+<td>Český text; použije se první hodnota.</td>
+<td><code>Ministerstvo dopravy</code></td>
+</tr>
+<tr>
+<td>
+<code>podmínky užití - databáze jako autorské dílo</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.origin%C3%A1ln%C3%ADDatab%C3%A1ze">Určuje ochranu originální struktury nebo uspořádání
+                      databáze autorským právem.</a>
+</td>
+<td>
+<code>podmínky_užití.databáze_jako_autorské_dílo</code>
+</td>
+<td>Jedna URL začínající <code>https://</code>.</td>
+<td>
+<code>https://creativecommons.org/licenses/by/4.0/</code>
+</td>
+</tr>
+<tr>
+<td>
+<code>podmínky užití - autor databáze</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.jm%C3%A9naAutor%C5%AFOrigin%C3%A1ln%C3%ADDatab%C3%A1ze">Jména autorů originální databáze uváděná pro licenci CC
+                      BY 4.0.</a>
+</td>
+<td><code>podmínky_užití.autor_databáze.cs</code></td>
+<td>Český text; použije se první hodnota.</td>
+<td><code>Ministerstvo dopravy</code></td>
+</tr>
+<tr>
+<td>
+<code>podmínky užití - databáze chráněná zvláštními právy</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.zvl%C3%A1%C5%A1tn%C3%ADPr%C3%A1voPo%C5%99izovateleDatab%C3%A1ze">Určuje zvláštní práva chránící investici do pořízení,
+                      ověření nebo zveřejnění databáze.</a>
+</td>
+<td>
+<code>podmínky_užití.databáze_chráněná_zvláštními_právy</code>
+</td>
+<td>Jedna URL začínající <code>https://</code>.</td>
+<td>
+<code>https://creativecommons.org/publicdomain/zero/1.0/</code>
+</td>
+</tr>
+<tr>
+<td>
+<code>podmínky užití - osobní údaje</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#SpecifikacePodm%C3%ADnekU%C5%BEit%C3%AD.osobn%C3%AD%C3%9Adaje">Informuje příjemce, zda data obsahují osobní údaje.</a>
+</td>
+<td><code>podmínky_užití.osobní_údaje</code></td>
+<td>Jedna URL začínající <code>https://</code>.</td>
+<td>
+<code>https://data.example.cz/podminky-osobnich-udaju</code>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="soubor">
+<h2>Distribuce – soubor ke stažení</h2>
+<p>
+            Tyto vlastnosti se použijí pouze při
+            <code>stereotype = distribuceSouborKeStazeni</code>.
+          </p>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Zdroj v EA XMI</th>
+<th>Výstup JSON-LD</th>
+<th>Povolená hodnota</th>
+<th>Příklad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>soubor ke stažení</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.odkazNaSta%C5%BEen%C3%ADSouboru">Přímý odkaz na soubor ke stažení v daném formátu.</a>
+</td>
+<td><code>soubor_ke_stažení</code></td>
+<td>URL začínající přesně <code>https://</code>.</td>
+<td><code>https://data.example.cz/jizdni-rady.csv</code></td>
+</tr>
+<tr>
+<td>
+<code>formát</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.form%C3%A1tSouboruKeSta%C5%BEen%C3%AD">Typ souboru, ve kterém je distribuce poskytována.</a>
+</td>
+<td><code>formát</code></td>
+<td>Kód typu souboru; prefix <code>formáty:</code> je volitelný.</td>
+<td><code>CSV</code></td>
+</tr>
+<tr>
+<td>
+<code>typ média</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.typM%C3%A9dia">Typ média distribuce podle registru IANA.</a>
+</td>
+<td><code>typ_média</code></td>
+<td>IANA typ média; prefix <code>mediaTypes:</code> je volitelný.</td>
+<td><code>text/csv</code></td>
+</tr>
+<tr>
+<td>
+<code>schéma</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.strojov%C4%9B%C4%8Citeln%C3%A9Sch%C3%A9maSouboruKeSta%C5%BEen%C3%AD">Strojově čitelné schéma, kterým se distribuce řídí.</a>
+</td>
+<td><code>schéma</code></td>
+<td>URL začínající přesně <code>https://</code>.</td>
+<td><code>https://data.example.cz/schema.json</code></td>
+</tr>
+<tr>
+<td>
+<code>typ média komprese</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.form%C3%A1tKomprese">Formát komprese použitý například ke zmenšení stahovaného
+                      souboru.</a>
+</td>
+<td><code>typ_média_komprese</code></td>
+<td>IANA typ média; prefix <code>mediaTypes:</code> je volitelný.</td>
+<td><code>application/gzip</code></td>
+</tr>
+<tr>
+<td>
+<code>typ média balíčku</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Distribuce-SouborKeSta%C5%BEen%C3%AD.form%C3%A1tBal%C3%AD%C4%8Dku">Formát balíčku sdružujícího jeden nebo více souvisejících
+                      souborů.</a>
+</td>
+<td><code>typ_média_balíčku</code></td>
+<td>IANA typ média; prefix <code>mediaTypes:</code> je volitelný.</td>
+<td><code>application/zip</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="sluzba">
+<h2>Distribuce – datová služba</h2>
+<p>Se stereotypem <code>distribuceDatovaSluzba</code> tyto tagged values vytvářejí vnořený objekt <code>přístupová_služba</code>.</p>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Zdroj v EA XMI</th>
+<th>Výstup JSON-LD</th>
+<th>Povolená hodnota</th>
+<th>Příklad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>přístupová služba - přístupový bod</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Slu%C5%BEba.p%C5%99%C3%ADstupov%C3%BDBodSlu%C5%BEby">Kořenové umístění nebo hlavní webový přístupový bod
+                      služby.</a>
+</td>
+<td><code>přístupová_služba.přístupový_bod</code></td>
+<td>Jedna absolutní URL <code>https://</code>.</td>
+<td><code>https://api.example.cz/jizdni-rady</code></td>
+</tr>
+<tr>
+<td>
+<code>přístupová služba - popis přístupového bodu</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Slu%C5%BEba.popisP%C5%99%C3%ADstupov%C3%A9hoBoduSlu%C5%BEby">Popis přístupového bodu včetně operací a parametrů.</a>
+</td>
+<td><code>přístupová_služba.popis_přístupového_bodu</code></td>
+<td>Jedna absolutní URL <code>https://</code> s popisem bodu.</td>
+<td><code>https://api.example.cz/popis</code></td>
+</tr>
+<tr>
+<td>
+<code>přístupová služba - právní předpis</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Slu%C5%BEba.p%C5%99%C3%ADslu%C5%A1n%C3%BDPr%C3%A1vn%C3%ADP%C5%99edpis">Předpis, který ukládá vznik datové služby.</a>
+</td>
+<td><code>přístupová_služba.právní_předpis</code></td>
+<td>
+                    Jedna či více <code>https://</code> URL oddělených
+                    <code>;</code>.
+                  </td>
+<td>
+<code>https://www.e-sbirka.cz/sb/1999/106;https://www.e-sbirka.cz/sb/2000/365</code>
+</td>
+</tr>
+<tr>
+<td>
+<code>přístupová služba - specifikace</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Slu%C5%BEba.specifikace">Standard nebo specifikace, podle které se datová služba
+                      řídí.</a>
+</td>
+<td><code>přístupová_služba.specifikace</code></td>
+<td>
+                    Jedna či více <code>https://</code> URL oddělených
+                    středníkem.
+                  </td>
+<td><code>https://api.example.cz/openapi.json</code></td>
+</tr>
+<tr>
+<td>
+<code>přístupová služba - dokumentace</code><a class="ofn-definition" href="https://ofn.gov.cz/dcat-ap-cz-datov%C3%A1-rozhran%C3%AD/draft/cs/#Datov%C3%A1Slu%C5%BEba.dokumentace">Dokumentace, která datovou službu podrobněji popisuje.</a>
+</td>
+<td><code>přístupová_služba.dokumentace</code></td>
+<td>Jedna URL začínající přesně <code>https://</code>.</td>
+<td><code>https://api.example.cz/dokumentace</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="vztahy"><h2>Jak vytvořit vztahy v modelu</h2><h3>Datová sada a distribuce</h3><p>Vytvořte zabalený UML vztah mezi prvkem <code>datovaSada</code> a prvkem distribuce. Směr ani UML typ tohoto propojení se nekontroluje.</p><h3>Datová sada a pojmy</h3><p>Tag datové sady <code>metoda sbírání pojmů</code> přijímá <code>podrobně</code>, <code>standard</code> nebo <code>agresivně</code>. Podrobná strategie použije přímo asociované pojmy; standard přidá vlastnosti v kompozici vybraných tříd a způsobilé pojmenované asociace; agresivní strategie rekurzivně prochází orientované pojmenované asociace, Generalization/Specialization a Composition.</p><p>Samotný objekt UML vztahu musí být rovněž pod <code>slovnikyPackage</code>. Vztah mimo balíček se ignoruje, i když jsou zahrnuty oba koncové body.</p></section>
+<section id="priklad"><h2>Minimální relevantní EA XMI</h2><pre><code>&lt;xmi:XMI xmlns:xmi="http://schema.omg.org/spec/XMI/2.1"
+ xmlns:uml="http://schema.omg.org/spec/UML/2.1" xmlns:Slovniky="urn:Slovniky"&gt;
+ &lt;uml:Model xmi:id="model"&gt;
+  &lt;packagedElement xmi:type="uml:Package" xmi:id="pkg" name="Doprava"&gt;
+   &lt;packagedElement xmi:type="uml:Class" xmi:id="ds" name="Jízdní řády"/&gt;
+  &lt;/packagedElement&gt;
+ &lt;/uml:Model&gt;
+ &lt;Slovniky:slovnikyPackage base_Package="pkg"/&gt;
+ &lt;Slovniky:datovaSada base_Class="ds"&gt;
+  &lt;tag name="popis" value="Aktuální jízdní řády."/&gt;
+  &lt;tag name="klíčové slovo" value="doprava;jízdní řád"/&gt;
+  &lt;tag name="vstupní stránka" value="https://data.example.cz"/&gt;
+ &lt;/Slovniky:datovaSada&gt;
+&lt;/xmi:XMI&gt;</code></pre></section>
+<section id="kontrolni-seznam"><h2>Kontrolní seznam před exportem</h2><ul><li>XMI 2.1 obsahuje UML model a aplikace profilu.</li><li>Každý zpracovávaný prvek a vztah je pod <code>slovnikyPackage</code>.</li><li>Stereotypy datových sad a distribucí používají přesné kanonické názvy.</li><li>Každá vlastnost kromě typu používá tagged value uvedenou v tomto průvodci.</li><li>Každá datová sada má UML name a každá distribuce má vztah ke své datové sadě.</li><li>Hodnoty splňují povolené formáty v tabulkách.</li></ul></section>
+<section id="omezeni"><h2>Známá omezení</h2><ul><li>UML <code>name</code> se považuje za český, protože názvy XMI nemají značku jazyka.</li><li>Vypisují se pouze prvky a formy vztahů používané společným mapováním datových sad.</li><li>Neznámé tagy stereotypu parser zachová, ale generování JSON-LD je ignoruje.</li></ul></section>
+<footer>
+          Zdroj pravdy pro tento návod: <code>jsonld_creation.py</code>,
+          <code>xml_processing.py</code> a
+          <code>ofnDistributionBindings.py</code> v aplikaci
+          <code>tools-dataset</code>.
+        </footer>
+</main>
+</div>
+</body>
+</html>

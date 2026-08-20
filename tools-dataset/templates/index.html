@@ -13,7 +13,7 @@
         <p>{{ texts.page.description }}</p>
         <form method="post" enctype="multipart/form-data">
           <label for="xml_file">{{ texts.form.file_label }}</label>
-          <input id="xml_file" name="xml_file" type="file" accept=".xml,application/xml,text/xml" required>
+          <input id="xml_file" name="xml_file" type="file" accept=".xml,.xmi,application/xml,text/xml" required>
           <button type="submit">{{ texts.form.submit_button }}</button>
         </form>
         {% if error %}

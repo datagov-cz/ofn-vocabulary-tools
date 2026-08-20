@@ -1,4 +1,5 @@
 import re
+import unicodedata
 import warnings
 
 from xml_processing import ArchimateElement, ArchimateRelationship
@@ -65,10 +66,22 @@ def sanitizeString(string: str) -> str:
 
 
 def containsCompare(input: str | list[str], target: str) -> bool:
+    def comparable(value: str) -> str:
+        # EA stereotype names are camelCase ASCII (for example
+        # ``distribuceSouborKeStazeni``), whereas the Archi ``typ`` property
+        # contains human-readable Czech. Ignoring separators and diacritics
+        # lets the shared mapping recognize both without changing either
+        # parser's source representation.
+        normalized = unicodedata.normalize("NFKD", value)
+        ascii_value = normalized.encode("ascii", "ignore").decode()
+        return re.sub(r"[^a-z0-9]", "", ascii_value.lower())
+
     if type(input) is str:
-        return target.lower() in input.lower()
+        return comparable(target) in comparable(input)
     if type(input) is list:
-        boolList: list[bool] = [target.lower() in x.lower() for x in input]
+        boolList: list[bool] = [
+            comparable(target) in comparable(x) for x in input
+        ]
         return any(boolList)
     return False
 

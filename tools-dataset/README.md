@@ -1,15 +1,18 @@
-# XML to JSON-LD Web App
+# ArchiMate / Enterprise Architect XMI to JSON-LD Web App
 
-This is a small standalone Flask app. It serves one page with an XML upload form and returns a generated JSON-LD file for download.
+This is a small standalone Flask app. It accepts either an ArchiMate Model Exchange XML file or an Enterprise Architect XMI 2.1 export through the same upload and returns the generated JSON-LD file(s). The input format is detected from the XML root and namespaces.
 
-The XML conversion is currently only a skeleton. It parses the XML, reads the root element name, and emits a minimal JSON-LD document. The real XML parsing can be added later in `parse_xml()` in `xml_processing.py`, and the real JSON-LD mapping can be added in `create_jsonld_files()` in `jsonld_creation.py`.
+For EA exports, only elements and relationships nested anywhere below a package with stereotype `slovnikyPackage` are processed. Regular properties come from stereotype tagged values. `typ` is derived from the element's stereotype name in ASCII camelCase, for example `datovaSada` or `distribuceSouborKeStazeni`.
 
 ## Project Structure
 
 - `app.py` creates and runs the Flask application.
 - `routes.py` connects the upload form to the conversion flow.
 - `file_upload.py` loads and checks the uploaded XML file.
-- `xml_processing.py` parses XML and contains the marked setup area for custom XML parsing.
+- `xml_processing.py` detects the XML format and dispatches it.
+- `archimate_xml.py` contains only ArchiMate Model Exchange parsing.
+- `ea_xmi.py` contains only Enterprise Architect XMI 2.1 parsing and package filtering.
+- `xml_model.py` defines the neutral model used by JSON-LD generation.
 - `jsonld_creation.py` orchestrates creation of one or more JSON-LD files and preserves the public creation API.
 - `jsonld_builders.py` maps datasets and distributions to JSON-LD documents.
 - `jsonld_properties.py` reads, normalizes, and validates ArchiMate properties.
@@ -20,6 +23,8 @@ The XML conversion is currently only a skeleton. It parses the XML, reads the ro
 - `texts.json` contains the user-facing front-end text and displayed error messages.
 - `texts.py` loads text from `texts.json`.
 - `templates/index.html` and `static/styles.css` contain the front end.
+- `docs/archimate-jsonld-guide.html` and `docs/archimate-jsonld-guide-en.html` document Archi input.
+- `docs/ea-xmi-jsonld-guide.html` and `docs/ea-xmi-jsonld-guide-en.html` document EA XMI input.
 
 ## Setup
 
