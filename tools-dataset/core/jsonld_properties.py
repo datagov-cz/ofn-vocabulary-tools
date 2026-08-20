@@ -2,7 +2,7 @@ import re
 import unicodedata
 import warnings
 
-from xml_processing import ArchimateElement, ArchimateRelationship
+from .xml_processing import ArchimateElement, ArchimateRelationship
 
 
 # https://www.w3.org/TR/sparql11-query/#rPN_LOCAL

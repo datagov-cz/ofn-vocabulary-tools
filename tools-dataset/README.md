@@ -6,25 +6,20 @@ For EA exports, only elements and relationships nested anywhere below a package 
 
 ## Project Structure
 
-- `app.py` creates and runs the Flask application.
-- `routes.py` connects the upload form to the conversion flow.
-- `file_upload.py` loads and checks the uploaded XML file.
-- `xml_processing.py` detects the XML format and dispatches it.
-- `archimate_xml.py` contains only ArchiMate Model Exchange parsing.
-- `ea_xmi.py` contains only Enterprise Architect XMI 2.1 parsing and package filtering.
-- `xml_model.py` defines the neutral model used by JSON-LD generation.
-- `jsonld_creation.py` orchestrates creation of one or more JSON-LD files and preserves the public creation API.
-- `jsonld_builders.py` maps datasets and distributions to JSON-LD documents.
-- `jsonld_properties.py` reads, normalizes, and validates ArchiMate properties.
-- `jsonld_relationships.py` finds distributions and terms related to a dataset.
-- `jsonld_required_fields.py` reports required fields missing from generated documents.
-- `jsonld_validation.py` validates generated JSON-LD against the default OFN schema or a schema configured with `JSON_SCHEMA_URL`.
-- `jsonld_download.py` returns one generated JSON-LD file directly, or multiple JSON-LD files as a ZIP download.
-- `texts.json` contains the user-facing front-end text and displayed error messages.
-- `texts.py` loads text from `texts.json`.
-- `templates/index.html` and `static/styles.css` contain the front end.
+- `app.py` is the thin Flask composition and launch entry point.
+- `frontend/` contains the HTTP routes, upload/download handling, localized text,
+  templates, and static assets.
+- `archi/` contains only ArchiMate Model Exchange parsing.
+- `ea/` contains only Enterprise Architect XMI 2.1 parsing and package filtering.
+- `core/` contains the neutral XML model, format dispatcher, shared JSON-LD
+  conversion pipeline, validation, bindings, and logging configuration.
+- `tests/` mirrors the runtime behavior with conversion and logging tests.
 - `docs/archimate-jsonld-guide.html` and `docs/archimate-jsonld-guide-en.html` document Archi input.
 - `docs/ea-xmi-jsonld-guide.html` and `docs/ea-xmi-jsonld-guide-en.html` document EA XMI input.
+
+The format-specific parsers depend on `core.models`. The shared dispatcher in
+`core.xml_processing` detects the uploaded format and invokes the appropriate
+parser; the front end only calls the public core conversion flow.
 
 ## Setup
 
@@ -62,6 +57,12 @@ Then open:
 
 ```text
 http://127.0.0.1:5000
+```
+
+Run the automated tests from this directory with:
+
+```bash
+python -m unittest discover -s tests -v
 ```
 
 ## Logging

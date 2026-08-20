@@ -3,9 +3,9 @@
 import logging
 from xml.etree import ElementTree
 
-from archimate_xml import local_name, parse_archimate_xml
-from ea_xmi import is_ea_xmi, parse_ea_xmi
-from xml_model import (  # re-exported for backwards compatibility
+from archi.parser import local_name, parse_archimate_xml
+from ea.parser import is_ea_xmi, parse_ea_xmi
+from .models import (  # re-exported for backwards compatibility
     ArchimateElement,
     ArchimateModel,
     ArchimateProperty,

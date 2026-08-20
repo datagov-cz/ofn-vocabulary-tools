@@ -10,9 +10,9 @@ import logging
 import re
 import unicodedata
 
-import ofnDistributionBindings as bindings
-from archimate_xml import local_name
-from xml_model import (
+from archi.parser import local_name
+from core import ofn_distribution_bindings as bindings
+from core.models import (
     ArchimateElement, ArchimateModel, ArchimateRelationship, LangText, ParsedXml,
 )
 

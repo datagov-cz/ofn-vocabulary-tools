@@ -2,7 +2,7 @@
 
 import logging
 
-from xml_model import (
+from core.models import (
     ArchimateElement, ArchimateModel, ArchimateProperty,
     ArchimateRelationship, LangText, ParsedXml, PropertyDefinition,
 )

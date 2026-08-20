@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ofnDistributionBindings import (
+from .ofn_distribution_bindings import (
     CONTEXT,
     CS,
     DISTRIBUCE,
@@ -26,7 +26,7 @@ from ofnDistributionBindings import (
 )
 
 if TYPE_CHECKING:
-    from jsonld_builders import DistributionDocument
+    from .jsonld_builders import DistributionDocument
 
 
 DATASET_REQUIRED_FIELDS = (

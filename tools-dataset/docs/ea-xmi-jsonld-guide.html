@@ -859,9 +859,9 @@
 <section id="kontrolni-seznam"><h2>Kontrolní seznam před exportem</h2><ul><li>XMI 2.1 obsahuje UML model a aplikace profilu.</li><li>Každý zpracovávaný prvek a vztah je pod <code>slovnikyPackage</code>.</li><li>Stereotypy datových sad a distribucí používají přesné kanonické názvy.</li><li>Každá vlastnost kromě typu používá tagged value uvedenou v tomto průvodci.</li><li>Každá datová sada má UML name a každá distribuce má vztah ke své datové sadě.</li><li>Hodnoty splňují povolené formáty v tabulkách.</li></ul></section>
 <section id="omezeni"><h2>Známá omezení</h2><ul><li>UML <code>name</code> se považuje za český, protože názvy XMI nemají značku jazyka.</li><li>Vypisují se pouze prvky a formy vztahů používané společným mapováním datových sad.</li><li>Neznámé tagy stereotypu parser zachová, ale generování JSON-LD je ignoruje.</li></ul></section>
 <footer>
-          Zdroj pravdy pro tento návod: <code>jsonld_creation.py</code>,
-          <code>xml_processing.py</code> a
-          <code>ofnDistributionBindings.py</code> v aplikaci
+          Zdroj pravdy pro tento návod: <code>core/jsonld_creation.py</code>,
+          <code>core/xml_processing.py</code> a
+          <code>core/ofn_distribution_bindings.py</code> v aplikaci
           <code>tools-dataset</code>.
         </footer>
 </main>

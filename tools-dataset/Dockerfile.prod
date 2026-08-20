@@ -8,10 +8,11 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY *.py .
-COPY texts.json .
-COPY templates ./templates
-COPY static ./static
+COPY app.py .
+COPY archi ./archi
+COPY core ./core
+COPY ea ./ea
+COPY frontend ./frontend
 
 EXPOSE 5000
 

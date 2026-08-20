@@ -799,9 +799,9 @@
 <section id="checklist"><h2>Pre-export checklist</h2><ul><li>XMI 2.1 contains the UML model and profile applications.</li><li>Every consumed element and relationship is below <code>slovnikyPackage</code>.</li><li>Dataset and distribution stereotypes use the exact canonical names.</li><li>Every non-type property uses a tagged value listed in this guide.</li><li>Every dataset has a UML name and every distribution is related to its dataset.</li><li>Values satisfy the allowed formats in the tables.</li></ul></section>
 <section id="limitations"><h2>Known limitations</h2><ul><li>UML <code>name</code> is interpreted as Czech because XMI names have no language marker.</li><li>Only elements and relationship forms used by the shared dataset mapping are emitted.</li><li>Unknown stereotype tags are preserved by the parser but ignored by JSON-LD generation.</li></ul></section>
 <footer>
-          Sources of truth for this guide: <code>jsonld_creation.py</code>,
-          <code>xml_processing.py</code>, and
-          <code>ofnDistributionBindings.py</code> in <code>tools-dataset</code>.
+          Sources of truth for this guide: <code>core/jsonld_creation.py</code>,
+          <code>core/xml_processing.py</code>, and
+          <code>core/ofn_distribution_bindings.py</code> in <code>tools-dataset</code>.
         </footer>
 </main>
 </div>

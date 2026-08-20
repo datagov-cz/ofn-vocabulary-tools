@@ -5,12 +5,12 @@ import requests
 from flask import Blueprint, render_template, request
 from jsonschema.exceptions import ValidationError
 
-from file_upload import UploadError, read_xml_upload
-from jsonld_creation import create_jsonld_files
-from jsonld_download import create_jsonld_download
-from jsonld_validation import validate_jsonld_files
-from texts import get_error_text, get_texts
-from xml_processing import parse_xml
+from core.jsonld_creation import create_jsonld_files
+from core.jsonld_validation import validate_jsonld_files
+from core.xml_processing import parse_xml
+from .file_upload import UploadError, read_xml_upload
+from .jsonld_download import create_jsonld_download
+from .texts import get_error_text, get_texts
 
 
 main_routes = Blueprint("main_routes", __name__)

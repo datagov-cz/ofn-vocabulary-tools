@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import logging
 import warnings
 
-from jsonld_properties import (
+from .jsonld_properties import (
     DATE_REGEX,
     EUROVOC_REGEX,
     FORMAT_REGEX,
@@ -24,7 +24,7 @@ from jsonld_properties import (
     readProperty,
     splitProperty,
 )
-from ofnDistributionBindings import (
+from .ofn_distribution_bindings import (
     AUTOR,
     AUTOR_DATABAZE,
     AUTORSKE_DILO,
@@ -72,7 +72,7 @@ from ofnDistributionBindings import (
     VSTUPNI_STRANKA,
     ZACATEK,
 )
-from xml_processing import ArchimateElement
+from .xml_processing import ArchimateElement
 
 
 logger = logging.getLogger(__name__)

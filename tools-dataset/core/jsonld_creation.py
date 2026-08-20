@@ -4,12 +4,12 @@ from dataclasses import dataclass
 import logging
 import warnings
 
-from jsonld_builders import (
+from .jsonld_builders import (
     DistributionDocument,
     build_dataset_document,
     build_distributions,
 )
-from jsonld_properties import (
+from .jsonld_properties import (
     DATE_REGEX,
     EMAIL_REGEX,
     EUROVOC_REGEX,
@@ -45,12 +45,12 @@ from jsonld_properties import (
     sanitizeString,
     splitProperty,
 )
-from jsonld_relationships import (
+from .jsonld_relationships import (
     getIRIofTerm,
     getRelatedDistributionElements,
     getRelatedTerms,
 )
-from jsonld_required_fields import (
+from .jsonld_required_fields import (
     ACCESS_SERVICE_REQUIRED_FIELDS,
     CONTACT_POINT_REQUIRED_FIELDS,
     DATASET_REQUIRED_FIELDS,
@@ -61,8 +61,8 @@ from jsonld_required_fields import (
 )
 # These bindings were historically available from this module through a
 # wildcard import. Keep re-exporting them for compatibility with callers.
-from ofnDistributionBindings import *  # noqa: F403
-from xml_processing import ArchimateElement, ArchimateRelationship, ParsedXml
+from .ofn_distribution_bindings import *  # noqa: F403
+from .xml_processing import ArchimateElement, ArchimateRelationship, ParsedXml
 
 
 logger = logging.getLogger(__name__)

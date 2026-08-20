@@ -2,15 +2,15 @@ import logging
 import re
 import warnings
 
-from jsonld_properties import (
+from .jsonld_properties import (
     HTTPS_REGEX,
     containsCompare,
     readProperty,
     regexWarning,
     sanitizeString,
 )
-from ofnDistributionBindings import CS, IDENTIFIKATOR, METODA_SBIRANI_POJMU, TYP
-from xml_processing import (
+from .ofn_distribution_bindings import CS, IDENTIFIKATOR, METODA_SBIRANI_POJMU, TYP
+from .xml_processing import (
     ArchimateElement,
     ArchimateModel,
     ArchimateRelationship,

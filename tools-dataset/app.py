@@ -2,12 +2,16 @@ import os
 
 from flask import Flask
 
-from logging_config import configure_logging
-from routes import main_routes
+from core.logging_config import configure_logging
+from frontend.routes import main_routes
 
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(
+        __name__,
+        template_folder="frontend/templates",
+        static_folder="frontend/static",
+    )
     configure_logging(app)
     app.register_blueprint(main_routes)
     app.logger.info("Flask application initialized")
