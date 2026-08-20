@@ -7,4 +7,5 @@ services:
       - "5000:5000"
     environment:
       JSON_SCHEMA_URL: ${JSON_SCHEMA_URL-https://ofn.gov.cz/dcat-ap-cz-datov%c3%a1-rozhran%c3%ad/draft/datov%C3%A1-sada/sch%C3%A9ma.json}
+      LOG_LEVEL: ${LOG_LEVEL-INFO}
     restart: unless-stopped

@@ -1,9 +1,13 @@
 import json
+import logging
 from io import BytesIO
 from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile
 
 from flask import Response
+
+
+logger = logging.getLogger(__name__)
 
 
 def upload_stem(upload_name):
@@ -27,11 +31,13 @@ def json_bytes(document):
 
 
 def create_single_jsonld_download(jsonld_file, upload_name):
+    download_name = single_download_name(upload_name, jsonld_file)
+    logger.info("Preparing single JSON-LD download %r", download_name)
     return Response(
         json_bytes(jsonld_file.document),
         mimetype="application/ld+json",
         headers={
-            "Content-Disposition": f'attachment; filename="{single_download_name(upload_name, jsonld_file)}"'
+            "Content-Disposition": f'attachment; filename="{download_name}"'
         },
     )
 
@@ -44,6 +50,12 @@ def create_zip_download(jsonld_files, upload_name):
         for index, jsonld_file in enumerate(jsonld_files, start=1):
             file_name = unique_file_name(jsonld_file.filename, used_names, index, upload_stem(upload_name))
             zip_file.writestr(file_name, json_bytes(jsonld_file.document))
+
+    logger.info(
+        "Preparing ZIP download %r containing %d JSON-LD file(s)",
+        zip_download_name(upload_name),
+        len(jsonld_files),
+    )
 
     return Response(
         zip_buffer.getvalue(),

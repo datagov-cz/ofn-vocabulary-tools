@@ -1,4 +1,8 @@
+import logging
 from dataclasses import dataclass
+
+
+logger = logging.getLogger(__name__)
 
 
 class UploadError(ValueError):
@@ -15,12 +19,23 @@ class UploadedXml:
 
 def read_xml_upload(uploaded_file):
     if uploaded_file is None or uploaded_file.filename == "":
+        logger.warning("Upload rejected: no file was provided")
         raise UploadError("missing_file")
 
     if not uploaded_file.filename.lower().endswith((".xml", ".xmi")):
+        logger.warning(
+            "Upload rejected because file type is not XML or XMI: %r",
+            uploaded_file.filename,
+        )
         raise UploadError("invalid_file_type")
 
-    return UploadedXml(
+    uploaded_xml = UploadedXml(
         filename=uploaded_file.filename,
         content=uploaded_file.read(),
     )
+    logger.info(
+        "Accepted upload %r (%d bytes)",
+        uploaded_xml.filename,
+        len(uploaded_xml.content),
+    )
+    return uploaded_xml

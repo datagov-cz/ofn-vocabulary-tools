@@ -88,11 +88,31 @@ def _czech_names(element: ArchimateElement):
     ]
 
 
+def _log_element_properties(element_kind, element):
+    for property_name, value in sorted(element.resolved_properties.items()):
+        logger.debug(
+            "Property found for %s element ID %r: %r=%r",
+            element_kind,
+            element.identifier,
+            property_name,
+            value,
+        )
+
+
 def create_jsonld_files(parsed_xml: ParsedXml) -> list[JsonLdFile]:
     model = parsed_xml.model
     if not model:
+        logger.error(
+            "Cannot create JSON-LD: no supported model found under XML root %s",
+            parsed_xml.root_element_name,
+        )
         raise Exception("Cannot find model in Archimate File")
 
+    logger.info(
+        "Creating JSON-LD from %s model with %d element(s)",
+        parsed_xml.source_format,
+        len(model.elements),
+    )
     jsonld_files = []
     for dataset in model.elements:
         czech_names = _czech_names(dataset)
@@ -110,19 +130,43 @@ def create_jsonld_files(parsed_xml: ParsedXml) -> list[JsonLdFile]:
             )
 
         if not containsCompare(readProperty(dataset, TYP), "datová sada"):  # noqa: F405
+            logger.debug("Skipping non-dataset element ID %s", dataset.identifier)
             continue
 
         dataset_name = czech_names[0].value
+        logger.info(
+            "Found dataset element ID %r named %r with type %r",
+            dataset.identifier,
+            dataset_name,
+            readProperty(dataset, TYP),
+        )
+        _log_element_properties("dataset", dataset)
         dataset_iri = createDatasetIRI(dataset_name)
+        logger.info(
+            "Generated dataset IRI %r for dataset element ID %r",
+            dataset_iri,
+            dataset.identifier,
+        )
         related_terms = getRelatedTerms(parsed_xml, dataset)
         related_term_iris = [
             iri
             for iri in (getIRIofTerm(term, model) for term in related_terms)
             if iri
         ]
+        distribution_elements = getRelatedDistributionElements(
+            parsed_xml,
+            dataset,
+        )
         distributions = build_distributions(
-            getRelatedDistributionElements(parsed_xml, dataset),
+            distribution_elements,
             dataset_iri,
+        )
+        logger.debug(
+            "Dataset element ID %s has %d related term(s) and %d valid "
+            "distribution(s)",
+            dataset.identifier,
+            len(related_term_iris),
+            len(distributions),
         )
         document = build_dataset_document(
             dataset,
@@ -147,5 +191,10 @@ def create_jsonld_files(parsed_xml: ParsedXml) -> list[JsonLdFile]:
             filename=dataset_name,
             document=document,
         ))
+
+    if not jsonld_files:
+        logger.warning("No dataset JSON-LD documents were generated")
+    else:
+        logger.info("Created %d JSON-LD document(s)", len(jsonld_files))
 
     return jsonld_files

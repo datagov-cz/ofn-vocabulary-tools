@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import logging
 import warnings
 
 from jsonld_properties import (
@@ -72,6 +73,9 @@ from ofnDistributionBindings import (
     ZACATEK,
 )
 from xml_processing import ArchimateElement
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -323,6 +327,16 @@ def build_distributions(
             distribution_type,
             "distribuce - soubor ke stažení",
         ):
+            logger.info(
+                "Generated distribution IRI %r for element ID %r",
+                distribution_iri,
+                distribution.identifier,
+            )
+            logger.info(
+                "Generated usage terms IRI %r for distribution element ID %r",
+                usage_terms[IRI],
+                distribution.identifier,
+            )
             documents.append(DistributionDocument(
                 kind="download",
                 document=_build_download_distribution(
@@ -335,6 +349,21 @@ def build_distributions(
             distribution_type,
             "distribuce - datová služba",
         ):
+            logger.info(
+                "Generated distribution IRI %r for element ID %r",
+                distribution_iri,
+                distribution.identifier,
+            )
+            logger.info(
+                "Generated usage terms IRI %r for distribution element ID %r",
+                usage_terms[IRI],
+                distribution.identifier,
+            )
+            logger.info(
+                "Generated access service IRI %r for distribution element ID %r",
+                distribution_iri + "/přístupová-služba",
+                distribution.identifier,
+            )
             documents.append(DistributionDocument(
                 kind="service",
                 document=_build_service_distribution(

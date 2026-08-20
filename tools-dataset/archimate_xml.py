@@ -1,9 +1,14 @@
 """Parser for Open Group ArchiMate Model Exchange XML."""
 
+import logging
+
 from xml_model import (
     ArchimateElement, ArchimateModel, ArchimateProperty,
     ArchimateRelationship, LangText, ParsedXml, PropertyDefinition,
 )
+
+
+logger = logging.getLogger(__name__)
 
 XML_NAMESPACE = "http://www.w3.org/XML/1998/namespace"
 XSI_NAMESPACE = "http://www.w3.org/2001/XMLSchema-instance"
@@ -102,12 +107,20 @@ def parse_model(model_node):
                 node.attrib.get("accessType"), node.attrib.get("modifier"),
                 node.attrib.get("isDirected"),
             ))
-    return ArchimateModel(
+    model = ArchimateModel(
         model_node.attrib.get("identifier"), model_node.attrib.get("version"),
         parse_lang_texts(model_node, "name"), parse_lang_texts(model_node, "documentation"),
         properties, resolve_properties(properties, definitions), definitions,
         elements, relationships,
     )
+    logger.info(
+        "Parsed ArchiMate model with %d element(s), %d relationship(s), and "
+        "%d property definition(s)",
+        len(elements),
+        len(relationships),
+        len(definitions),
+    )
+    return model
 
 
 def parse_archimate_xml(root):

@@ -1,3 +1,4 @@
+import logging
 import re
 import warnings
 
@@ -24,6 +25,25 @@ AGGRESSIVE = "agresivně"
 CLASS_TYPES = ("typ subjektu", "typ objektu")
 PROPERTY_TYPE = "typ vlastnosti"
 GENERALIZATION_RELATIONSHIP_TYPES = ("Specialization", "Generalization")
+logger = logging.getLogger(__name__)
+
+
+def _czech_name(element):
+    return next(
+        (name.value for name in element.names if name.language == CS),
+        None,
+    )
+
+
+def _log_properties(element_kind, element):
+    for property_name, value in sorted(element.resolved_properties.items()):
+        logger.debug(
+            "Property found for %s element ID %r: %r=%r",
+            element_kind,
+            element.identifier,
+            property_name,
+            value,
+        )
 
 
 def getRelatedDistributionElements(
@@ -57,11 +77,25 @@ def getRelatedDistributionElements(
         ):
             related_distribution_ids.add(relationship.source)
 
-    return [
+    distributions = [
         element
         for element_id, element in distribution_by_id.items()
         if element_id in related_distribution_ids
     ]
+    logger.info(
+        "Found %d distribution element(s) for dataset element ID %r",
+        len(distributions),
+        dataset_element.identifier,
+    )
+    for distribution in distributions:
+        logger.info(
+            "Found distribution element ID %r named %r with type %r",
+            distribution.identifier,
+            _czech_name(distribution),
+            readProperty(distribution, TYP),
+        )
+        _log_properties("distribution", distribution)
+    return distributions
 
 
 def getRelatedElementsByAssociation(
@@ -265,6 +299,11 @@ def getRelatedTerms(
         dataset_element.identifier,
     )
     method = _collection_method(dataset_element)
+    logger.info(
+        "Dataset element ID %r uses class/term retrieval method %r",
+        dataset_element.identifier,
+        method,
+    )
 
     if method == DETAILED:
         selected_element_ids = direct_ids & term_element_ids
@@ -315,15 +354,64 @@ def getRelatedTerms(
             and relationship.target in selected_element_ids
         }
 
-    return [
+    selected_elements = [
         element
         for element in model.elements
         if element.identifier in selected_element_ids
-    ] + [
+    ]
+    selected_classes = [
+        element
+        for element in selected_elements
+        if element.identifier in class_ids
+    ]
+    selected_attributes = [
+        element
+        for element in selected_elements
+        if element.identifier in property_ids
+    ]
+    selected_relationships = [
         relationship
         for relationship in model.relationships
         if relationship.identifier in selected_association_ids
     ]
+    logger.info(
+        "Class/term retrieval for dataset element ID %r found %d class(es), "
+        "%d relationship(s), and %d attribute(s)",
+        dataset_element.identifier,
+        len(selected_classes),
+        len(selected_relationships),
+        len(selected_attributes),
+    )
+    for element in selected_classes:
+        logger.debug(
+            "Class found: element ID %r, name %r, term type %r, "
+            "model type %r",
+            element.identifier,
+            _czech_name(element),
+            readProperty(element, TYP),
+            element.type,
+        )
+    for relationship in selected_relationships:
+        logger.debug(
+            "Relationship found: element ID %r, name %r, model type %r, "
+            "source %r, target %r",
+            relationship.identifier,
+            _czech_name(relationship),
+            relationship.type,
+            relationship.source,
+            relationship.target,
+        )
+    for element in selected_attributes:
+        logger.debug(
+            "Attribute found: element ID %r, name %r, term type %r, "
+            "model type %r",
+            element.identifier,
+            _czech_name(element),
+            readProperty(element, TYP),
+            element.type,
+        )
+
+    return selected_elements + selected_relationships
 
 
 def getIRIofTerm(
@@ -335,6 +423,11 @@ def getIRIofTerm(
         iri = iri[0]
     if isinstance(iri, str) and iri:
         if re.fullmatch(HTTPS_REGEX, iri):
+            logger.info(
+                "Retrieved term IRI %r for element ID %r",
+                iri,
+                element.identifier,
+            )
             return iri
         regexWarning(element, IDENTIFIKATOR, iri, HTTPS_REGEX)
 
@@ -355,8 +448,14 @@ def getIRIofTerm(
         raise ValueError("The model doesn't have a name in Czech")
 
     namespace = "https://slovník.gov.cz"
-    return "{}/{}/pojem/{}".format(
+    generated_iri = "{}/{}/pojem/{}".format(
         namespace.rstrip("/"),
         sanitizeString(model_czech_names[0].value.strip().lower()),
         sanitizeString(czech_names[0].value.strip().lower()),
     )
+    logger.info(
+        "Generated term IRI %r for element ID %r",
+        generated_iri,
+        element.identifier,
+    )
+    return generated_iri

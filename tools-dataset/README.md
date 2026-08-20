@@ -64,6 +64,47 @@ Then open:
 http://127.0.0.1:5000
 ```
 
+## Logging
+
+Application, conversion, validation, download, and Python warning messages are
+written to the Flask instance log:
+
+```text
+instance/tools-dataset.log
+```
+
+The log rotates at 10 MB and keeps five backup files. The default logging
+level is `INFO`. Set `LOG_LEVEL` to `DEBUG`, `INFO`, `WARNING`, `ERROR`, or
+`CRITICAL` before starting the application. `DEBUG` includes detailed parsing,
+element-selection, and per-document validation messages.
+
+At `INFO`, the conversion records the dataset and distribution elements it
+finds, the selected class/term retrieval method, class/relationship/attribute
+counts, and every generated or retrieved output IRI. At `DEBUG`, it additionally
+records every selected class, relationship, and attribute, plus every resolved
+property on each selected dataset and distribution element.
+
+On Linux or macOS:
+
+```bash
+LOG_LEVEL=DEBUG python app.py
+```
+
+On Windows PowerShell:
+
+```powershell
+$env:LOG_LEVEL = "DEBUG"
+python app.py
+```
+
+With Docker Compose:
+
+```bash
+LOG_LEVEL=DEBUG docker compose up --build
+```
+
+An invalid `LOG_LEVEL` stops application startup with an explanatory error.
+
 ## JSON Schema Validation
 
 By default, the app validates generated JSON-LD against:

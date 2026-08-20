@@ -6,6 +6,7 @@ Profile applications supply tagged values and the application name supplies
 the special ``typ`` value.
 """
 
+import logging
 import re
 import unicodedata
 
@@ -14,6 +15,9 @@ from archimate_xml import local_name
 from xml_model import (
     ArchimateElement, ArchimateModel, ArchimateRelationship, LangText, ParsedXml,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 XMI_NAMESPACES = (
@@ -206,6 +210,10 @@ def parse_ea_xmi(root):
     parent_by_node = {id(child): parent for parent in all_nodes for child in parent}
     applications = _stereotype_applications(root)
     package_roots = _package_roots(root, nodes_by_id, applications)
+    logger.debug(
+        "Found %d slovnikyPackage root(s) in Enterprise Architect XMI",
+        len(package_roots),
+    )
     included = _included_nodes(package_roots)
     elements, relationships = [], []
 
@@ -260,5 +268,11 @@ def parse_ea_xmi(root):
         names=[LangText(model_name, "cs")] if model_name else [],
         elements=elements,
         relationships=relationships,
+    )
+    logger.info(
+        "Parsed Enterprise Architect XMI with %d included element(s) and "
+        "%d included relationship(s)",
+        len(elements),
+        len(relationships),
     )
     return ParsedXml(local_name(root.tag), model, "ea-xmi-2.1")
