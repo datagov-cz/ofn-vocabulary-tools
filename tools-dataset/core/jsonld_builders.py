@@ -40,7 +40,6 @@ from .ofn_distribution_bindings import (
     E_MAIL,
     FORMAT,
     IRI,
-    JE_SOUCASTI,
     JE_ZAHRNUTA_V_ISVS,
     JMENO,
     KLICOVE_SLOVO,
@@ -77,6 +76,8 @@ from .xml_processing import ArchimateElement
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_LEGISLATION_IRI = "https://www.e-sbirka.cz/eli/cz/sb/2026/60/2026-05-27"
+
 
 @dataclass(frozen=True)
 class DistributionDocument:
@@ -90,6 +91,17 @@ def _single_property(element: ArchimateElement, property_name: str):
 
 def _list_property(element: ArchimateElement, property_name: str):
     return splitProperty(readProperty(element, property_name))
+
+
+def _build_legislation(element: ArchimateElement, property_name: str = PRAVNI_PREDPIS) -> list[str]:
+    supplied = addRegexProperty(
+        PRAVNI_PREDPIS,
+        _list_property(element, property_name),
+        HTTPS_REGEX,
+        element,
+        property_name,
+    ).get(PRAVNI_PREDPIS, [])
+    return list(dict.fromkeys([DEFAULT_LEGISLATION_IRI, *supplied]))
 
 
 def _localized_names(element: ArchimateElement) -> dict:
@@ -171,12 +183,7 @@ def _build_common_distribution_properties(
             HTTPS_REGEX,
             distribution,
         ),
-        **addRegexProperty(
-            PRAVNI_PREDPIS,
-            _list_property(distribution, PRAVNI_PREDPIS),
-            HTTPS_REGEX,
-            distribution,
-        ),
+        PRAVNI_PREDPIS: _build_legislation(distribution),
         **addPrefixedProperty(PODMINKY_UZITI, usage_terms, distribution),
     }
 
@@ -267,12 +274,8 @@ def _build_access_service(
             distribution,
             property_name(POPIS_PRISTUPOVEHO_BODU),
         ),
-        **addRegexProperty(
-            PRAVNI_PREDPIS,
-            _list_property(distribution, property_name(PRAVNI_PREDPIS)),
-            HTTPS_REGEX,
-            distribution,
-            property_name(PRAVNI_PREDPIS),
+        PRAVNI_PREDPIS: _build_legislation(
+            distribution, property_name(PRAVNI_PREDPIS),
         ),
         **addRegexProperty(
             SPECIFIKACE,
@@ -428,7 +431,7 @@ def build_dataset_document(
     distributions: list[DistributionDocument],
 ) -> dict:
     return {
-        CONTEXT: "https://ofn.gov.cz/dcat-ap-cz-datová-rozhraní/draft/datová-sada/kontext.jsonld",
+        CONTEXT: "https://ofn.gov.cz/dcat-ap-cz-datová-rozhraní/2026-09-23/datová-sada/kontext.jsonld",
         IRI: dataset_iri,
         TYP: ["Datová sada", "Datová sada SSP"],
         NAZEV: _localized_names(dataset),
@@ -503,18 +506,7 @@ def build_dataset_document(
             ISVS_REGEX,
             dataset,
         ),
-        **addRegexProperty(
-            JE_SOUCASTI,
-            _single_property(dataset, JE_SOUCASTI),
-            HTTPS_REGEX,
-            dataset,
-        ),
-        **addRegexProperty(
-            PRAVNI_PREDPIS,
-            _list_property(dataset, PRAVNI_PREDPIS),
-            HTTPS_REGEX,
-            dataset,
-        ),
+        PRAVNI_PREDPIS: _build_legislation(dataset),
         **addNonEmptyProperty(
             DISTRIBUCE,
             [distribution.document for distribution in distributions],

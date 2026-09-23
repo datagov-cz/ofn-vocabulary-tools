@@ -11,8 +11,10 @@
   "errors": {
     "missing_file": "Choose an XML file to upload.",
     "invalid_file_type": "Only .xml and .xmi files are accepted.",
+    "unsupported_xml": "Unsupported XML format. Upload an ArchiMate Model Exchange XML or Enterprise Architect XMI 2.1 export.",
+    "no_datasets": "No datasets were found. Check that dataset elements have a dataset type and a Czech name.",
     "invalid_xml": "Invalid XML: {details}",
-    "schema_load_failed": "Could not load JSON schema: {details}",
+    "schema_load_failed": "Could not load or use JSON schema: {details}",
     "schema_validation_failed": "Generated JSON-LD failed schema validation: {details}"
   }
 }

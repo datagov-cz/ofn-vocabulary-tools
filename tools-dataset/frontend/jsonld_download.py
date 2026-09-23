@@ -4,7 +4,7 @@ from io import BytesIO
 from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile
 
-from flask import Response
+from flask import send_file
 
 
 logger = logging.getLogger(__name__)
@@ -33,12 +33,11 @@ def json_bytes(document):
 def create_single_jsonld_download(jsonld_file, upload_name):
     download_name = single_download_name(upload_name, jsonld_file)
     logger.info("Preparing single JSON-LD download %r", download_name)
-    return Response(
-        json_bytes(jsonld_file.document),
+    return send_file(
+        BytesIO(json_bytes(jsonld_file.document)),
         mimetype="application/ld+json",
-        headers={
-            "Content-Disposition": f'attachment; filename="{download_name}"'
-        },
+        as_attachment=True,
+        download_name=download_name,
     )
 
 
@@ -57,12 +56,12 @@ def create_zip_download(jsonld_files, upload_name):
         len(jsonld_files),
     )
 
-    return Response(
-        zip_buffer.getvalue(),
+    zip_buffer.seek(0)
+    return send_file(
+        zip_buffer,
         mimetype="application/zip",
-        headers={
-            "Content-Disposition": f'attachment; filename="{zip_download_name(upload_name)}"'
-        },
+        as_attachment=True,
+        download_name=zip_download_name(upload_name),
     )
 
 
@@ -83,6 +82,9 @@ def unique_file_name(file_name, used_names, index, default_stem):
     stem = Path(safe_name).stem
     suffix = Path(safe_name).suffix
     deduplicated_name = f"{stem}-{index}{suffix}"
+    while deduplicated_name in used_names:
+        index += 1
+        deduplicated_name = f"{stem}-{index}{suffix}"
     used_names.add(deduplicated_name)
     return deduplicated_name
 

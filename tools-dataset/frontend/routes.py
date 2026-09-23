@@ -3,7 +3,7 @@ from xml.etree import ElementTree
 
 import requests
 from flask import Blueprint, render_template, request
-from jsonschema.exceptions import ValidationError
+from jsonschema.exceptions import SchemaError, ValidationError
 
 from core.jsonld_creation import create_jsonld_files
 from core.jsonld_validation import validate_jsonld_files
@@ -29,7 +29,11 @@ def convert():
     try:
         uploaded_xml = read_xml_upload(request.files.get("xml_file"))
         parsed_xml = parse_xml(uploaded_xml.content)
+        if parsed_xml.model is None:
+            raise UploadError("unsupported_xml")
         jsonld_files = create_jsonld_files(parsed_xml)
+        if not jsonld_files:
+            raise UploadError("no_datasets")
         validate_jsonld_files(jsonld_files)
     except UploadError as exc:
         logger.warning("Conversion request rejected: %s", exc.text_key)
@@ -38,7 +42,7 @@ def convert():
         logger.warning("Conversion failed because the XML is invalid: %s", exc)
         error = get_error_text("invalid_xml", details=exc)
         return render_template("index.html", texts=get_texts(), error=error), 400
-    except requests.RequestException as exc:
+    except (requests.RequestException, SchemaError) as exc:
         logger.error("Conversion failed while loading the JSON schema: %s", exc)
         error = get_error_text("schema_load_failed", details=exc)
         return render_template("index.html", texts=get_texts(), error=error), 502

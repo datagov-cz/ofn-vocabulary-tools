@@ -17,3 +17,8 @@ test*
 bodge*
 schéma.json
 tools-dataset/instance/
+
+# Keep HTTP regression tests visible despite the general test* exclusion.
+!tools-dataset/tests/
+tools-dataset/tests/*
+!tools-dataset/tests/test_http_regressions.py

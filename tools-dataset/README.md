@@ -125,12 +125,19 @@ LOG_LEVEL=DEBUG docker compose up --build
 
 An invalid `LOG_LEVEL` stops application startup with an explanatory error.
 
+## Generated legislation
+
+Datasets, distributions, and access services always include
+`https://www.e-sbirka.cz/eli/cz/sb/2026/60/2026-05-27` in `právní_předpis`.
+Additional valid legislation URLs from the model are preserved without duplicates.
+The unsupported `je součástí` property is ignored and `je_součástí` is no longer emitted.
+
 ## JSON Schema Validation
 
 By default, the app validates generated JSON-LD against:
 
 ```text
-https://ofn.gov.cz/dcat-ap-cz-datov%c3%a1-rozhran%c3%ad/draft/datov%C3%A1-sada/sch%C3%A9ma.json
+https://ofn.gov.cz/dcat-ap-cz-datov%c3%a1-rozhran%c3%ad/2026-09-23/datov%C3%A1-sada/sch%C3%A9ma.json
 ```
 
 Set `JSON_SCHEMA_URL` to override the schema URL before running the app:
