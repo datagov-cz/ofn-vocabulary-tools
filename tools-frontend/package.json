@@ -1,0 +1,26 @@
+{
+  "name": "ofn-workbench",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Desktop shell for the OFN tools frontend",
+  "main": "electron/main.js",
+  "scripts": {
+    "desktop": "electron .",
+    "dist:windows": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "^38.1.2",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "cz.gov.ofn.workbench",
+    "productName": "OFN Workbench",
+    "asar": false,
+    "files": ["electron/**/*", "app.py", "templates/**/*", "static/**/*", "package.json"],
+    "extraResources": [
+      { "from": "../tools-dataset", "to": "tools-dataset", "filter": ["**/*.py", "frontend/texts.json"] },
+      { "from": "../tools-vocabulary", "to": "tools-vocabulary", "filter": ["**/*.py"] }
+    ],
+    "win": { "target": "nsis" }
+  }
+}
