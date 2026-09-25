@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ texts.page.title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <main>
+      <section class="panel">
+        <h1>{{ texts.page.heading }}</h1>
+        <p>{{ texts.page.description }}</p>
+        <form method="post" enctype="multipart/form-data">
+          <label for="xml_file">{{ texts.form.file_label }}</label>
+          <input id="xml_file" name="xml_file" type="file" accept=".xml,.xmi,application/xml,text/xml" required>
+          <button type="submit">{{ texts.form.submit_button }}</button>
+        </form>
+        {% if error %}
+          <div class="error">{{ error }}</div>
+        {% endif %}
+      </section>
+    </main>
+  </body>
+</html>
