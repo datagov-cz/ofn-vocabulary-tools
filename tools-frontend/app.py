@@ -11,7 +11,7 @@ import tempfile
 from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile
 
-from flask import Flask, jsonify, render_template, request, send_file
+from flask import Flask, jsonify, render_template, request, send_file, send_from_directory
 from werkzeug.utils import secure_filename
 
 
@@ -74,6 +74,10 @@ def create_app(test_config=None):
     @app.get("/news")
     def news_page():
         return render_template("news.html")
+
+    @app.get("/docs/dataset/<path:filename>")
+    def dataset_documentation(filename):
+        return send_from_directory(DATASET_ROOT / "docs", filename)
 
     @app.get("/api/news")
     def news_feed():

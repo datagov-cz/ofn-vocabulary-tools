@@ -275,6 +275,24 @@ main {
   font-size: 16px;
   line-height: 1.65;
 }
+.documentation-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin-top: 20px;
+}
+.documentation-links a {
+  color: var(--green-dark);
+  font-size: 14px;
+  font-weight: 650;
+  text-decoration: underline;
+  text-decoration-color: rgba(14, 78, 59, 0.35);
+  text-underline-offset: 3px;
+}
+.documentation-links a:hover {
+  color: var(--green);
+  text-decoration-color: currentColor;
+}
 .section-copy ul {
   list-style: none;
   padding: 12px 0 0;
