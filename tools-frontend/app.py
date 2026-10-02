@@ -19,6 +19,7 @@ HERE = Path(__file__).resolve().parent
 REPOSITORY = HERE.parent
 DATASET_ROOT = REPOSITORY / "tools-dataset"
 VOCABULARY_ROOT = REPOSITORY / "tools-vocabulary"
+NEWS_ROOT = HERE / "news"
 
 # The legacy tools are intentionally left in their existing directories. Their
 # public Python API is loaded here, while vocabulary CLIs run in an isolated
@@ -54,6 +55,10 @@ VOCABULARY_CONVERTERS = {
         "options": {"with_view": "--with-view"},
     },
 }
+VOCABULARY_OUTPUT_FORMATS = {
+    "ttl": {"suffix": ".ttl", "mimetype": "text/turtle"},
+    "json-ld": {"suffix": ".json-ld", "mimetype": "application/ld+json"},
+}
 
 
 def create_app(test_config=None):
@@ -65,6 +70,14 @@ def create_app(test_config=None):
     @app.get("/")
     def index():
         return render_template("index.html")
+
+    @app.get("/news")
+    def news_page():
+        return render_template("news.html")
+
+    @app.get("/api/news")
+    def news_feed():
+        return jsonify(items=_load_news(app.logger))
 
     @app.get("/api/health")
     def health():
@@ -78,14 +91,14 @@ def create_app(test_config=None):
         try:
             parsed = parse_xml(upload.read())
             if parsed.model is None:
-                return _error("The XML format is not supported.", 400)
+                return _error("Tento formát XML není podporován.", 400)
             outputs = create_jsonld_files(parsed)
             if not outputs:
-                return _error("No datasets were found in the uploaded model.", 422)
+                return _error("V nahraném modelu nebyly nalezeny žádné datové sady.", 422)
             validate_jsonld_files(outputs)
         except Exception as exc:  # converters expose several domain exceptions
             app.logger.exception("Dataset conversion failed")
-            return _error(f"Dataset conversion failed: {exc}", 422)
+            return _error(f"Převod datové sady se nezdařil: {exc}", 422)
 
         stem = Path(secure_filename(upload.filename)).stem or "dataset"
         if len(outputs) == 1:
@@ -113,16 +126,26 @@ def create_app(test_config=None):
         converter_name = request.form.get("converter", "")
         converter = VOCABULARY_CONVERTERS.get(converter_name)
         if converter is None:
-            return _error("Select a supported conversion.", 400)
+            return _error("Vyberte podporovaný typ převodu.", 400)
         upload = _required_upload("file", converter["inputs"])
         if not hasattr(upload, "filename"):
             return upload
+
+        output_suffix = converter["output"]
+        output_mimetype = "application/xml"
+        if output_suffix == ".ttl":
+            output_format = request.form.get("output_format", "ttl")
+            format_config = VOCABULARY_OUTPUT_FORMATS.get(output_format)
+            if format_config is None:
+                return _error("Vyberte podporovaný výstupní formát.", 400)
+            output_suffix = format_config["suffix"]
+            output_mimetype = format_config["mimetype"]
 
         with tempfile.TemporaryDirectory(prefix="ofn-tools-") as temp_dir:
             temp = Path(temp_dir)
             input_name = secure_filename(upload.filename) or f"input{next(iter(converter['inputs']))}"
             input_path = temp / input_name
-            output_path = temp / f"{Path(input_name).stem}{converter['output']}"
+            output_path = temp / f"{Path(input_name).stem}{output_suffix}"
             upload.save(input_path)
             command = [sys.executable, str(VOCABULARY_ROOT / converter["script"]),
                        str(input_path), str(output_path)]
@@ -135,34 +158,76 @@ def create_app(test_config=None):
                     timeout=120, check=False,
                 )
             except subprocess.TimeoutExpired:
-                return _error("Conversion timed out after 120 seconds.", 504)
+                return _error("Převod nebyl dokončen v časovém limitu 120 sekund.", 504)
             if result.returncode != 0 or not output_path.is_file():
-                detail = (result.stderr or result.stdout or "No output was produced.").strip()
-                return _error(f"Vocabulary conversion failed: {detail[-2000:]}", 422)
-            mimetype = "application/xml" if converter["output"] == ".xml" else "text/turtle"
-            return _download(output_path.read_bytes(), output_path.name, mimetype)
+                detail = (result.stderr or result.stdout or "Nebyl vytvořen žádný výstup.").strip()
+                return _error(f"Převod slovníku se nezdařil: {detail[-2000:]}", 422)
+            return _download(output_path.read_bytes(), output_path.name, output_mimetype)
 
     @app.post("/api/validation/validate")
     def validate_vocabulary():
         return _error(
-            "Vocabulary validation is prepared in the interface but has not been implemented yet.",
+            "Validace slovníku je v rozhraní připravena, ale zatím nebyla implementována.",
             501,
         )
 
     @app.errorhandler(413)
     def too_large(_error_value):
-        return _error("The uploaded file exceeds the 50 MB limit.", 413)
+        return _error("Nahraný soubor překračuje limit 50 MB.", 413)
 
     return app
+
+
+def _load_news(logger):
+    """Load valid, repository-owned news entries, newest first."""
+    items = []
+    if not NEWS_ROOT.is_dir():
+        return items
+
+    for path in NEWS_ROOT.glob("*.json"):
+        try:
+            item = json.loads(path.read_text(encoding="utf-8"))
+            _validate_news_item(item)
+        except (OSError, json.JSONDecodeError, ValueError) as exc:
+            logger.warning("Ignoring invalid news entry %s: %s", path.name, exc)
+            continue
+        items.append({
+            "id": item["id"],
+            "publishedAt": item["publishedAt"],
+            "title": item["title"],
+            "summary": item["summary"],
+            "details": item.get("details", []),
+        })
+    return sorted(items, key=lambda item: (item["publishedAt"], item["id"]), reverse=True)
+
+
+def _validate_news_item(item):
+    if not isinstance(item, dict):
+        raise ValueError("entry must be a JSON object")
+    required = {"id", "publishedAt", "title", "summary"}
+    if not required.issubset(item):
+        raise ValueError(f"missing fields: {', '.join(sorted(required - item.keys()))}")
+    if not all(isinstance(item[field], str) and item[field].strip() for field in required):
+        raise ValueError("required fields must be non-empty strings")
+    if not item["id"].replace("-", "").isalnum() or item["id"].lower() != item["id"]:
+        raise ValueError("id must be a lowercase slug")
+    try:
+        from datetime import date
+        date.fromisoformat(item["publishedAt"])
+    except ValueError as exc:
+        raise ValueError("publishedAt must be an ISO date") from exc
+    details = item.get("details", [])
+    if not isinstance(details, list) or not all(isinstance(detail, str) for detail in details):
+        raise ValueError("details must be an array of strings")
 
 
 def _required_upload(field, suffixes):
     upload = request.files.get(field)
     if upload is None or not upload.filename:
-        return _error("Choose a file to continue.", 400)
+        return _error("Nejprve vyberte soubor.", 400)
     if Path(upload.filename).suffix.lower() not in suffixes:
         expected = ", ".join(sorted(suffixes))
-        return _error(f"Unsupported file type. Expected: {expected}.", 400)
+        return _error(f"Nepodporovaný typ souboru. Očekávané typy: {expected}.", 400)
     return upload
 
 
@@ -178,4 +243,11 @@ def _download(content, filename, mimetype):
 app = create_app()
 
 if __name__ == "__main__":
-    app.run(host=os.getenv("HOST", "127.0.0.1"), port=int(os.getenv("PORT", "5000")), debug=False)
+    # This entry point is for local development. The production container uses
+    # Gunicorn and the desktop-style launcher uses Waitress, so enabling Flask's
+    # debugger and reloader here does not affect either deployment.
+    app.run(
+        host=os.getenv("OFN_HOST", "127.0.0.1"),
+        port=int(os.getenv("OFN_PORT", "5127")),
+        debug=True,
+    )

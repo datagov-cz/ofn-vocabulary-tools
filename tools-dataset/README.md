@@ -39,5 +39,5 @@ pip install -r ../tools-frontend/requirements.txt
 python -m unittest discover -s tests -v
 ```
 
-For the web and Windows Electron applications, see
+For the Python web application and Windows launcher, see
 [`../tools-frontend/README.md`](../tools-frontend/README.md).

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#12261f" />
+    <title>Novinky · OFN Workbench</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+    <script src="{{ url_for('static', filename='news.js') }}" defer></script>
+  </head>
+  <body>
+    <header class="masthead">
+      <a
+        class="brand"
+        href="#dataset"
+        aria-label="Domovská stránka OFN Workbench"
+      >
+        <span class="brand-mark">O</span>
+        <span
+          ><strong>Nástroje pro práci s OFN Slovníky</strong
+          ><small>Sada funkcí pro interní využití</small></span
+        >
+      </a>
+      <a class="back-link" href="/">← Zpět do aplikace</a>
+    </header>
+    <main class="news-page">
+      <section class="news-page-heading">
+        <div>
+          <h1>Novinky</h1>
+          <p>Nové funkce, vylepšení a opravy.</p>
+        </div>
+        <button class="secondary" type="button" data-mark-all>
+          Označit vše jako přečtené
+        </button>
+      </section>
+      <div
+        class="news-list news-archive"
+        data-news-list
+        data-show-all
+        aria-live="polite"
+      >
+        <p class="news-loading">Načítání novinek…</p>
+      </div>
+    </main>
+  </body>
+</html>

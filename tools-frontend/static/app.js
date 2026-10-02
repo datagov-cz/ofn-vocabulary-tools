@@ -28,14 +28,18 @@ document.querySelectorAll('input[type="file"]').forEach((input) => {
 });
 
 const converter = document.querySelector('#converter');
-converter.addEventListener('change', () => {
+function updateVocabularyFields() {
   const option = converter.selectedOptions[0];
-  const input = converter.closest('form').querySelector('input[type="file"]');
+  const form = converter.closest('form');
+  const input = form.querySelector('input[type="file"]');
   input.value = ''; input.accept = option.dataset.accept;
-  converter.closest('form').querySelector('.filename').textContent = '';
-  converter.closest('form').querySelector('.accept-copy').textContent = option.dataset.accept.replaceAll('.', '').toUpperCase();
-  converter.closest('form').querySelector('.with-view').hidden = converter.value !== 'table-to-archi';
-});
+  form.querySelector('.filename').textContent = '';
+  form.querySelector('.accept-copy').textContent = option.dataset.accept.replaceAll('.', '').toUpperCase();
+  form.querySelector('.with-view').hidden = converter.value !== 'table-to-archi';
+  form.querySelector('.output-format').hidden = converter.value === 'table-to-archi';
+}
+converter.addEventListener('change', updateVocabularyFields);
+updateVocabularyFields();
 
 function downloadBlob(blob, disposition) {
   const match = disposition?.match(/filename\*?=(?:UTF-8''|["']?)([^"';]+)/i);
@@ -50,15 +54,15 @@ document.querySelectorAll('[data-download-form]').forEach((form) => {
     event.preventDefault();
     const button = form.querySelector('button[type="submit"]');
     const message = form.querySelector('.form-message');
-    button.disabled = true; button.classList.add('loading'); message.textContent = 'Processing…'; message.className = 'form-message';
+    button.disabled = true; button.classList.add('loading'); message.textContent = 'Zpracovávání…'; message.className = 'form-message';
     try {
       const response = await fetch(form.action, { method: 'POST', body: new FormData(form) });
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
-        throw new Error(body.error || `Request failed (${response.status})`);
+        throw new Error(body.error || `Požadavek se nezdařil (${response.status})`);
       }
       downloadBlob(await response.blob(), response.headers.get('Content-Disposition'));
-      message.textContent = 'Complete — your download is ready.'; message.classList.add('success');
+      message.textContent = 'Hotovo – soubor je připraven ke stažení.'; message.classList.add('success');
     } catch (error) {
       message.textContent = error.message; message.classList.add('error');
     } finally {

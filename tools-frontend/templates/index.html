@@ -1,103 +1,228 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#12261f">
-  <title>OFN Workbench</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
-</head>
-<body>
-  <header class="masthead">
-    <a class="brand" href="#dataset" aria-label="OFN Workbench home">
-      <span class="brand-mark">O</span>
-      <span><strong>OFN</strong><small>Workbench</small></span>
-    </a>
-    <div class="status"><span></span> Runs locally</div>
-  </header>
-
-  <main>
-    <section class="hero">
-      <p class="eyebrow">Open Formal Norms toolkit</p>
-      <h1>From model to machine-readable standard.</h1>
-      <p>Generate datasets, create and convert vocabularies, and validate your work in one focused workspace.</p>
-    </section>
-
-    <nav class="tabs" aria-label="Tool categories" role="tablist">
-      <button id="tab-dataset" role="tab" aria-selected="true" aria-controls="dataset" data-tab="dataset">
-        <span>01</span> Dataset generation
-      </button>
-      <button id="tab-vocabulary" role="tab" aria-selected="false" aria-controls="vocabulary" data-tab="vocabulary">
-        <span>02</span> Vocabulary creation
-      </button>
-      <button id="tab-validation" role="tab" aria-selected="false" aria-controls="validation" data-tab="validation">
-        <span>03</span> Vocabulary validation
-      </button>
-    </nav>
-
-    <section id="dataset" class="workspace active" role="tabpanel" aria-labelledby="tab-dataset">
-      <div class="section-copy">
-        <p class="eyebrow">tools-dataset</p>
-        <h2>Generate dataset metadata</h2>
-        <p>Convert an ArchiMate exchange model or Enterprise Architect XMI export into schema-validated JSON-LD.</p>
-        <ul><li>Automatic source format detection</li><li>Multiple datasets packaged as ZIP</li><li>JSON Schema validation before download</li></ul>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#12261f" />
+    <title>Nástroje pro práci s OFN Slovníky</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+  </head>
+  <body>
+    <header class="masthead">
+      <a
+        class="brand"
+        href="#dataset"
+        aria-label="Domovská stránka OFN Workbench"
+      >
+        <span class="brand-mark">O</span>
+        <span
+          ><strong>Nástroje pro práci s OFN Slovníky</strong
+          ><small>Sada funkcí pro interní využití</small></span
+        >
+      </a>
+      <div class="header-actions">
+        <a class="news-link" href="/news"
+          >Novinky <span data-news-count hidden></span
+        ></a>
+        <a
+          class="news-link"
+          href="https://github.com/datagov-cz/ofn-vocabulary-tools/issues/new"
+          >Nahlásit chybu (GitHub)</a
+        >
       </div>
-      <form class="tool-card" action="/api/dataset/convert" data-download-form>
-        <div class="card-heading"><span class="icon">↗</span><div><h3>Model to JSON-LD</h3><p>ArchiMate XML or EA XMI</p></div></div>
-        <label class="dropzone">
-          <input type="file" name="file" accept=".xml,.xmi" required>
-          <span class="drop-icon">＋</span><strong>Drop a model here</strong><small>or click to browse · XML, XMI · max 50 MB</small>
-          <span class="filename"></span>
-        </label>
-        <button class="primary" type="submit">Generate dataset <span>→</span></button>
-        <div class="form-message" aria-live="polite"></div>
-      </form>
-    </section>
+    </header>
 
-    <section id="vocabulary" class="workspace" role="tabpanel" aria-labelledby="tab-vocabulary" hidden>
-      <div class="section-copy">
-        <p class="eyebrow">tools-vocabulary</p>
-        <h2>Create and convert vocabularies</h2>
-        <p>Move between modelling tools, spreadsheet templates, OFN RDF, and ArchiMate exchange models.</p>
-        <div class="note">Output format for OFN conversions is Turtle (.ttl).</div>
-      </div>
-      <form class="tool-card" action="/api/vocabulary/convert" data-download-form>
-        <div class="field">
-          <label for="converter">Conversion</label>
-          <select id="converter" name="converter">
-            <option value="archi-to-ofn" data-accept=".xml,.archimate">ArchiMate → OFN vocabulary</option>
-            <option value="ea-to-ofn" data-accept=".xml,.xmi">Enterprise Architect → OFN vocabulary</option>
-            <option value="table-to-ofn" data-accept=".xlsx">Excel table → OFN vocabulary</option>
-            <option value="table-to-archi" data-accept=".xlsx">Excel table → ArchiMate model</option>
-          </select>
+    <main>
+      <section
+        class="home-news"
+        data-home-news
+        hidden
+        aria-labelledby="latest-news-heading"
+      >
+        <div class="home-news-heading">
+          <div>
+            <p class="eyebrow">Co je nového</p>
+            <h2 id="latest-news-heading">Nepřečtené novinky</h2>
+          </div>
+          <a href="/news">Zobrazit všechny novinky →</a>
         </div>
-        <label class="dropzone compact">
-          <input type="file" name="file" accept=".xml,.archimate" required>
-          <span class="drop-icon">＋</span><strong>Choose source file</strong><small class="accept-copy">XML or ArchiMate</small>
-          <span class="filename"></span>
-        </label>
-        <label class="check with-view" hidden><input type="checkbox" name="with_view"><span>Include diagram views in the ArchiMate model</span></label>
-        <button class="primary" type="submit">Convert vocabulary <span>→</span></button>
-        <div class="form-message" aria-live="polite"></div>
-      </form>
-    </section>
+        <div class="news-list" data-news-list aria-live="polite"></div>
+      </section>
 
-    <section id="validation" class="workspace" role="tabpanel" aria-labelledby="tab-validation" hidden>
-      <div class="section-copy">
-        <p class="eyebrow">tools-validation</p>
-        <h2>Validate a vocabulary</h2>
-        <p>This workspace is ready for the forthcoming vocabulary validation service. Its API route and UI boundary are already separated from conversion.</p>
-      </div>
-      <div class="tool-card coming-soon">
-        <span class="badge">Planned</span>
-        <div class="validation-illustration"><span>✓</span></div>
-        <h3>Validation is coming next</h3>
-        <p>The input controls will be enabled when <code>tools-validation</code> is implemented.</p>
-        <button class="primary" disabled>Validate vocabulary</button>
-      </div>
-    </section>
-  </main>
-  <footer><span>OFN Workbench</span><span>Files are processed by the local application service.</span></footer>
-</body>
+      <nav class="tabs" aria-label="Kategorie nástrojů" role="tablist">
+        <button
+          id="tab-dataset"
+          role="tab"
+          aria-selected="true"
+          aria-controls="dataset"
+          data-tab="dataset"
+        >
+          <span>01</span> Generování datové sady
+          <span class="badge">BETA</span>
+        </button>
+        <button
+          id="tab-vocabulary"
+          role="tab"
+          aria-selected="false"
+          aria-controls="vocabulary"
+          data-tab="vocabulary"
+        >
+          <span>02</span> Tvorba slovníku
+        </button>
+        <button
+          id="tab-validation"
+          role="tab"
+          aria-selected="false"
+          aria-controls="validation"
+          data-tab="validation"
+        >
+          <span>03</span> Validace slovníku
+        </button>
+      </nav>
+
+      <section
+        id="dataset"
+        class="workspace active"
+        role="tabpanel"
+        aria-labelledby="tab-dataset"
+      >
+        <div class="section-copy">
+          <p class="eyebrow">Nástroje pro datové sady</p>
+          <h2>Generování metadat datové sady dle OFN Datová rozhraní</h2>
+          <div class="note">
+            Funkce je ještě ve vývoji a není připravena pro použití pro úřady.
+          </div>
+          <p>
+            Převeďte výměnný model ArchiMate nebo export XMI z Enterprise
+            Architectu do JSON-LD ověřeného podle schématu.
+          </p>
+        </div>
+        <form
+          class="tool-card"
+          action="/api/dataset/convert"
+          data-download-form
+        >
+          <div class="card-heading">
+            <span class="icon">↗</span>
+            <div>
+              <h3>Model do JSON-LD</h3>
+              <p>ArchiMate XML nebo EA XMI</p>
+            </div>
+          </div>
+          <label class="dropzone">
+            <input type="file" name="file" accept=".xml,.xmi" required />
+            <span class="drop-icon">＋</span
+            ><strong>Přetáhněte model sem</strong
+            ><small
+              >nebo klikněte a vyberte soubor · XML, XMI · max. 50 MB</small
+            >
+            <span class="filename"></span>
+          </label>
+          <button class="primary" type="submit">
+            Vygenerovat metadata datové sady<span>→</span>
+          </button>
+          <div class="form-message" aria-live="polite"></div>
+        </form>
+      </section>
+
+      <section
+        id="vocabulary"
+        class="workspace"
+        role="tabpanel"
+        aria-labelledby="tab-vocabulary"
+        hidden
+      >
+        <div class="section-copy">
+          <p class="eyebrow">Nástroje pro převod slovníků</p>
+          <h2>Převod slovníků do různých formátů</h2>
+          <p>
+            Převádějte data mezi modelovacími nástroji, tabulkovými šablonami,
+            OFN RDF a výměnnými modely ArchiMate.
+          </p>
+          <div class="note">
+            Pro převod ze šablon do slovníku OFN použijte validátor ISMD.
+          </div>
+        </div>
+        <form
+          class="tool-card"
+          action="/api/vocabulary/convert"
+          data-download-form
+        >
+          <div class="field">
+            <label for="converter">Převod</label>
+            <select id="converter" name="converter">
+              <option value="table-to-archi" data-accept=".xlsx">
+                Tabulka Excel → model ArchiMate
+              </option>
+              <!-- <option value="archi-to-ofn" data-accept=".xml,.archimate">
+                ArchiMate → slovník OFN
+              </option>
+              <option value="ea-to-ofn" data-accept=".xml,.xmi">
+                Enterprise Architect → slovník OFN
+              </option>
+              <option value="table-to-ofn" data-accept=".xlsx">
+                Tabulka Excel → slovník OFN
+              </option> -->
+            </select>
+          </div>
+          <div class="field output-format" hidden>
+            <label for="output-format">Výstupní formát</label>
+            <select id="output-format" name="output_format">
+              <option value="ttl">Turtle (.ttl)</option>
+              <option value="json-ld">JSON-LD (.json-ld)</option>
+            </select>
+          </div>
+          <label class="dropzone compact">
+            <input type="file" name="file" accept=".xlsx" required />
+            <span class="drop-icon">＋</span
+            ><strong>Vyberte zdrojový soubor</strong
+            ><small class="accept-copy">XLSX</small>
+            <span class="filename"></span>
+          </label>
+          <label class="check with-view"
+            ><input type="checkbox" name="with_view" /><span
+              >Zahrnout do modelu ArchiMate pohledy diagramů</span
+            ></label
+          >
+          <button class="primary" type="submit">
+            Převést slovník <span>→</span>
+          </button>
+          <div class="form-message" aria-live="polite"></div>
+        </form>
+      </section>
+
+      <section
+        id="validation"
+        class="workspace"
+        role="tabpanel"
+        aria-labelledby="tab-validation"
+        hidden
+      >
+        <div class="section-copy">
+          <p class="eyebrow">Nástroje pro validaci slovníků</p>
+          <h2>Validace slovníku</h2>
+          <p>
+            Toto prostředí je připravené pro chystanou službu validace slovníků.
+            Její rozhraní API i uživatelské rozhraní jsou již oddělené od
+            převodu.
+          </p>
+        </div>
+        <div class="tool-card coming-soon">
+          <span class="badge">Plánováno</span>
+          <div class="validation-illustration"><span>✓</span></div>
+          <h3>Validace bude k dispozici brzy</h3>
+          <p>
+            Vstupní prvky budou zpřístupněny po implementaci
+            <code>tools-validation</code>.
+          </p>
+          <button class="primary" disabled>Validovat slovník</button>
+        </div>
+      </section>
+    </main>
+    <script src="{{ url_for('static', filename='news.js') }}" defer></script>
+  </body>
 </html>
