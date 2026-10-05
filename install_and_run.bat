@@ -42,8 +42,6 @@ if errorlevel 1 goto error
 
 :install
 echo Installing Python dependencies...
-"%VENV_PYTHON%" -m pip install --upgrade pip
-if errorlevel 1 goto error
 "%VENV_PYTHON%" -m pip install --only-binary=:all: -r tools-frontend\requirements.txt
 if errorlevel 1 goto error
 
@@ -56,12 +54,13 @@ exit /b 0
 set "UPDATE_TEMP=%TEMP%\ofn-vocabulary-tools-update-%RANDOM%-%RANDOM%"
 set "UPDATE_ZIP=%UPDATE_TEMP%\main.zip"
 set "UPDATE_EXTRACT=%UPDATE_TEMP%\extracted"
+set "UPDATE_URL=https://github.com/datagov-cz/ofn-vocabulary-tools/archive/refs/heads/main.zip"
 for %%I in ("%~dp0.") do set "REPO_ROOT=%%~fI"
 
 mkdir "%UPDATE_TEMP%"
 if errorlevel 1 exit /b 1
 
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$ProgressPreference = 'SilentlyContinue'; $ErrorActionPreference = 'Stop'; try { Invoke-WebRequest -Uri $args[0] -OutFile $args[1]; Expand-Archive -LiteralPath $args[1] -DestinationPath $args[2] -Force } catch { Write-Error $_; exit 1 }" "https://github.com/datagov-cz/ofn-vocabulary-tools/archive/refs/heads/main.zip" "%UPDATE_ZIP%" "%UPDATE_EXTRACT%"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$ProgressPreference = 'SilentlyContinue'; $ErrorActionPreference = 'Stop'; try { Invoke-WebRequest -Uri $env:UPDATE_URL -OutFile $env:UPDATE_ZIP; Expand-Archive -LiteralPath $env:UPDATE_ZIP -DestinationPath $env:UPDATE_EXTRACT -Force } catch { Write-Error $_; exit 1 }"
 if errorlevel 1 (
     rmdir /s /q "%UPDATE_TEMP%"
     exit /b 1
