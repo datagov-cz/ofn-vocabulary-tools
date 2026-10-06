@@ -275,6 +275,23 @@ main {
   font-size: 16px;
   line-height: 1.65;
 }
+.converter-descriptions {
+  margin-top: 27px;
+}
+.converter-descriptions h3 {
+  margin: 0 0 8px;
+  color: var(--green-dark);
+  font: 650 18px/1.35 system-ui;
+}
+.converter-descriptions p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.converter-descriptions [hidden] {
+  display: none;
+}
 .documentation-links {
   display: flex;
   flex-wrap: wrap;
@@ -357,6 +374,12 @@ main {
   padding: 30px;
   box-shadow: var(--shadow);
 }
+.tool-card[hidden] {
+  display: none;
+}
+.converter-picker {
+  margin-bottom: 16px;
+}
 .card-heading {
   display: flex;
   gap: 15px;
@@ -427,6 +450,9 @@ main {
 }
 .dropzone.compact {
   min-height: 150px;
+}
+.tool-card .dropzone + .dropzone {
+  margin-top: 16px;
 }
 .primary {
   width: 100%;
@@ -503,6 +529,9 @@ main {
   margin-top: 16px;
   font-size: 14px;
   color: #48564f;
+}
+.check[hidden] {
+  display: none;
 }
 .check input {
   accent-color: var(--green);

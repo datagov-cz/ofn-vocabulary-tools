@@ -36,6 +36,13 @@ from core.xml_processing import parse_xml  # noqa: E402
 
 MAX_UPLOAD_BYTES = 50 * 1024 * 1024
 VOCABULARY_CONVERTERS = {
+    "ofn-iri-to-archi": {
+        "script": "ofnIRItoArchi.py",
+        "inputs": {".xml", ".archimate"},
+        "vocabulary_inputs": {".json", ".jsonld", ".json-ld", ".ttl"},
+        "output": ".xml",
+        "output_name_suffix": "-with-iri",
+    },
     "archi-to-ofn": {
         "script": "archiToOFN.py",
         "inputs": {".xml", ".archimate"},
@@ -146,6 +153,11 @@ def create_app(test_config=None):
         upload = _required_upload("file", converter["inputs"])
         if not hasattr(upload, "filename"):
             return upload
+        vocabulary_upload = None
+        if "vocabulary_inputs" in converter:
+            vocabulary_upload = _required_upload("vocabulary_file", converter["vocabulary_inputs"])
+            if not hasattr(vocabulary_upload, "filename"):
+                return vocabulary_upload
 
         output_suffix = converter["output"]
         output_mimetype = "application/xml"
@@ -161,10 +173,18 @@ def create_app(test_config=None):
             temp = Path(temp_dir)
             input_name = secure_filename(upload.filename) or f"input{next(iter(converter['inputs']))}"
             input_path = temp / input_name
-            output_path = temp / f"{Path(input_name).stem}{output_suffix}"
+            output_path = temp / (
+                f"{Path(input_name).stem}{converter.get('output_name_suffix', '')}{output_suffix}"
+            )
             upload.save(input_path)
             command = [sys.executable, str(VOCABULARY_ROOT / converter["script"]),
-                       str(input_path), str(output_path)]
+                       str(input_path)]
+            if vocabulary_upload is not None:
+                vocabulary_name = secure_filename(vocabulary_upload.filename) or "vocabulary.json"
+                vocabulary_path = temp / vocabulary_name
+                vocabulary_upload.save(vocabulary_path)
+                command.append(str(vocabulary_path))
+            command.append(str(output_path))
             for field, argument in converter.get("options", {}).items():
                 if request.form.get(field) in {"1", "true", "on"}:
                     command.append(argument)

@@ -28,18 +28,16 @@ document.querySelectorAll('input[type="file"]').forEach((input) => {
 });
 
 const converter = document.querySelector('#converter');
-function updateVocabularyFields() {
-  const option = converter.selectedOptions[0];
-  const form = converter.closest('form');
-  const input = form.querySelector('input[type="file"]');
-  input.value = ''; input.accept = option.dataset.accept;
-  form.querySelector('.filename').textContent = '';
-  form.querySelector('.accept-copy').textContent = option.dataset.accept.replaceAll('.', '').toUpperCase();
-  form.querySelector('.with-view').hidden = converter.value !== 'table-to-archi';
-  form.querySelector('.output-format').hidden = converter.value === 'table-to-archi';
+function updateVocabularyTool() {
+  document.querySelectorAll('[data-converter-description]').forEach((description) => {
+    description.hidden = description.dataset.converterDescription !== converter.value;
+  });
+  document.querySelectorAll('[data-converter-form]').forEach((form) => {
+    form.hidden = form.dataset.converterForm !== converter.value;
+  });
 }
-converter.addEventListener('change', updateVocabularyFields);
-updateVocabularyFields();
+converter.addEventListener('change', updateVocabularyTool);
+updateVocabularyTool();
 
 function downloadBlob(blob, disposition) {
   const match = disposition?.match(/filename\*?=(?:UTF-8''|["']?)([^"';]+)/i);

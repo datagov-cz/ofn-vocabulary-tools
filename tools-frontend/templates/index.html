@@ -71,7 +71,7 @@
           aria-controls="vocabulary"
           data-tab="vocabulary"
         >
-          <span>02</span> Tvorba slovníku
+          <span>02</span> Nástroje pro slovník
         </button>
         <button
           id="tab-validation"
@@ -97,8 +97,8 @@
             <strong>Upozornění</strong>
             <span
               >Funkce je ještě ve vývoji a není připravena pro použití pro
-              úřady. Nefunguje mj. tvorba samotného slovníku a jeho přiřazování
-              k datové sadě.</span
+              úřady. Nefunguje mj. podpora Enterprise Architectu a přiřazování
+              nových pojmů k datové sadě.</span
             >
           </div>
           <p>
@@ -160,62 +160,106 @@
         hidden
       >
         <div class="section-copy">
-          <p class="eyebrow">Nástroje pro převod slovníků</p>
+          <p class="eyebrow">Nástroje pro slovníky</p>
           <h2>Převod slovníků do různých formátů</h2>
           <p>
             Převádějte data mezi modelovacími nástroji, tabulkovými šablonami,
-            OFN RDF a výměnnými modely ArchiMate.
+            OFN RDF a modely ArchiMate/Enterprise Architect.
           </p>
+          <div class="converter-descriptions">
+            <div data-converter-description="ofn-iri-to-archi">
+              <h3>Doplnit IRI z OFN do modelu ArchiMate</h3>
+              <p>
+                Doplní do prvků a vztahů modelu ArchiMate identifikátory pojmů
+                ze slovníku OFN podle shodných názvů. Existující hodnoty
+                identifikátorů zůstanou zachovány.
+              </p>
+            </div>
+            <div data-converter-description="table-to-archi" hidden>
+              <h3>Tabulka Excel → model ArchiMate</h3>
+              <p>
+                Převede třídy, vlastnosti a vztahy z tabulkové šablony do
+                výměnného modelu ArchiMate. Volitelně může vytvořit také pohledy
+                diagramů.
+              </p>
+            </div>
+          </div>
           <div class="note">
             Pro převod ze šablon do slovníku OFN použijte validátor ISMD.
           </div>
         </div>
-        <form
-          class="tool-card"
-          action="/api/vocabulary/convert"
-          data-download-form
-        >
-          <div class="field">
+        <div class="vocabulary-tools">
+          <div class="field converter-picker">
             <label for="converter">Převod</label>
-            <select id="converter" name="converter">
-              <option value="table-to-archi" data-accept=".xlsx">
+            <select id="converter">
+              <option value="ofn-iri-to-archi">
+                Doplnit IRI z OFN do modelu ArchiMate
+              </option>
+              <option value="table-to-archi">
                 Tabulka Excel → model ArchiMate
               </option>
-              <!-- <option value="archi-to-ofn" data-accept=".xml,.archimate">
-                ArchiMate → slovník OFN
-              </option>
-              <option value="ea-to-ofn" data-accept=".xml,.xmi">
-                Enterprise Architect → slovník OFN
-              </option>
-              <option value="table-to-ofn" data-accept=".xlsx">
-                Tabulka Excel → slovník OFN
-              </option> -->
             </select>
           </div>
-          <div class="field output-format" hidden>
-            <label for="output-format">Výstupní formát</label>
-            <select id="output-format" name="output_format">
-              <option value="ttl">Turtle (.ttl)</option>
-              <option value="json-ld">JSON-LD (.json-ld)</option>
-            </select>
-          </div>
-          <label class="dropzone compact">
-            <input type="file" name="file" accept=".xlsx" required />
-            <span class="drop-icon">＋</span
-            ><strong>Vyberte zdrojový soubor</strong
-            ><small class="accept-copy">XLSX</small>
-            <span class="filename"></span>
-          </label>
-          <label class="check with-view"
-            ><input type="checkbox" name="with_view" /><span
-              >Zahrnout do modelu ArchiMate pohledy diagramů</span
-            ></label
+          <form
+            class="tool-card"
+            action="/api/vocabulary/convert"
+            data-converter-form="ofn-iri-to-archi"
+            data-download-form
           >
-          <button class="primary" type="submit">
-            Převést slovník <span>→</span>
-          </button>
-          <div class="form-message" aria-live="polite"></div>
-        </form>
+            <input type="hidden" name="converter" value="ofn-iri-to-archi" />
+            <label class="dropzone compact">
+              <input
+                type="file"
+                name="file"
+                accept=".xml,.archimate"
+                required
+              />
+              <span class="drop-icon">＋</span
+              ><strong>Vyberte model ArchiMate</strong><small>XML</small>
+              <span class="filename"></span>
+            </label>
+            <label class="dropzone compact">
+              <input
+                type="file"
+                name="vocabulary_file"
+                accept=".json,.jsonld,.json-ld,.ttl"
+                required
+              />
+              <span class="drop-icon">＋</span
+              ><strong>Vyberte slovník OFN</strong
+              ><small>JSON, JSON-LD nebo TTL</small>
+              <span class="filename"></span>
+            </label>
+            <button class="primary" type="submit">
+              Doplnit IRI <span>→</span>
+            </button>
+            <div class="form-message" aria-live="polite"></div>
+          </form>
+          <form
+            class="tool-card"
+            action="/api/vocabulary/convert"
+            data-converter-form="table-to-archi"
+            data-download-form
+            hidden
+          >
+            <input type="hidden" name="converter" value="table-to-archi" />
+            <label class="dropzone compact">
+              <input type="file" name="file" accept=".xlsx" required />
+              <span class="drop-icon">＋</span
+              ><strong>Vyberte tabulku Excel</strong><small>XLSX</small>
+              <span class="filename"></span>
+            </label>
+            <label class="check with-view"
+              ><input type="checkbox" name="with_view" /><span
+                >Zahrnout do modelu ArchiMate pohledy diagramů</span
+              ></label
+            >
+            <button class="primary" type="submit">
+              Vytvořit model ArchiMate <span>→</span>
+            </button>
+            <div class="form-message" aria-live="polite"></div>
+          </form>
+        </div>
       </section>
 
       <section
