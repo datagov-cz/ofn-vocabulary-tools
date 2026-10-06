@@ -315,6 +315,41 @@ main {
   color: var(--muted);
   font-size: 14px;
 }
+.warning {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 2px 12px;
+  align-items: center;
+  padding: 16px 18px;
+  margin-top: 27px;
+  border: 1px solid #e2a12f;
+  border-left: 5px solid #c65f20;
+  border-radius: 10px;
+  background: #fff1c7;
+  color: #6b3517;
+  box-shadow: 0 8px 22px rgba(107, 53, 23, 0.12);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.warning:before {
+  content: "!";
+  grid-row: 1 / span 2;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #c65f20;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+}
+.warning strong {
+  font-size: 15px;
+}
+.warning span {
+  grid-column: 2;
+}
 .tool-card {
   background: var(--card);
   border: 1px solid rgba(23, 107, 82, 0.16);
@@ -481,6 +516,13 @@ main {
 }
 .form-message.error {
   color: #a63e2f;
+}
+.form-message ul {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+.form-message li + li {
+  margin-top: 5px;
 }
 .form-message.success {
   color: var(--green);

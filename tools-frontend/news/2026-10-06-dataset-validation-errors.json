@@ -1,0 +1,10 @@
+{
+  "id": "2026-10-06-dataset-validation-errors",
+  "publishedAt": "2026-10-06",
+  "title": "Srozumitelnější chyby při převodu datových sad",
+  "summary": "Při převodu datových sad se nyní v jednom přehledu zobrazí chybějící povinné údaje i chybně zadané hodnoty, například neplatné URL nebo identifikátor poskytovatele.",
+  "details": [
+    "Každá chyba uvádí název a IRI příslušného záznamu, pokud jsou k dispozici.",
+    "Názvy atributů v rozhraní odpovídají názvům vlastností (properties) ve zdrojovém modelu"
+  ]
+}

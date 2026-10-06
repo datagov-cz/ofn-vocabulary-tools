@@ -35,7 +35,13 @@ restarts after Python source changes. Refresh the browser after changing HTML,
 CSS, or JavaScript files. This debug server is intended only for local
 development; use `launcher.py` or the Docker image for normal deployments.
 
-On Windows, [`../install_and_run.bat`](../install_and_run.bat) creates a dedicated `.venv-windows` environment, installs the dependencies, and starts the application. Double-click it in the project root for the first and subsequent launches. Set `OFN_PYTHON` if the Python executable cannot be found automatically. If setup fails, the window stays open and displays the error.
+On Windows, [`../install_and_run.bat`](../install_and_run.bat) creates a dedicated `.venv-windows` environment, installs the dependencies, and starts the application. Double-click it in the project root for the first and subsequent launches. To run the Flask development server with debug mode and automatic reload, invoke it from a terminal in the project root:
+
+```bat
+install_and_run.bat --debug
+```
+
+Run `install_and_run.bat --help` to display the available option. Set `OFN_PYTHON` if the Python executable cannot be found automatically. If setup fails, the window stays open and displays the error.
 
 The Windows installer accepts prebuilt Python packages only. It does not require Visual Studio or the Microsoft C++ Build Tools.
 

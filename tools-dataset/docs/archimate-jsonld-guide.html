@@ -361,6 +361,12 @@
         <section id="jak-se-ctou-vlastnosti">
           <h2>Jak převodník čte ArchiMate XML</h2>
 
+          <div class="callout danger"><strong>Povinná adresa LKD:</strong>
+            model musí mít vlastnost <code>adresa LKD</code> s absolutním
+            <code>https://</code> IRI. Používá se jako jmenný prostor pro
+            generovaná IRI datových sad a pojmů. Výchozí hodnota neexistuje.
+          </div>
+
           <h3>Název vlastnosti musí být přesný</h3>
           <p>
             Element odkazuje přes <code>propertyDefinitionRef</code> na záznam v
@@ -435,7 +441,7 @@
           </p>
           <p>
             IRI se generuje jako
-            <code>https://slovník.gov.cz/{upravený-český-název}</code>. Český
+            <code>{adresa LKD}/{upravený-český-název}</code>. Český
             název se ořízne, převede na malá písmena a znaky nepovolené v
             lokální části IRI se nahradí pomlčkami. Český název je zároveň
             základem názvu souboru <code>.jsonld</code>. JSON-LD

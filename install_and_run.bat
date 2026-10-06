@@ -2,6 +2,18 @@
 setlocal
 cd /d "%~dp0"
 
+set "RUN_MODE=production"
+if "%~1"=="" goto arguments_done
+if /I "%~1"=="--debug" (
+    set "RUN_MODE=debug"
+    goto arguments_done
+)
+if /I "%~1"=="--help" goto usage
+if /I "%~1"=="/?" goto usage
+echo Unknown option: %~1
+goto usage_error
+
+:arguments_done
 where git >nul 2>nul
 if errorlevel 1 (
     echo Git is not installed or is not available in PATH.
@@ -45,8 +57,13 @@ echo Installing Python dependencies...
 "%VENV_PYTHON%" -m pip install --only-binary=:all: -r tools-frontend\requirements.txt
 if errorlevel 1 goto error
 
-echo Starting OFN Workbench...
-"%VENV_PYTHON%" tools-frontend\launcher.py
+if /I "%RUN_MODE%"=="debug" (
+    echo Starting OFN Workbench in debug mode...
+    "%VENV_PYTHON%" tools-frontend\app.py
+) else (
+    echo Starting OFN Workbench...
+    "%VENV_PYTHON%" tools-frontend\launcher.py
+)
 if errorlevel 1 goto error
 exit /b 0
 
@@ -81,6 +98,16 @@ if errorlevel 2 (
 rmdir /s /q "%UPDATE_TEMP%"
 echo Manual update completed successfully.
 exit /b 0
+
+:usage
+echo Usage: install_and_run.bat [--debug]
+echo.
+echo   --debug  Start the Flask development server with automatic reload.
+exit /b 0
+
+:usage_error
+echo Usage: install_and_run.bat [--debug]
+exit /b 2
 
 :error
 echo.

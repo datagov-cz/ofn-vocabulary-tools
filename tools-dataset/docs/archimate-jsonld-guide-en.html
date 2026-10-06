@@ -315,6 +315,12 @@
         <section id="property-reading">
           <h2>How the converter reads ArchiMate XML</h2>
 
+          <div class="callout danger"><strong>Required LKD address:</strong>
+            the model must define <code>adresa LKD</code> as an absolute
+            <code>https://</code> IRI. It is the namespace for generated dataset
+            and term IRIs. There is no default.
+          </div>
+
           <h3>Property names must match exactly</h3>
           <p>
             An element refers to an entry in
@@ -391,7 +397,7 @@
           </p>
           <p>
             The IRI is generated as
-            <code>https://slovník.gov.cz/{sanitized-Czech-name}</code>. The
+            <code>{adresa LKD}/{sanitized-Czech-name}</code>. The
             Czech name is trimmed, lowercased, and characters disallowed in the
             local IRI part are replaced with hyphens. It also becomes the basis
             of the <code>.jsonld</code> file name. JSON-LD <code>typ</code> is

@@ -83,6 +83,7 @@ DEFAULT_LEGISLATION_IRI = "https://www.e-sbirka.cz/eli/cz/sb/2026/60/2026-05-27"
 class DistributionDocument:
     kind: str
     document: dict
+    source_element_id: str | None = None
 
 
 def _single_property(element: ArchimateElement, property_name: str):
@@ -347,6 +348,7 @@ def build_distributions(
                     distribution_iri,
                     usage_terms,
                 ),
+                source_element_id=distribution.identifier,
             ))
         elif containsCompare(
             distribution_type,
@@ -374,6 +376,7 @@ def build_distributions(
                     distribution_iri,
                     usage_terms,
                 ),
+                source_element_id=distribution.identifier,
             ))
         else:
             warnings.warn(

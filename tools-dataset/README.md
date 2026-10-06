@@ -3,6 +3,12 @@
 Python modules for converting ArchiMate Model Exchange XML and Enterprise
 Architect XMI 2.1 exports to dataset JSON-LD.
 
+Every input must define the model/package property `adresa LKD` as an absolute
+`https://` IRI. It is the namespace used for generated dataset and term IRIs;
+there is no default. In ArchiMate, set it on the model. In Enterprise Architect,
+set it as a tagged value on the package carrying the `slovnikyPackage`
+stereotype.
+
 The user interface and deployment configuration live in `../tools-frontend`.
 This directory contains the format parsers, shared conversion pipeline,
 documentation, examples, and functional tests.

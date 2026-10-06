@@ -93,14 +93,22 @@
         <div class="section-copy">
           <p class="eyebrow">Nástroje pro datové sady</p>
           <h2>Generování metadat datové sady dle OFN Datová rozhraní</h2>
-          <div class="note">
-            Funkce je ještě ve vývoji a není připravena pro použití pro úřady.
+          <div class="warning" role="note" aria-label="Upozornění">
+            <strong>Upozornění</strong>
+            <span
+              >Funkce je ještě ve vývoji a není připravena pro použití pro
+              úřady. Nefunguje mj. tvorba samotného slovníku a jeho přiřazování
+              k datové sadě.</span
+            >
           </div>
           <p>
             Převeďte výměnný model ArchiMate nebo export XMI z Enterprise
             Architectu do JSON-LD ověřeného podle schématu.
           </p>
-          <div class="documentation-links" aria-label="Dokumentace k přípravě modelu">
+          <div
+            class="documentation-links"
+            aria-label="Dokumentace k přípravě modelu"
+          >
             <a
               href="{{ url_for('dataset_documentation', filename='archimate-jsonld-guide.html') }}"
               target="_blank"
@@ -111,7 +119,7 @@
               href="{{ url_for('dataset_documentation', filename='ea-xmi-jsonld-guide.html') }}"
               target="_blank"
               rel="noopener"
-              >Návod pro Enterprise Architect XMI
+              >Návod pro Enterprise Architect
               <span aria-hidden="true">↗</span></a
             >
           </div>

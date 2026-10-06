@@ -123,3 +123,51 @@ def find_missing_required_fields(
             ))
 
     return missing_fields
+
+
+def find_missing_required_entries(document: dict) -> list[tuple[str, dict]]:
+    """Return every missing field together with the JSON entry it belongs to.
+
+    Unlike ``find_missing_required_fields``, this representation retains the
+    entry itself so reports can include its name and IRI.
+    """
+    missing = [
+        (field, document)
+        for field in DATASET_REQUIRED_FIELDS
+        if field not in document
+    ]
+
+    contact_point = document.get(KONTAKTNI_BOD)
+    if isinstance(contact_point, dict):
+        missing.extend(
+            (field, document)
+            for field in CONTACT_POINT_REQUIRED_FIELDS
+            if field not in contact_point
+        )
+        contact_name = contact_point.get(JMENO)
+        if isinstance(contact_name, dict) and CS not in contact_name:
+            missing.append(("{}.{}.{}".format(KONTAKTNI_BOD, JMENO, CS), document))
+
+    for distribution in document.get(DISTRIBUCE, []):
+        if not isinstance(distribution, dict):
+            continue
+        access_service = distribution.get(PRISTUPOVA_SLUZBA)
+        required_fields = (
+            SERVICE_DISTRIBUTION_REQUIRED_FIELDS
+            if isinstance(access_service, dict)
+            else DOWNLOAD_DISTRIBUTION_REQUIRED_FIELDS
+        )
+        missing.extend(
+            (field, distribution)
+            for field in required_fields
+            if field not in distribution
+        )
+
+        if isinstance(access_service, dict):
+            missing.extend(
+                (field, access_service)
+                for field in ACCESS_SERVICE_REQUIRED_FIELDS
+                if field not in access_service
+            )
+
+    return missing

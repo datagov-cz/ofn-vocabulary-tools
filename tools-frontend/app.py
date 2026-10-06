@@ -27,7 +27,10 @@ NEWS_ROOT = HERE / "news"
 sys.path.insert(0, str(DATASET_ROOT))
 
 from core.jsonld_creation import create_jsonld_files  # noqa: E402
-from core.jsonld_validation import validate_jsonld_files  # noqa: E402
+from core.jsonld_validation import (  # noqa: E402
+    JsonLdValidationError,
+    validate_jsonld_files,
+)
 from core.xml_processing import parse_xml  # noqa: E402
 
 
@@ -100,6 +103,15 @@ def create_app(test_config=None):
             if not outputs:
                 return _error("V nahraném modelu nebyly nalezeny žádné datové sady.", 422)
             validate_jsonld_files(outputs)
+        except JsonLdValidationError as exc:
+            app.logger.warning(
+                "Dataset conversion found %d validation error(s)",
+                len(exc.errors),
+            )
+            return jsonify(
+                error="Vygenerovaná metadata obsahují chyby.",
+                errors=exc.errors,
+            ), 422
         except Exception as exc:  # converters expose several domain exceptions
             app.logger.exception("Dataset conversion failed")
             return _error(f"Převod datové sady se nezdařil: {exc}", 422)

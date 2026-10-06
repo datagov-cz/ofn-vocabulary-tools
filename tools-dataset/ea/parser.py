@@ -54,6 +54,7 @@ def _canonical_property_names():
 
 
 CANONICAL_PROPERTIES = _canonical_property_names()
+CANONICAL_PROPERTIES[_signature("adresa LKD")] = "adresa LKD"
 
 
 def _canonical_property_name(name):
@@ -262,10 +263,15 @@ def parse_ea_xmi(root):
     model_node = next((node for node in all_nodes if local_name(node.tag) == "Model"), root)
     package_names = [attribute(package, "name") for package in package_roots if attribute(package, "name")]
     model_name = package_names[0] if package_names else attribute(model_node, "name")
+    package_properties = {}
+    for package in package_roots:
+        package_properties.update(_tagged_values(applications.get(attribute(package, "id"), [])))
+    package_properties.pop("typ", None)
     model = ArchimateModel(
         identifier=attribute(model_node, "id"),
         version=attribute(root, "version"),
         names=[LangText(model_name, "cs")] if model_name else [],
+        resolved_properties=package_properties,
         elements=elements,
         relationships=relationships,
     )

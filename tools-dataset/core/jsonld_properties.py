@@ -1,6 +1,9 @@
 import re
 import unicodedata
 import warnings
+from contextlib import contextmanager
+from contextvars import ContextVar
+from dataclasses import dataclass
 
 from .xml_processing import ArchimateElement, ArchimateRelationship
 
@@ -55,6 +58,30 @@ DATE_REGEX = r"^\d{4}-\d{2}-\d{2}$"
 EMAIL_REGEX = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
 
 
+@dataclass(frozen=True)
+class MalformedProperty:
+    element_id: str | None
+    attribute: str
+    value: object
+    expected_pattern: str
+
+
+_malformed_properties: ContextVar[list[MalformedProperty] | None] = ContextVar(
+    "malformed_properties", default=None,
+)
+
+
+@contextmanager
+def collect_malformed_properties():
+    """Collect invalid source values while building one dataset document."""
+    problems: list[MalformedProperty] = []
+    token = _malformed_properties.set(problems)
+    try:
+        yield problems
+    finally:
+        _malformed_properties.reset(token)
+
+
 def sanitizeString(string: str) -> str:
     result: str = ""
     for match in PN_LOCAL.finditer(string):
@@ -86,11 +113,8 @@ def containsCompare(input: str | list[str], target: str) -> bool:
     return False
 
 
-def createDatasetIRI(name: str) -> str:
-    namespace = "https://slovník.gov.cz"
-    namespace = re.sub("/$", "", namespace)
-    while namespace.endswith("/"):
-        namespace = namespace[:-1]
+def createDatasetIRI(name: str, namespace: str) -> str:
+    namespace = namespace.rstrip("/")
     return "{}/{}".format(
         namespace,
         sanitizeString(name.strip().lower()),
@@ -116,6 +140,20 @@ def regexWarning(
     value,
     regex: str,
 ):
+    problems = _malformed_properties.get()
+    if problems is not None:
+        # Empty optional tags are commonly present in exported models. If a
+        # mandatory tag is empty, the required-field check reports it instead.
+        if value is not None and (not isinstance(value, str) or value.strip()):
+            source_value = element.resolved_properties.get(getProperty(property), value)
+            if isinstance(source_value, (list, dict)) or (
+                isinstance(source_value, str) and ";" in source_value
+            ):
+                source_value = value  # Identify the offending item in a list.
+            problems.append(MalformedProperty(
+                element.identifier, property, source_value, regex,
+            ))
+        return
     warnings.warn(
         "Skipping property {} of element ID {} because value {!r} doesn't "
         "satisfy regex {}".format(

@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 import logging
+import re
 import warnings
 
 from .jsonld_builders import (
@@ -35,6 +36,7 @@ from .jsonld_properties import (
     addProperty,
     addPropertyHelper,
     addRegexProperty,
+    collect_malformed_properties,
     containsCompare,
     createDatasetIRI,
     getProperty,
@@ -44,6 +46,7 @@ from .jsonld_properties import (
     regexWarning,
     sanitizeString,
     splitProperty,
+    MalformedProperty,
 )
 from .jsonld_relationships import (
     getIRIofTerm,
@@ -66,6 +69,7 @@ from .xml_processing import ArchimateElement, ArchimateRelationship, ParsedXml
 
 
 logger = logging.getLogger(__name__)
+LKD_ADDRESS = "adresa LKD"
 
 # Preserve the private names introduced by the original single-file refactor.
 _DistributionDocument = DistributionDocument
@@ -78,6 +82,8 @@ _find_missing_required_fields = find_missing_required_fields
 class JsonLdFile:
     filename: str | None
     document: dict
+    malformed_properties: tuple[MalformedProperty, ...] = ()
+    source_entries: dict[str | None, dict] | None = None
 
 
 def _czech_names(element: ArchimateElement):
@@ -107,6 +113,21 @@ def create_jsonld_files(parsed_xml: ParsedXml) -> list[JsonLdFile]:
             parsed_xml.root_element_name,
         )
         raise Exception("Cannot find model in Archimate File")
+
+    lkd_address = model.resolved_properties.get(LKD_ADDRESS)
+    if isinstance(lkd_address, list):
+        lkd_address = next(
+            (value for value in lkd_address if isinstance(value, str) and value.strip()),
+            None,
+        )
+    if not isinstance(lkd_address, str) or not lkd_address.strip():
+        raise ValueError(
+            "The ArchiMate model or EA slovnikyPackage must define the mandatory "
+            "property 'adresa LKD'"
+        )
+    lkd_address = lkd_address.strip()
+    if not re.fullmatch(HTTPS_REGEX, lkd_address):
+        raise ValueError("The mandatory property 'adresa LKD' must be an https:// IRI")
 
     logger.info(
         "Creating JSON-LD from %s model with %d element(s)",
@@ -141,7 +162,7 @@ def create_jsonld_files(parsed_xml: ParsedXml) -> list[JsonLdFile]:
             readProperty(dataset, TYP),
         )
         _log_element_properties("dataset", dataset)
-        dataset_iri = createDatasetIRI(dataset_name)
+        dataset_iri = createDatasetIRI(dataset_name, lkd_address)
         logger.info(
             "Generated dataset IRI %r for dataset element ID %r",
             dataset_iri,
@@ -150,46 +171,46 @@ def create_jsonld_files(parsed_xml: ParsedXml) -> list[JsonLdFile]:
         related_terms = getRelatedTerms(parsed_xml, dataset)
         related_term_iris = [
             iri
-            for iri in (getIRIofTerm(term, model) for term in related_terms)
+            for iri in (
+                getIRIofTerm(term, model, lkd_address) for term in related_terms
+            )
             if iri
         ]
         distribution_elements = getRelatedDistributionElements(
             parsed_xml,
             dataset,
         )
-        distributions = build_distributions(
-            distribution_elements,
-            dataset_iri,
-        )
-        logger.debug(
-            "Dataset element ID %s has %d related term(s) and %d valid "
-            "distribution(s)",
-            dataset.identifier,
-            len(related_term_iris),
-            len(distributions),
-        )
-        document = build_dataset_document(
-            dataset,
-            dataset_iri,
-            related_term_iris,
-            distributions,
-        )
-
-        missing_fields = find_missing_required_fields(
-            document,
-            distributions,
-        )
-        if missing_fields:
-            logger.error(
-                "Generated JSON-LD for dataset element ID %s is missing "
-                "required fields: %s",
-                dataset.identifier,
-                ", ".join(missing_fields),
+        with collect_malformed_properties() as malformed_properties:
+            distributions = build_distributions(
+                distribution_elements,
+                dataset_iri,
             )
+            logger.debug(
+                "Dataset element ID %s has %d related term(s) and %d valid "
+                "distribution(s)",
+                dataset.identifier,
+                len(related_term_iris),
+                len(distributions),
+            )
+            document = build_dataset_document(
+                dataset,
+                dataset_iri,
+                related_term_iris,
+                distributions,
+            )
+
+        source_entries = {dataset.identifier: document}
+        source_entries.update(
+            (distribution.source_element_id, distribution.document)
+            for distribution in distributions
+            if distribution.source_element_id is not None
+        )
 
         jsonld_files.append(JsonLdFile(
             filename=dataset_name,
             document=document,
+            malformed_properties=tuple(malformed_properties),
+            source_entries=source_entries,
         ))
 
     if not jsonld_files:

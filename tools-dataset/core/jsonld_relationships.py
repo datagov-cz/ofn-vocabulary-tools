@@ -417,6 +417,7 @@ def getRelatedTerms(
 def getIRIofTerm(
     element: ArchimateElement | ArchimateRelationship,
     model: ArchimateModel,
+    namespace: str,
 ) -> str:
     iri = readProperty(element, IDENTIFIKATOR)
     if isinstance(iri, list):
@@ -447,7 +448,6 @@ def getIRIofTerm(
     if not model_czech_names:
         raise ValueError("The model doesn't have a name in Czech")
 
-    namespace = "https://slovník.gov.cz"
     generated_iri = "{}/{}/pojem/{}".format(
         namespace.rstrip("/"),
         sanitizeString(model_czech_names[0].value.strip().lower()),
