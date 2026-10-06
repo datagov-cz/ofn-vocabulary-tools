@@ -29,8 +29,13 @@ if errorlevel 1 (
     git pull origin main
     if errorlevel 1 (
         echo.
-        echo WARNING: The update from origin/main failed. See the Git error above.
-        echo Continuing with installation and startup...
+        echo Downloading the latest version from origin/main instead...
+        call :download_update
+        if errorlevel 1 (
+            echo.
+            echo WARNING: The manual update from origin/main failed. See the error above.
+            echo Continuing with installation and startup...
+        )
     )
 )
 echo.
