@@ -61,10 +61,25 @@ Open <http://localhost:5000>. The build context intentionally includes the sibli
 - `launcher.py`: local production server and browser launcher
 - `templates/` and `static/`: dependency-free browser frontend
 - `/api/dataset/convert`: existing dataset conversion pipeline
+- `/api/dataset/vocabulary`: send ArchiMate XML to the configurable OFN converter,
+  return its validation report and a signed vocabulary result
 - `/api/vocabulary/convert`: allow-listed vocabulary converter scripts
 - `/api/validation/validate`: explicit `501` placeholder until `tools-validation` is implemented
 - `/api/news`: repository-owned changelog entries, newest first
 - `/news`: complete news archive with browser-local read state
+
+Dataset generation first calls the OFN converter (default:
+`https://oha03.dia.gov.cz/validujeme/api/backend/api/converter/convert`).
+The converter address can be changed in the dataset form or with the
+`DATASET_CONVERTER_ENDPOINT` environment variable. The converter receives the
+uploaded model as the `file` form part with `output=json` and
+`Accept: application/ld+json`. A reported error stops processing. The final
+ZIP contains the generated OFN vocabulary, the ArchiMate model enriched with
+IRIs, and the dataset JSON-LD files. The prepared vocabulary is bound to the
+uploaded model for 30 minutes. The browser sends the vocabulary as a file in
+the second request so its JSON-LD bytes and line endings are preserved.
+Set `OFN_SECRET_KEY` to the same private value across app workers to protect
+the prepared result token.
 
 Uploads are limited to 50 MB. Temporary vocabulary inputs and outputs are deleted after every request.
 

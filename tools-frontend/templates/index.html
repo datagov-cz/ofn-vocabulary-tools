@@ -97,13 +97,13 @@
             <strong>Upozornění</strong>
             <span
               >Funkce je ještě ve vývoji a není připravena pro použití pro
-              úřady. Nefunguje mj. podpora Enterprise Architectu a přiřazování
-              nových pojmů k datové sadě.</span
+              úřady. Nefunguje mj. podpora Enterprise Architectu.</span
             >
           </div>
           <p>
             Převeďte výměnný model ArchiMate nebo export XMI z Enterprise
-            Architectu do JSON-LD ověřeného podle schématu.
+            Architectu do JSON-LD ověřeného podle schématu. Nejdříve se vytvoří
+            slovník OFN a do modelu se doplní IRI. Výsledky stáhnete v ZIPu.
           </p>
           <div
             class="documentation-links"
@@ -124,11 +124,7 @@
             >
           </div>
         </div>
-        <form
-          class="tool-card"
-          action="/api/dataset/convert"
-          data-download-form
-        >
+        <form class="tool-card" action="/api/dataset/convert" data-dataset-form>
           <div class="card-heading">
             <span class="icon">↗</span>
             <div>
@@ -137,18 +133,37 @@
             </div>
           </div>
           <label class="dropzone">
-            <input type="file" name="file" accept=".xml,.xmi" required />
+            <input type="file" name="file" accept=".xml,.archimate" required />
             <span class="drop-icon">＋</span
             ><strong>Přetáhněte model sem</strong
             ><small
-              >nebo klikněte a vyberte soubor · XML, XMI · max. 50 MB</small
+              >nebo klikněte a vyberte soubor · ArchiMate XML · max. 50
+              MB</small
             >
             <span class="filename"></span>
           </label>
+          <div class="field">
+            <label for="dataset-endpoint">Adresa konvertoru slovníku</label>
+            <input
+              id="dataset-endpoint"
+              type="url"
+              name="endpoint"
+              value="{{ config.DATASET_CONVERTER_ENDPOINT }}"
+              required
+            />
+          </div>
           <button class="primary" type="submit">
             Vygenerovat metadata datové sady<span>→</span>
           </button>
+          <ol class="conversion-steps" aria-live="polite">
+            <li data-step="vocabulary">Vytvoření a validace slovníku OFN</li>
+            <li data-step="dataset">
+              Doplnění IRI a generování metadat datové sady
+            </li>
+            <li data-step="download">Stažení ZIPu</li>
+          </ol>
           <div class="form-message" aria-live="polite"></div>
+          <div class="validation-report" hidden></div>
         </form>
       </section>
 

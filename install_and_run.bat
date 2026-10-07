@@ -25,16 +25,16 @@ if errorlevel 1 (
         echo Continuing with installation and startup...
     )
 ) else (
-    echo Pulling the latest commit from origin/main...
-    git pull origin main
-    if errorlevel 1 (
-        echo.
-        echo Downloading the latest version from origin/main instead...
-        call :download_update
+    set "LOCAL_CHANGES="
+    for /f %%I in ('git status --porcelain') do set "LOCAL_CHANGES=1"
+    if defined LOCAL_CHANGES (
+        echo Local changes detected. Skipping automatic update to preserve them.
+    ) else (
+        echo Pulling the latest commit from origin/main...
+        git pull origin main
         if errorlevel 1 (
             echo.
-            echo WARNING: The manual update from origin/main failed. See the error above.
-            echo Continuing with installation and startup...
+            echo WARNING: Automatic update failed. Continuing with the current version...
         )
     )
 )

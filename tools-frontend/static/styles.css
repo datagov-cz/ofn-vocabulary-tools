@@ -466,6 +466,7 @@ main {
   cursor: pointer;
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 10px;
 }
 .primary:hover {
@@ -476,6 +477,15 @@ main {
   cursor: not-allowed;
 }
 .primary.loading span {
+  display: none;
+}
+.primary.loading::after {
+  content: "";
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
 @keyframes spin {
@@ -522,6 +532,32 @@ main {
   background-size: 5px 5px;
   background-repeat: no-repeat;
 }
+.field input[type="url"] {
+  width: 100%;
+  border: 1px solid #cbd1cb;
+  border-radius: 9px;
+  background: white;
+  padding: 13px;
+  font: inherit;
+  color: var(--ink);
+}
+.conversion-steps {
+  padding-left: 24px;
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.conversion-steps [data-state="active"] { color: var(--green-dark); font-weight: 700; }
+.conversion-steps [data-state="done"] { color: var(--green); }
+.conversion-steps [data-state="done"]::after { content: " ✓"; }
+.conversion-steps [data-state="error"] { color: #a63e2f; font-weight: 700; }
+.validation-report { overflow-x: auto; margin-top: 18px; font-size: 12px; }
+.validation-report[hidden] { display: none; }
+.validation-report h4 { margin: 0 0 8px; font-size: 13px; }
+.validation-report table { width: 100%; border-collapse: collapse; text-align: left; }
+.validation-report th, .validation-report td { border: 1px solid var(--line); padding: 7px; overflow-wrap: anywhere; }
+.validation-report th { background: #edf2eb; }
 .check {
   display: flex;
   gap: 10px;

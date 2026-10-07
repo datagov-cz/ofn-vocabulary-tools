@@ -121,6 +121,96 @@ function showErrors(container, summary, errors) {
   container.classList.add('error');
 }
 
+function showConverterReport(container, body) {
+  container.replaceChildren();
+  const groups = body.validationResults?.severityGroups || [];
+  const validation = body.validationReport?.validation || {};
+  const rows = [];
+  for (const [concept, entry] of Object.entries(validation)) {
+    for (const [rule, finding] of Object.entries(entry?.violations || {})) {
+      rows.push([entry.conceptIri || concept, finding.name || rule,
+        finding.severity || finding.level || '', finding.description || finding.value || '']);
+    }
+  }
+  const heading = document.createElement('h4');
+  heading.textContent = 'Zpráva validátoru slovníku';
+  container.append(heading);
+  if (!groups.length && !rows.length) {
+    const empty = document.createElement('p');
+    empty.textContent = 'Validátor nevrátil žádná zjištění.';
+    container.append(empty);
+    container.hidden = false;
+    return;
+  }
+  const table = document.createElement('table');
+  const detailed = rows.length > 0;
+  const columns = detailed ? ['Pojem', "Pravidlo", 'Závažnost', 'Popis']
+    : ['Závažnost', 'Počet', 'Popis'];
+  const head = document.createElement('thead');
+  const headingRow = document.createElement('tr');
+  columns.forEach((column) => {
+    const cell = document.createElement('th'); cell.textContent = column; headingRow.append(cell);
+  });
+  head.append(headingRow); table.append(head);
+  const tbody = document.createElement('tbody');
+  (detailed ? rows : groups.map((group) =>
+    [group.severity || '', group.count ?? '', group.description || '']))
+    .forEach((row) => {
+      const tr = document.createElement('tr');
+      row.forEach((value) => {
+        const cell = document.createElement('td'); cell.textContent = value; tr.append(cell);
+      });
+      tbody.append(tr);
+    });
+  table.append(tbody); container.append(table); container.hidden = false;
+}
+
+const datasetForm = document.querySelector('[data-dataset-form]');
+datasetForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const button = datasetForm.querySelector('button[type="submit"]');
+  const message = datasetForm.querySelector('.form-message');
+  const report = datasetForm.querySelector('.validation-report');
+  const steps = [...datasetForm.querySelectorAll('[data-step]')];
+  const setStep = (index, state) => { steps[index].dataset.state = state; };
+  steps.forEach((step) => { delete step.dataset.state; });
+  report.hidden = true; report.replaceChildren();
+  message.textContent = ''; message.className = 'form-message';
+  button.disabled = true; button.classList.add('loading');
+  let active = 0;
+  setStep(active, 'active');
+  try {
+    const formData = new FormData(datasetForm);
+    const prepared = await fetch('/api/dataset/vocabulary', { method: 'POST', body: formData });
+    const body = await prepared.json().catch(() => ({}));
+    showConverterReport(report, body);
+    if (!prepared.ok) throw new Error(body.error || `Konvertor selhal (${prepared.status}).`);
+    setStep(active, 'done'); active = 1; setStep(active, 'active');
+    const conversionData = new FormData();
+    conversionData.set('file', formData.get('file'));
+    conversionData.set('vocabulary_file',
+      new Blob([body.vocabulary], { type: 'application/ld+json' }), 'vocabulary.jsonld');
+    conversionData.set('conversion_token', body.conversionToken);
+    const converted = await fetch(datasetForm.action, { method: 'POST', body: conversionData });
+    if (!converted.ok) {
+      const failure = await converted.json().catch(() => ({}));
+      const error = new Error(failure.error || `Převod selhal (${converted.status}).`);
+      error.details = failure.errors;
+      throw error;
+    }
+    setStep(active, 'done'); active = 2; setStep(active, 'active');
+    downloadBlob(await converted.blob(), converted.headers.get('Content-Disposition'));
+    setStep(active, 'done');
+    message.textContent = 'Hotovo – ZIP obsahuje metadata, model s IRI a slovník OFN.';
+    message.classList.add('success');
+  } catch (error) {
+    setStep(active, 'error');
+    showErrors(message, error.message, error.details);
+  } finally {
+    button.disabled = false; button.classList.remove('loading');
+  }
+});
+
 document.querySelectorAll('[data-download-form]').forEach((form) => {
   form.addEventListener('submit', async (event) => {
     event.preventDefault();

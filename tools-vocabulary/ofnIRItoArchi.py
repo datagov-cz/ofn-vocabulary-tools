@@ -18,13 +18,10 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from lxml import etree
-from rdflib import Graph, RDF, SKOS, URIRef
 
 
-OFN_CONCEPT = URIRef(
-    "https://slovník.gov.cz/generický/datový-slovník-ofn-slovníků/pojem/pojem"
-)
-SKOS_PREF_LABEL = str(SKOS.prefLabel)
+OFN_CONCEPT = "https://slovník.gov.cz/generický/datový-slovník-ofn-slovníků/pojem/pojem"
+SKOS_PREF_LABEL = "http://www.w3.org/2004/02/skos/core#prefLabel"
 IDENTIFIER_NAME = "identifikátor"
 
 
@@ -103,10 +100,12 @@ def load_concepts(path: Path) -> dict[str, set[str]]:
         with path.open(encoding="utf-8-sig") as source:
             concepts = _json_concepts(json.load(source))
     elif suffix in {".ttl", ".turtle"}:
+        from rdflib import Graph, RDF, SKOS, URIRef
+
         graph = Graph()
         graph.parse(path, format="turtle")
         concepts = defaultdict(set)
-        for subject in graph.subjects(RDF.type, OFN_CONCEPT):
+        for subject in graph.subjects(RDF.type, URIRef(OFN_CONCEPT)):
             if not isinstance(subject, URIRef):
                 continue
             for label in graph.objects(subject, SKOS.prefLabel):
