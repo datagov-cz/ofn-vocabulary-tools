@@ -201,7 +201,20 @@ def add_hierarchical_view(diagrams, view_id, name, identifiers, relationships, r
         source, target = link.attrib["source"], link.attrib["target"]
         source_row, _ = cells[source]
         target_row, _ = cells[target]
-        routes[identifier] = {"needs_corridor": source_row + 1 != target_row}
+        if source_row < target_row:
+            source_band, target_band = source_row + 1, target_row
+            source_side, target_side = "bottom", "top"
+        elif source_row > target_row:
+            source_band, target_band = source_row, target_row + 1
+            source_side, target_side = "top", "bottom"
+        else:
+            source_band = target_band = source_row + 1
+            source_side = target_side = "bottom"
+        routes[identifier] = {
+            "source_band": source_band, "target_band": target_band,
+            "source_side": source_side, "target_side": target_side,
+            "needs_corridor": source_band != target_band,
+        }
         uses[(source, "source")].append(link)
         uses[(target, "target")].append(link)
     width = max(180, max((len(value) + 1 for value in uses.values()), default=0))
@@ -252,8 +265,8 @@ def add_hierarchical_view(diagrams, view_id, name, identifiers, relationships, r
         route = routes[identifier]
         if not route["needs_corridor"]:
             continue
-        source_band = cells[link.attrib["source"]][0] + 1
-        target_band = cells[link.attrib["target"]][0]
+        source_band = route["source_band"]
+        target_band = route["target_band"]
         first, last = sorted((source_band, target_band))
         blocked = [box for row in row_boxes[first:last] for box in row]
         sx, tx = ports[(identifier, "source")], ports[(identifier, "target")]
@@ -274,8 +287,8 @@ def add_hierarchical_view(diagrams, view_id, name, identifiers, relationships, r
     for link in relationships:
         identifier = link.attrib["identifier"]
         route = routes[identifier]
-        source_band = cells[link.attrib["source"]][0] + 1
-        target_band = cells[link.attrib["target"]][0]
+        source_band = route["source_band"]
+        target_band = route["target_band"]
         sx, tx = ports[(identifier, "source")], ports[(identifier, "target")]
         if not route["needs_corridor"]:
             route["source_lane"] = route["target_lane"] = reserve(bands[source_band], sx, tx)
@@ -302,12 +315,14 @@ def add_hierarchical_view(diagrams, view_id, name, identifiers, relationships, r
         sr, tr = cells[source][0], cells[target][0]
         sx, tx = ports[(identifier, "source")], ports[(identifier, "target")]
         route = routes[identifier]
-        sy = band_y[sr + 1] + 12 * (route["source_lane"] + 1)
-        ty = band_y[tr] + 12 * (route["target_lane"] + 1)
-        points = [(sx, row_y[sr] + 80), (sx, sy)]
+        sy = band_y[route["source_band"]] + 12 * (route["source_lane"] + 1)
+        ty = band_y[route["target_band"]] + 12 * (route["target_lane"] + 1)
+        source_y = row_y[sr] + (80 if route["source_side"] == "bottom" else 0)
+        target_y = row_y[tr] + (80 if route["target_side"] == "bottom" else 0)
+        points = [(sx, source_y), (sx, sy)]
         if route["needs_corridor"]:
             points.extend([(route["x"], sy), (route["x"], ty)])
-        points.extend([(tx, ty), (tx, row_y[tr])])
+        points.extend([(tx, ty), (tx, target_y)])
         connection = child(view, "connection", identifier=f"{view_id}-connection-{identifier}",
                            relationshipRef=identifier, source=references[source], target=references[target],
                            **{f"{{{XSI}}}type": "Relationship"})
@@ -330,14 +345,11 @@ def add_default_views(root, elements, relationships):
                if element_type(element) in ("typ objektu", "typ subjektu")}
     tropes = {element.attrib["identifier"] for element in elements if element_type(element) == "typ vlastnosti"}
     diagrams = child(child(root, "views"), "diagrams")
-    associations = [link for link in relationships
-                    if link.attrib[f"{{{XSI}}}type"] == "Association"
-                    and link.attrib["source"] in classes and link.attrib["target"] in classes]
-    layout_links = [link for link in relationships
-                    if link.attrib[f"{{{XSI}}}type"] in ("Association", "Specialization")
-                    and link.attrib["source"] in classes and link.attrib["target"] in classes]
+    class_links = [link for link in relationships
+                   if link.attrib[f"{{{XSI}}}type"] in ("Association", "Specialization")
+                   and link.attrib["source"] in classes and link.attrib["target"] in classes]
     add_hierarchical_view(diagrams, "id-class-overview", "Subjekty a objekty práva",
-                          list(classes), associations, layout_relationships=layout_links)
+                          list(classes), class_links)
     for owner, element in classes.items():
         properties = set()
         for link in relationships:
