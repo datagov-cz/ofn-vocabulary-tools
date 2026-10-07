@@ -22,3 +22,5 @@ tools-dataset/instance/
 !tools-dataset/tests/
 tools-dataset/tests/*
 !tools-dataset/tests/test_http_regressions.py
+!tools-frontend/tests/
+!tools-frontend/tests/test_dataset_conversion.py

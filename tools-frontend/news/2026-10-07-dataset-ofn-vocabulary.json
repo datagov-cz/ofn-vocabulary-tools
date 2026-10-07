@@ -1,0 +1,11 @@
+{
+  "id": "2026-10-07-dataset-ofn-vocabulary",
+  "publishedAt": "2026-10-07",
+  "title": "Slovník OFN před generováním datové sady",
+  "summary": "Generování datové sady nyní nejprve vytvoří slovník OFN, zobrazí zprávu validátoru a doplní IRI do modelu ArchiMate.",
+  "details": [
+    "Adresu konvertoru slovníku lze změnit přímo ve formuláři.",
+    "Při chybě konvertoru nebo validace se generování zastaví.",
+    "Výsledný ZIP obsahuje metadata datové sady, slovník OFN a model s doplněnými IRI."
+  ]
+}

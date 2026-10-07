@@ -1,0 +1,11 @@
+{
+  "id": "2026-10-06-ofn-iri-to-archimate",
+  "publishedAt": "2026-10-06",
+  "title": "Doplnění IRI pojmů do modelu ArchiMate",
+  "summary": "Nový nástroj doplní do prvků a vztahů modelu ArchiMate identifikátory pojmů ze slovníku OFN podle shodných názvů.",
+  "details": [
+    "Vstupem je model ve výměnném formátu ArchiMate a slovník OFN ve formátu JSON, JSON-LD nebo Turtle.",
+    "Existující hodnoty vlastnosti identifikátor zůstávají zachovány a nalezená IRI se přidají jako nové hodnoty.",
+    "Výsledný model je po zpracování automaticky nabídnut ke stažení."
+  ]
+}
