@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import unicodedata
 from collections import defaultdict
@@ -23,6 +24,7 @@ from lxml import etree
 OFN_CONCEPT = "https://slovník.gov.cz/generický/datový-slovník-ofn-slovníků/pojem/pojem"
 SKOS_PREF_LABEL = "http://www.w3.org/2004/02/skos/core#prefLabel"
 IDENTIFIER_NAME = "identifikátor"
+HTTPS_IRI_REGEX = r"^https://.*$"
 
 
 def normalized(value: str) -> str:
@@ -114,7 +116,8 @@ def load_concepts(path: Path) -> dict[str, set[str]]:
     else:
         raise ValueError("Vocabulary must be JSON, JSON-LD, or Turtle (.ttl)")
     if not concepts:
-        raise ValueError("The vocabulary contains no Pojem entries with a preferred label and IRI")
+        raise ValueError(
+            "The vocabulary contains no Pojem entries with a preferred label and IRI")
     return concepts
 
 
@@ -139,9 +142,10 @@ def enrich_model(model_path: Path, vocabulary_path: Path, output_path: Path) -> 
     tree = etree.parse(str(model_path), parser)
     root = tree.getroot()
     if _local_name(root) != "model":
-        raise ValueError("The first input is not an ArchiMate Open Exchange model")
+        raise ValueError(
+            "The first input is not an ArchiMate Open Exchange model")
     namespace = etree.QName(root).namespace
-    qname = lambda name: f"{{{namespace}}}{name}" if namespace else name
+    def qname(name): return f"{{{namespace}}}{name}" if namespace else name
 
     identifier_definitions = set()
     definition_ids = set()
@@ -155,7 +159,8 @@ def enrich_model(model_path: Path, vocabulary_path: Path, output_path: Path) -> 
             if name is not None and normalized(name.text or "") == normalized(IDENTIFIER_NAME):
                 identifier_definitions.add(identifier)
 
-    identifier_definition = sorted(identifier_definitions)[0] if identifier_definitions else None
+    identifier_definition = sorted(identifier_definitions)[
+        0] if identifier_definitions else None
     if identifier_definition is None:
         number = 1
         identifier_definition = "id-property-identifier"
@@ -187,33 +192,59 @@ def enrich_model(model_path: Path, vocabulary_path: Path, output_path: Path) -> 
             continue
         matched += 1
         properties = _direct_child(node, "properties")
-        if properties is None:
-            properties = etree.SubElement(node, qname("properties"))
         existing = set()
-        for prop in _children(properties, "property"):
-            if prop.get("propertyDefinitionRef") in identifier_definitions:
-                value = _direct_child(prop, "value")
-                if value is not None and value.text:
-                    existing.add(value.text.strip())
-        for iri in sorted(iris - existing):
+        malformed = []
+        has_identifier_property = False
+        if properties is not None:
+            for prop in _children(properties, "property"):
+                if prop.get("propertyDefinitionRef") in identifier_definitions:
+                    has_identifier_property = True
+                    value = _direct_child(prop, "value")
+                    text = (value.text or "").strip() if value is not None else ""
+                    if text and re.fullmatch(HTTPS_IRI_REGEX, text):
+                        existing.add(text)
+                    else:
+                        malformed.append((prop, value))
+
+        # A valid identifier means that this object is already assigned: keep
+        # it and discard newly matched IRIs. Empty or malformed identifier
+        # properties are replaced, while a missing property is created below.
+        if existing:
+            continue
+        ordered_iris = sorted(iris)
+        for index, (prop, value) in enumerate(malformed):
+            iri = ordered_iris[index % len(ordered_iris)]
+            if value is None:
+                value = etree.SubElement(prop, qname("value"))
+            value.text = iri
+            added += 1
+        if has_identifier_property:
+            continue
+        for iri in ordered_iris:
+            if properties is None:
+                properties = etree.SubElement(node, qname("properties"))
             prop = etree.SubElement(properties, qname("property"),
                                     propertyDefinitionRef=identifier_definition)
             etree.SubElement(prop, qname("value")).text = iri
             added += 1
 
-    tree.write(str(output_path), encoding="utf-8", xml_declaration=True, pretty_print=True)
+    tree.write(str(output_path), encoding="utf-8",
+               xml_declaration=True, pretty_print=True)
     return matched, added
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("model", type=Path, help="ArchiMate Open Exchange XML model")
-    parser.add_argument("vocabulary", type=Path, help="OFN vocabulary (.json, .jsonld, or .ttl)")
+    parser.add_argument("model", type=Path,
+                        help="ArchiMate Open Exchange XML model")
+    parser.add_argument("vocabulary", type=Path,
+                        help="OFN vocabulary (.json, .jsonld, or .ttl)")
     parser.add_argument("output", type=Path, help="output ArchiMate XML model")
     args = parser.parse_args()
     try:
         matched, added = enrich_model(args.model, args.vocabulary, args.output)
-        print(f"Matched {matched} model object(s); added {added} identifier value(s).")
+        print(
+            f"Matched {matched} model object(s); added {added} identifier value(s).")
     except (OSError, ValueError, json.JSONDecodeError, etree.XMLSyntaxError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1

@@ -114,10 +114,7 @@ def getRelatedElementsByAssociation(
         element.identifier: element
         for element in model.elements
         if element.identifier
-        and any(
-            containsCompare(readProperty(element, TYP), requested_type)
-            for requested_type in requested_types
-        )
+        and _has_any_type(element, requested_types)
     }
     related_element_ids = set()
 
@@ -144,7 +141,9 @@ def getRelatedElementsByAssociation(
 
 def _has_any_type(element: ArchimateElement, requested_types) -> bool:
     return any(
-        containsCompare(readProperty(element, TYP), requested_type)
+        containsCompare(value, requested_type)
+        for property_name, value in element.resolved_properties.items()
+        if "typ" in property_name.casefold()
         for requested_type in requested_types
     )
 
