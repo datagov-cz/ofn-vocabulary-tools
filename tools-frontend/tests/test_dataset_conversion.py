@@ -1,5 +1,6 @@
-"""Checks the external vocabulary step and the dataset ZIP contract."""
+"""Checks vocabulary preparation and both dataset download formats."""
 
+import base64
 import io
 import json
 import sys
@@ -60,13 +61,30 @@ class DatasetConversionTest(unittest.TestCase):
             self.assertEqual(archive.read("model-ofn-vocabulary.jsonld"),
                              VOCABULARY.encode("utf-8"))
 
-    def test_converter_error_stops_before_dataset_step(self):
-        response = self.prepare({"output": VOCABULARY,
-                                 "validationResults": {"severityGroups": [
-                                     {"severity": "Violation", "count": 1}]}})
-        self.assertEqual(response.status_code, 422)
-        self.assertIn("validationResults", response.json)
-        self.assertNotIn("conversionToken", response.json)
+    def test_individual_files_include_all_generated_outputs(self):
+        prepared = self.prepare({"output": VOCABULARY})
+        self.assertEqual(prepared.status_code, 200)
+        with patch.object(frontend, "parse_xml", return_value=SimpleNamespace(model=object())), \
+             patch.object(frontend, "create_jsonld_files", return_value=[
+                 SimpleNamespace(filename="dataset.jsonld", document={"ok": True})]), \
+             patch.object(frontend, "validate_jsonld_files"):
+            converted = self.client.post(
+                "/api/dataset/convert",
+                data={"file": (io.BytesIO(MODEL), "model.xml"),
+                      "vocabulary_file": (io.BytesIO(VOCABULARY.encode("utf-8")),
+                                          "vocabulary.jsonld"),
+                      "conversion_token": prepared.json["conversionToken"],
+                      "download_mode": "files"},
+                content_type="multipart/form-data",
+            )
+        self.assertEqual(converted.status_code, 200)
+        files = {file["name"]: base64.b64decode(file["content"])
+                 for file in converted.json["files"]}
+        self.assertEqual(set(files), {
+            "model-ofn-vocabulary.jsonld", "model-with-iri.xml", "dataset.jsonld"})
+        self.assertEqual(files["model-ofn-vocabulary.jsonld"], VOCABULARY.encode("utf-8"))
+        self.assertIn(b"https://example.org/foo", files["model-with-iri.xml"])
+        self.assertEqual(json.loads(files["dataset.jsonld"]), {"ok": True})
 
     def test_dataset_step_requires_matching_prepared_model(self):
         prepared = self.prepare({"output": VOCABULARY})

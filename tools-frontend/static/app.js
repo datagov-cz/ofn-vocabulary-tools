@@ -39,12 +39,13 @@ function updateVocabularyTool() {
 converter.addEventListener('change', updateVocabularyTool);
 updateVocabularyTool();
 
-function downloadBlob(blob, disposition) {
+function downloadBlob(blob, disposition, explicitFilename) {
   const match = disposition?.match(/filename\*?=(?:UTF-8''|["']?)([^"';]+)/i);
-  const filename = match ? decodeURIComponent(match[1].replace(/["']/g, '')) : 'download';
+  const filename = explicitFilename || (match ? decodeURIComponent(match[1].replace(/["']/g, '')) : 'download');
   const url = URL.createObjectURL(blob);
   const link = Object.assign(document.createElement('a'), { href: url, download: filename });
-  document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url);
+  document.body.appendChild(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
 
 function sourceAttributeName(path, iri) {
@@ -171,6 +172,8 @@ datasetForm.addEventListener('submit', async (event) => {
   const button = datasetForm.querySelector('button[type="submit"]');
   const message = datasetForm.querySelector('.form-message');
   const report = datasetForm.querySelector('.validation-report');
+  const downloads = datasetForm.querySelector('.dataset-downloads');
+  downloads.replaceChildren(); downloads.hidden = true;
   const steps = [...datasetForm.querySelectorAll('[data-step]')];
   const setStep = (index, state) => { steps[index].dataset.state = state; };
   steps.forEach((step) => { delete step.dataset.state; });
@@ -191,6 +194,8 @@ datasetForm.addEventListener('submit', async (event) => {
     conversionData.set('vocabulary_file',
       new Blob([body.vocabulary], { type: 'application/ld+json' }), 'vocabulary.jsonld');
     conversionData.set('conversion_token', body.conversionToken);
+    const mode = formData.get('download_mode');
+    conversionData.set('download_mode', mode);
     const converted = await fetch(datasetForm.action, { method: 'POST', body: conversionData });
     if (!converted.ok) {
       const failure = await converted.json().catch(() => ({}));
@@ -199,9 +204,27 @@ datasetForm.addEventListener('submit', async (event) => {
       throw error;
     }
     setStep(active, 'done'); active = 2; setStep(active, 'active');
-    downloadBlob(await converted.blob(), converted.headers.get('Content-Disposition'));
+    if (mode === 'files') {
+      const result = await converted.json();
+      for (const file of result.files) {
+        const link = document.createElement('button');
+        link.type = 'button';
+        link.className = 'download-file';
+        link.textContent = `Stáhnout ${file.name}`;
+        link.addEventListener('click', () => {
+          const bytes = Uint8Array.from(atob(file.content), (character) => character.charCodeAt(0));
+          const type = file.name.endsWith('.xml') ? 'application/xml' : 'application/ld+json';
+          downloadBlob(new Blob([bytes], { type }), null, file.name);
+        });
+        downloads.append(link);
+      }
+      downloads.hidden = false;
+      message.textContent = 'Hotovo – vyberte soubory ke stažení.';
+    } else {
+      downloadBlob(await converted.blob(), converted.headers.get('Content-Disposition'));
+      message.textContent = 'Hotovo – ZIP obsahuje metadata, model s IRI a slovník OFN.';
+    }
     setStep(active, 'done');
-    message.textContent = 'Hotovo – ZIP obsahuje metadata, model s IRI a slovník OFN.';
     message.classList.add('success');
   } catch (error) {
     setStep(active, 'error');

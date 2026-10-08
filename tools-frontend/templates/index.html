@@ -103,7 +103,8 @@
           <p>
             Převeďte výměnný model ArchiMate nebo export XMI z Enterprise
             Architectu do JSON-LD ověřeného podle schématu. Nejdříve se vytvoří
-            slovník OFN a do modelu se doplní IRI. Výsledky stáhnete v ZIPu.
+            slovník OFN a do modelu se doplní IRI. Výsledné soubory stáhnete
+            jednotlivě nebo společně v ZIPu.
           </p>
           <div
             class="documentation-links"
@@ -152,6 +153,11 @@
               required
             />
           </div>
+          <fieldset class="download-choice">
+            <legend>Způsob stažení</legend>
+            <label><input type="radio" name="download_mode" value="files" checked /> Jednotlivé soubory</label>
+            <label><input type="radio" name="download_mode" value="zip" /> ZIP</label>
+          </fieldset>
           <button class="primary" type="submit">
             Vygenerovat metadata datové sady<span>→</span>
           </button>
@@ -160,9 +166,10 @@
             <li data-step="dataset">
               Doplnění IRI a generování metadat datové sady
             </li>
-            <li data-step="download">Stažení ZIPu</li>
+            <li data-step="download">Příprava souborů ke stažení</li>
           </ol>
           <div class="form-message" aria-live="polite"></div>
+          <div class="dataset-downloads" aria-label="Vygenerované soubory" hidden></div>
           <div class="validation-report" hidden></div>
         </form>
       </section>

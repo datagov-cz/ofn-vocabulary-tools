@@ -541,6 +541,30 @@ main {
   font: inherit;
   color: var(--ink);
 }
+.download-choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 22px;
+  margin: 16px 0;
+  padding: 0;
+  border: 0;
+  font-size: 14px;
+}
+.download-choice legend { margin-bottom: 8px; font-weight: 700; }
+.download-choice input { accent-color: var(--green); }
+.dataset-downloads { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.dataset-downloads[hidden] { display: none; }
+.download-file {
+  max-width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--green);
+  border-radius: 8px;
+  background: white;
+  color: var(--green-dark);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.download-file:hover, .download-file:focus-visible { background: #edf2eb; }
 .conversion-steps {
   padding-left: 24px;
   margin: 18px 0 0;

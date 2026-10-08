@@ -74,9 +74,11 @@ The converter address can be changed in the dataset form or with the
 `DATASET_CONVERTER_ENDPOINT` environment variable. The converter receives the
 uploaded model as the `file` form part with `output=json` and
 `Accept: application/ld+json`. A reported error stops processing. The final
-ZIP contains the generated OFN vocabulary, the ArchiMate model enriched with
-IRIs, and the dataset JSON-LD files. The prepared vocabulary is bound to the
-uploaded model for 30 minutes. The browser sends the vocabulary as a file in
+results contain the generated OFN vocabulary, the ArchiMate model enriched with
+IRIs, and the dataset JSON-LD files. The form offers individual download buttons
+or a single ZIP archive. The API defaults to ZIP for existing clients; send
+`download_mode=files` to receive a JSON list of Base64-encoded files. The
+prepared vocabulary is bound to the uploaded model for 30 minutes. The browser sends the vocabulary as a file in
 the second request so its JSON-LD bytes and line endings are preserved.
 Set `OFN_SECRET_KEY` to the same private value across app workers to protect
 the prepared result token.

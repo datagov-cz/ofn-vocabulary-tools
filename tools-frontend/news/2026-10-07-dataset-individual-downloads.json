@@ -1,0 +1,10 @@
+{
+  "id": "2026-10-07-dataset-individual-downloads",
+  "publishedAt": "2026-10-07",
+  "title": "Samostatné stažení souborů datové sady",
+  "summary": "Výsledky generování metadat datové sady lze nyní stáhnout jednotlivě pomocí tlačítek pro každý soubor.",
+  "details": [
+    "Před generováním lze vybrat jednotlivé soubory nebo společný ZIP.",
+    "Jednotlivě jsou dostupná metadata JSON-LD, slovník OFN i model s doplněnými IRI."
+  ]
+}

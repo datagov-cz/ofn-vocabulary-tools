@@ -199,6 +199,14 @@ def create_jsonld_files(parsed_xml: ParsedXml) -> list[JsonLdFile]:
                 distributions,
             )
 
+        missing_fields = find_missing_required_fields(document, distributions)
+        if missing_fields:
+            logger.error(
+                "Missing required fields for dataset element ID %r: %s",
+                dataset.identifier,
+                ", ".join(missing_fields),
+            )
+
         source_entries = {dataset.identifier: document}
         source_entries.update(
             (distribution.source_element_id, distribution.document)

@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import io
+import base64
 import hashlib
+import io
 import json
 import os
 import subprocess
@@ -172,20 +173,33 @@ def create_app(test_config=None):
             return _error(f"Převod datové sady se nezdařil: {exc}", 422)
 
         stem = Path(secure_filename(upload.filename)).stem or "dataset"
+        files = [
+            (f"{stem}-ofn-vocabulary.jsonld", vocabulary_bytes),
+            (f"{stem}-with-iri.xml", enriched_bytes),
+        ]
+        used = {name for name, _ in files}
+        for number, output in enumerate(outputs, 1):
+            name = Path(output.filename or f"{stem}-{number}.jsonld").name
+            if not name.endswith(".jsonld"):
+                name += ".jsonld"
+            while name in used:
+                name = f"{Path(name).stem}-{number}.jsonld"
+            used.add(name)
+            files.append((name, json.dumps(
+                output.document, indent=2, ensure_ascii=False).encode("utf-8")))
+
+        mode = request.form.get("download_mode", "zip")
+        if mode == "files":
+            return jsonify(files=[
+                {"name": name, "content": base64.b64encode(content).decode("ascii")}
+                for name, content in files
+            ])
+        if mode != "zip":
+            return _error("Vyberte podporovaný způsob stažení.", 400)
         buffer = io.BytesIO()
         with ZipFile(buffer, "w", ZIP_DEFLATED) as archive:
-            archive.writestr(f"{stem}-ofn-vocabulary.jsonld", vocabulary_bytes)
-            archive.writestr(f"{stem}-with-iri.xml", enriched_bytes)
-            used = {f"{stem}-ofn-vocabulary.jsonld", f"{stem}-with-iri.xml"}
-            for number, output in enumerate(outputs, 1):
-                name = Path(output.filename or f"{stem}-{number}.jsonld").name
-                if not name.endswith(".jsonld"):
-                    name += ".jsonld"
-                while name in used:
-                    name = f"{Path(name).stem}-{number}.jsonld"
-                used.add(name)
-                archive.writestr(name, json.dumps(
-                    output.document, indent=2, ensure_ascii=False))
+            for name, content in files:
+                archive.writestr(name, content)
         return _download(buffer.getvalue(), f"{stem}.zip", "application/zip")
 
     @app.post("/api/dataset/vocabulary")
